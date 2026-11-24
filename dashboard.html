@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/tokens.css">
 <link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
 <style>
   .chart{display:grid;grid-template-columns:auto 1fr;gap:var(--gl-space-3);height:248px}
   .y-axis{display:flex;flex-direction:column;justify-content:space-between;font:var(--gl-type-caption);color:var(--gl-text-muted);text-align:end;padding-bottom:26px;margin-top:-9px}
@@ -54,11 +55,16 @@
 <script src="assets/icons.js"></script>
 <script src="assets/charts.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
 const MONTHS = [['ديسمبر','Dec'],['يناير','Jan'],['فبراير','Feb'],['مارس','Mar'],['أبريل','Apr'],['مايو','May'],['يونيو','Jun'],['يوليو','Jul'],['أغسطس','Aug'],['سبتمبر','Sep'],['أكتوبر','Oct'],['نوفمبر','Nov']];
 const MRR = [9.8,10.4,11.1,11.9,12.6,13.2,14.1,14.9,15.6,16.4,17.3,18.4];
 GL.mount({
   nav: 'overview',
+  menus: {
+    range: [{ icon: 'calendar', ar: 'آخر 7 أيام', en: 'Last 7 days', toast: L => `info|${L('الفترة: آخر 7 أيام', 'Range: last 7 days')}|` }, { icon: 'calendar', ar: 'آخر 30 يوم', en: 'Last 30 days', toast: L => `info|${L('الفترة: آخر 30 يوم', 'Range: last 30 days')}|` }, { icon: 'calendar', ar: 'آخر 12 شهر', en: 'Last 12 months', toast: L => `info|${L('الفترة: آخر 12 شهر', 'Range: last 12 months')}|` }, { icon: 'calendar-range', ar: 'فترة مخصصة…', en: 'Custom range…', toast: L => `info|${L('اختار الفترة', 'Pick a range')}|` }],
+    chart: [{ icon: 'download', ar: 'تحميل PNG', en: 'Download PNG', toast: L => `success|${L('جاري التحميل', 'Downloading')}|plans.png` }, { icon: 'external-link', ar: 'فتح الخطط', en: 'Open plans', href: 'plans.html' }]
+  },
   title: L => L('نظرة عامة', 'Overview'),
   render: (L, { icon, fwd }) => {
     const kpi = (label, ic, val, delta, dcls, foot, spark, color) => `
@@ -87,9 +93,9 @@ GL.mount({
       <div><h1 class="t-h1">${L('صباح الخير يا محمد 👋','Good morning, Mohamed 👋')}</h1>
         <p class="sub">${L('ده ملخص أداء المنصة خلال آخر 30 يوم.','Here’s how the platform performed over the last 30 days.')}</p></div>
       <div class="actions">
-        <button class="btn btn-outline">${icon('calendar','sm')}${L('آخر 30 يوم','Last 30 days')}${icon('chevron-down','sm')}</button>
-        <button class="btn btn-outline">${icon('download','sm')}${L('تصدير','Export')}</button>
-        <button class="btn btn-primary">${icon('plus','sm')}${L('إضافة شركة','Add company')}</button>
+        <button type="button" class="btn btn-outline" data-menu="range">${icon('calendar','sm')}${L('آخر 30 يوم','Last 30 days')}${icon('chevron-down','sm')}</button>
+        <button type="button" class="btn btn-outline" data-toast="success|${L('بنجهز التقرير','Preparing report')}|${L('هيوصلك على الإيميل','We’ll email it to you')}">${icon('download','sm')}${L('تصدير','Export')}</button>
+        <a class="btn btn-primary" href="companies.html?open=add">${icon('plus','sm')}${L('إضافة شركة','Add company')}</a>
       </div>
     </div>
 
@@ -104,7 +110,7 @@ GL.mount({
       <div class="card span-8">
         <div class="card-head">
           <div><h3 class="t-h3">${L('نمو الإيراد الشهري (MRR)','MRR growth')}</h3><p class="sub">${L('آخر 12 شهر، بالدولار','Last 12 months, USD')}</p></div>
-          <div class="pills"><span class="pill">${L('6 شهور','6M')}</span><span class="pill active">${L('12 شهر','12M')}</span><span class="pill">${L('الكل','All')}</span></div>
+          <div class="pills" data-pick="active"><span class="pill">${L('6 شهور','6M')}</span><span class="pill active">${L('12 شهر','12M')}</span><span class="pill">${L('الكل','All')}</span></div>
         </div>
         <div class="card-body pt0">
           <div class="mrr-sum"><span class="v">$18,420</span><span class="delta up">${icon('trending-up')}+$1,120</span><span class="muted t-sm">${L('عن أكتوبر','vs October')}</span></div>
@@ -120,7 +126,7 @@ GL.mount({
       </div>
       <div class="card span-4">
         <div class="card-head"><div><h3 class="t-h3">${L('توزيع الخطط','Plan distribution')}</h3><p class="sub">${L('128 شركة نشطة','128 active companies')}</p></div>
-          <button class="icon-btn sm">${icon('more')}</button></div>
+          <button type="button" class="icon-btn sm" data-menu="chart">${icon('more')}</button></div>
         <div class="card-body pt0">
           <div class="donut-wrap">${GLC.donut([{v:64,color:'var(--gl-brand-300)'},{v:52,color:'var(--gl-brand-primary)'},{v:12,color:'var(--gl-accent-default)'}],176,20)}
             <div class="donut-c"><span class="v">128</span><span class="t-cap muted">${L('شركة','companies')}</span></div></div>
@@ -142,7 +148,7 @@ GL.mount({
             <td class="num">${t[6]}</td>
             <td><div class="actv"><div class="bar thin ${t[7] < 40 ? 'warn' : ''}"><i style="width:${t[7]}%"></i></div><span class="num">${t[7]}%</span></div></td>
             <td><span class="tag ${days(t[8])}">${L(t[8] === 2 ? 'يومين' : t[8] + ' أيام', t[8] + ' days')}</span></td>
-            <td class="right"><button class="icon-btn sm">${icon('mail')}</button></td></tr>`).join('')}</tbody>
+            <td class="right"><button type="button" class="icon-btn sm" data-toast="success|${L('اتبعت تذكير التجربة','Trial reminder sent')}|">${icon('mail')}</button></td></tr>`).join('')}</tbody>
         </table>
       </div>
       <div class="card span-5">
