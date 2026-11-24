@@ -13,6 +13,9 @@
 .tbl td.co a:hover .nm{color:var(--gl-brand-text)}
 .portal-st{display:inline-flex;align-items:center;gap:6px;font:var(--gl-type-body-sm)}
 .portal-st svg.i{width:16px;height:16px}
+
+.toolbar .sel{width:184px}.toolbar .sel .control{width:100%}
+.toolbar .search{width:300px}
 </style>
 </head>
 <body>
@@ -21,26 +24,62 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
+const IND = [['mfg', 'تصنيع', 'Manufacturing'], ['dist', 'توزيع', 'Distribution'], ['health', 'رعاية صحية', 'Healthcare'], ['const', 'مقاولات', 'Construction'], ['retail', 'تجزئة', 'Retail'], ['hold', 'استثمار', 'Holding'], ['fnb', 'أغذية', 'F&B']];
+const clForm = (L, { ui }) => `<div class="sec-title">${L('الشركة', 'Company')}</div><div class="form-grid">
+  ${ui.field(L('اسم العميل', 'Client name'), ui.input('name', { req: 1, icon: 'building-2' }), { req: 1, full: 1 })}
+  ${ui.field(L('الدومين', 'Domain'), ui.input('domain', { req: 1, ltr: 1, icon: 'globe', ph: 'client.example' }), { req: 1 })}
+  ${ui.field(L('المجال', 'Industry'), ui.select('ind', IND.map(i => [i[0], GL.L(i[1], i[2])]), { ph: L('اختار', 'Choose'), req: 1 }), { req: 1 })}
+  ${ui.field(L('عدد الموظفين', 'Company size'), ui.select('size', ['1–50', '51–200', '201–500', '500+']))}
+  ${ui.field(L('الدولة', 'Country'), ui.select('country', [L('مصر', 'Egypt'), L('السعودية', 'Saudi Arabia'), L('الإمارات', 'UAE')]))}</div>
+  <div class="sec-title">${L('جهة الاتصال الأساسية', 'Primary contact')}</div><div class="form-grid">
+  ${ui.field(L('الاسم', 'Name'), ui.input('cn', { req: 1, icon: 'user' }), { req: 1 })}${ui.field(L('المسمى الوظيفي', 'Job title'), ui.input('ct', { ph: L('المدير المالي', 'CFO') }))}
+  ${ui.field(L('البريد', 'Email'), ui.input('ce', { req: 1, type: 'email', ltr: 1, icon: 'mail', ph: 'name@client.example' }), { req: 1 })}${ui.field(L('الموبايل', 'Phone'), ui.input('cp', { ltr: 1, icon: 'phone', ph: '+20 10 0000 0000' }))}</div>
+  <div class="set-row" style="padding:0"><div class="grow"><div class="t-strong">${L('ابعت دعوة لبوابة العميل', 'Invite to the client portal')}</div><div class="t-sm sec">${L('6 من 10 بوابات مستخدمة في خطتك', '6 of 10 portals used on your plan')}</div></div><span class="switch on" data-static data-val="portal"></span></div>`;
+const clRow = (L, ui, icon, c) => { const ps = { on: ['globe', 'yes', L('مفعلة', 'Active')], inv: ['mail', '', L('دعوة مرسلة', 'Invited')], off: ['ban', 'muted', L('مقفولة', 'Off')] };
+  return `<tr data-row data-ind="${c[11]}" data-portal="${c[7]}">
+          <td class="co"><a class="cell-co" href="#" data-open="view">${ui.av(c[2], c[3], '')}<div><div class="nm" data-f="name">${c[0]}</div><div class="dm" data-f="domain">${c[1]}</div></div></a></td>
+          <td class="sec">${c[4]}</td><td>${ui.stack(c[5])}</td><td><span class="t-strong">${c[6]}</span> <span class="t-cap muted">${L('نشط', 'active')}</span></td>
+          <td data-ps><span class="portal-st ${ps[c[7]][1]}">${icon(ps[c[7]][0])}${ps[c[7]][2]}</span></td><td class="sec">${c[8]}</td>
+          <td>${c[10] ? ui.tag(GL_HEALTH[c[10]][0], L(GL_HEALTH[c[10]][1], GL_HEALTH[c[10]][2])) : `<span class="t-sm muted">${L('مفيش مشروع', 'No project')}</span>`}</td>
+          <td class="right">${ui.menuBtn('cl')}</td></tr>`; };
 GL.mount({
   shell: 'ws', nav: 'ws-clients',
+  modals: {
+    new: { kind: 'drawer', size: 'lg', icon: 'building-2', title: L => L('عميل جديد', 'New client'), body: clForm, submit: L => L('إضافة العميل', 'Add client'), submitIcon: 'plus',
+      add: { table: 'clTbl', row: (v, L) => clRow(L, GL.ui, GL.icon, [v.name, v.domain, v.name.trim()[0], 'av-teal', GL.L(...(IND.find(i => i[0] === v.ind) || ['', '—', '—']).slice(1)), [[v.cn.trim()[0], 'av-amber']], 0, v.portal ? 'inv' : 'off', '—', '', '', v.ind]) },
+      toast: (L, v) => [L('اتضاف العميل', 'Client added'), v.portal ? L('واتبعتت دعوة البوابة لـ ', 'Portal invite sent to ') + v.ce : ''] },
+    edit: { kind: 'drawer', size: 'lg', icon: 'pencil', title: L => L('تعديل العميل', 'Edit client'), sub: (L, c) => c.name, body: clForm, toast: L => [L('اتحفظ العميل', 'Client saved'), ''] },
+    import: { icon: 'upload', title: L => L('استيراد عملاء', 'Import clients'), sub: L => L('من ملف CSV أو Excel', 'From a CSV or Excel file'),
+      body: L => `<div class="dropzone">${GL.icon('cloud-upload')}<span>${L('اسحب الملف هنا أو', 'Drop the file here or')} <b class="brand-t">${L('اختار', 'browse')}</b></span><a class="link t-cap" href="#" data-toast="success|${L('اتحمل القالب', 'Template downloaded')}|clients_template.csv">${L('حمّل القالب', 'Download template')}</a></div>
+        <div class="att" style="width:100%">${GL.icon('file-spreadsheet', 'sm')}<span class="ltr grow" style="text-align:start">crm_export_nov.csv</span><span class="muted">24 ${L('سطر', 'rows')}</span>${GL.ui.tag('success', L('جاهز', 'Ready'), false)}</div>
+        <table class="tbl compact"><thead><tr><th>${L('عمود الملف', 'File column')}</th><th>${L('الحقل', 'Maps to')}</th></tr></thead><tbody>${[['company_name', L('اسم العميل', 'Client name')], ['website', L('الدومين', 'Domain')], ['contact_email', L('بريد جهة الاتصال', 'Contact email')], ['sector', L('المجال', 'Industry')]].map(r => `<tr><td class="ltr">${r[0]}</td><td>${GL.ui.select('m' + r[0], [r[1], L('تجاهل', 'Skip')], { cls: 'sm' })}</td></tr>`).join('')}</tbody></table>`,
+      submit: L => L('استيراد 24 عميل', 'Import 24 clients'), toast: L => [L('اتستورد 24 عميل', '24 clients imported'), L('2 اتجاهلوا لأنهم موجودين', '2 skipped as duplicates')] },
+    view: { kind: 'drawer', size: 'lg', icon: 'building-2', title: (L, c) => c.name, sub: (L, c) => c.domain,
+      body: (L, { ui }) => `<div class="sec-title">${L('جهات الاتصال', 'Contacts')}</div><div class="stack gap-2">${[[L('خ', 'KM'), 'av-amber', L('خالد منصور', 'Khaled Mansour'), L('المدير المالي · صاحب القرار', 'CFO · Decision maker'), 'on'], [L('ه', 'HS'), 'av-blue', L('هبة سليم', 'Heba Selim'), L('مديرة المشتريات', 'Procurement manager'), 'on'], [L('ط', 'TF'), 'av-violet', L('طارق فوزي', 'Tarek Fawzy'), L('مسؤول IT', 'IT lead'), 'inv']].map(c => `<div class="apc" data-row>${ui.av(c[0], c[1], 'round')}<div class="grow"><div class="t-strong" data-f="name">${c[2]}</div><div class="t-sm sec">${c[3]}</div></div>${c[4] === 'on' ? ui.tag('success', L('في البوابة', 'In portal')) : ui.tag('info', L('دعوة مرسلة', 'Invited'))}<button type="button" class="icon-btn sm" data-delete="${c[2]}">${GL.icon('trash-2')}</button></div>`).join('')}<button type="button" class="btn btn-outline btn-sm" style="align-self:flex-start" data-toast="info|${L('أضف جهة اتصال من صفحة المشروع', 'Add contacts from the project page')}|">${GL.icon('plus', 'sm')}${L('جهة اتصال', 'Contact')}</button></div>
+        <div class="sec-title">${L('المشاريع', 'Projects')}</div><a class="apc" href="ws-project.html"><span class="ic-tile">${GL.icon('briefcase', 'sm')}</span><div class="grow"><div class="t-strong">${L('تطبيق Odoo ERP', 'Odoo ERP rollout')}</div><div class="t-sm sec">${L('UAT · 72% · الإطلاق 15 ديسمبر', 'UAT · 72% · go-live Dec 15')}</div></div>${ui.tag('success', L('في المسار', 'On track'))}</a>`,
+      foot: L => `<a class="btn btn-outline" href="portal.html">${GL.icon('external-link', 'sm')}${L('معاينة البوابة', 'Preview portal')}</a><button type="button" class="btn btn-primary" data-close>${L('تم', 'Done')}</button>` }
+  },
+  menus: { cl: [{ icon: 'eye', ar: 'عرض العميل', en: 'View client', open: 'view' }, { icon: 'pencil', ar: 'تعديل', en: 'Edit', open: 'edit' }, { icon: 'briefcase', ar: 'مشروع جديد', en: 'New project', href: 'ws-projects.html?open=new' }, { icon: 'mail', ar: 'إعادة إرسال دعوة البوابة', en: 'Resend portal invite', toast: (L, n) => `success|${L('اتبعتت الدعوة', 'Invite resent')}|${n}` }, { icon: 'ban', ar: 'قفل البوابة', en: 'Disable portal', confirm: 'off' }, '-', { icon: 'trash-2', ar: 'حذف', en: 'Delete', del: 1, danger: 1 }] },
+  confirms: { off: { danger: 1, icon: 'ban', title: (L, c) => L(`قفل بوابة ${c.name}؟`, `Disable the portal for ${c.name}?`), text: L => L('جهات الاتصال مش هيقدروا يدخلوا، والبيانات هتفضل محفوظة.', 'Contacts lose access; data is kept.'), btn: L => L('قفل', 'Disable'), run: (L, c, row) => { row.querySelector('[data-ps]').innerHTML = `<span class="portal-st muted">${GL.icon('ban')}${L('مقفولة', 'Off')}</span>`; row.dataset.portal = 'off'; GLI.flash(row); }, toast: L => [L('اتقفلت البوابة', 'Portal disabled'), ''] } },
   title: L => L('العملاء', 'Clients'),
   render: (L, { icon, ui }) => {
     const C = [
-      [L('مصنع النور للبلاستيك', 'Al Nour Plastics'), 'alnour-plastics.example', L('ن', 'AN'), 'av-teal', L('تصنيع', 'Manufacturing'), [[L('خ', 'KM'), 'av-amber'], [L('ه', 'HS'), 'av-blue'], [L('ط', 'TF'), 'av-violet']], 1, 'on', L('منذ ساعة', '1h ago'), '$48,000', 'ok'],
-      [L('دلتا للتوزيع', 'Delta Distribution'), 'delta-dist.example', L('د', 'DD'), 'av-blue', L('توزيع', 'Distribution'), [[L('س', 'SM'), 'av-teal'], [L('ع', 'AR'), 'av-amber']], 1, 'on', L('منذ 6 أيام', '6 days ago'), '$22,500', 'blocked'],
-      [L('الريادة الطبية', 'Riyada Medical'), 'riyada-med.example', L('ر', 'RM'), 'av-violet', L('رعاية صحية', 'Healthcare'), [[L('ن', 'NA'), 'av-blue']], 1, 'on', L('منذ 3 أيام', '3 days ago'), '$18,000', 'risk'],
-      [L('الأمل للمقاولات', 'Al Amal Contracting'), 'alamal.example', L('أ', 'AA'), 'av-amber', L('مقاولات', 'Construction'), [[L('م', 'MS'), 'av-violet'], [L('ر', 'RA'), 'av-teal']], 1, 'on', L('اليوم', 'Today'), '$15,600', 'ok'],
-      [L('سوق فريش', 'Souq Fresh'), 'souqfresh.example', L('س', 'SF'), 'av-teal', L('تجزئة', 'Retail'), [[L('أ', 'AK'), 'av-amber'], [L('ل', 'LM'), 'av-blue'], [L('ف', 'FH'), 'av-teal'], ['+1', 'av-violet']], 1, 'on', L('أمس', 'Yesterday'), '$26,000', 'ok'],
-      [L('كيان القابضة', 'Kayan Holding'), 'kayan.example', L('ك', 'KH'), 'av-blue', L('استثمار', 'Holding'), [[L('و', 'WS'), 'av-violet']], 1, 'inv', '—', '$31,000', 'kick'],
-      [L('أوربت للصلب', 'Orbit Steel'), 'orbit-steel.example', L('أ', 'OS'), 'av-violet', L('تصنيع', 'Manufacturing'), [[L('ج', 'GN'), 'av-teal'], [L('ش', 'SH'), 'av-amber']], 1, 'off', '—', '$54,000', 'kick'],
-      [L('وادي للأغذية', 'Wadi Foods'), 'wadi-foods.example', L('و', 'WF'), 'av-amber', L('أغذية', 'F&B'), [[L('ه', 'HZ'), 'av-blue']], 0, 'on', L('منذ شهر', '1 month ago'), '$19,800', 'done']
+      [L('مصنع النور للبلاستيك', 'Al Nour Plastics'), 'alnour-plastics.example', L('ن', 'AN'), 'av-teal', L('تصنيع', 'Manufacturing'), [[L('خ', 'KM'), 'av-amber'], [L('ه', 'HS'), 'av-blue'], [L('ط', 'TF'), 'av-violet']], 1, 'on', L('منذ ساعة', '1h ago'), '$48,000', 'ok', 'mfg'],
+      [L('دلتا للتوزيع', 'Delta Distribution'), 'delta-dist.example', L('د', 'DD'), 'av-blue', L('توزيع', 'Distribution'), [[L('س', 'SM'), 'av-teal'], [L('ع', 'AR'), 'av-amber']], 1, 'on', L('منذ 6 أيام', '6 days ago'), '$22,500', 'blocked', 'dist'],
+      [L('الريادة الطبية', 'Riyada Medical'), 'riyada-med.example', L('ر', 'RM'), 'av-violet', L('رعاية صحية', 'Healthcare'), [[L('ن', 'NA'), 'av-blue']], 1, 'on', L('منذ 3 أيام', '3 days ago'), '$18,000', 'risk', 'health'],
+      [L('الأمل للمقاولات', 'Al Amal Contracting'), 'alamal.example', L('أ', 'AA'), 'av-amber', L('مقاولات', 'Construction'), [[L('م', 'MS'), 'av-violet'], [L('ر', 'RA'), 'av-teal']], 1, 'on', L('اليوم', 'Today'), '$15,600', 'ok', 'const'],
+      [L('سوق فريش', 'Souq Fresh'), 'souqfresh.example', L('س', 'SF'), 'av-teal', L('تجزئة', 'Retail'), [[L('أ', 'AK'), 'av-amber'], [L('ل', 'LM'), 'av-blue'], [L('ف', 'FH'), 'av-teal'], ['+1', 'av-violet']], 1, 'on', L('أمس', 'Yesterday'), '$26,000', 'ok', 'retail'],
+      [L('كيان القابضة', 'Kayan Holding'), 'kayan.example', L('ك', 'KH'), 'av-blue', L('استثمار', 'Holding'), [[L('و', 'WS'), 'av-violet']], 1, 'inv', '—', '$31,000', 'kick', 'hold'],
+      [L('أوربت للصلب', 'Orbit Steel'), 'orbit-steel.example', L('أ', 'OS'), 'av-violet', L('تصنيع', 'Manufacturing'), [[L('ج', 'GN'), 'av-teal'], [L('ش', 'SH'), 'av-amber']], 1, 'off', '—', '$54,000', 'kick', 'mfg'],
+      [L('وادي للأغذية', 'Wadi Foods'), 'wadi-foods.example', L('و', 'WF'), 'av-amber', L('أغذية', 'F&B'), [[L('ه', 'HZ'), 'av-blue']], 0, 'on', L('منذ شهر', '1 month ago'), '$19,800', 'done', 'fnb']
     ];
-    const ps = { on: ['globe', 'yes', L('مفعلة', 'Active')], inv: ['mail', '', L('دعوة مرسلة', 'Invited')], off: ['ban', 'muted', L('مقفولة', 'Off')] };
+    const _ps = { on: ['globe', 'yes', L('مفعلة', 'Active')], inv: ['mail', '', L('دعوة مرسلة', 'Invited')], off: ['ban', 'muted', L('مقفولة', 'Off')] };
     return `
     <div class="page-head">
       <div><h1 class="t-h1">${L('العملاء', 'Clients')}</h1><p class="sub">${L('الشركات اللي بتنفذ لها، وجهات الاتصال ووصولهم لبوابة العميل', 'Companies you implement for, their contacts and client-portal access')}</p></div>
-      <div class="actions"><button class="btn btn-outline">${icon('download', 'sm')}${L('استيراد', 'Import')}</button><button class="btn btn-primary">${icon('plus', 'sm')}${L('عميل جديد', 'New client')}</button></div>
+      <div class="actions"><button class="btn btn-outline" data-open="import">${icon('upload', 'sm')}${L('استيراد', 'Import')}</button><button class="btn btn-primary" data-open="new">${icon('plus', 'sm')}${L('عميل جديد', 'New client')}</button></div>
     </div>
     <section class="stat-strip">
       ${ui.mini('building-2', '', '8', L('عملاء', 'Clients'))}
@@ -49,16 +88,11 @@ GL.mount({
       ${ui.mini('smile', ui.tone.accent, '4.7', L('تقييم العملاء', 'Client rating'))}
     </section>
     <section class="card table-wrap">
-      <div class="toolbar"><label class="control search">${icon('search', 'sm')}<input placeholder="${L('ابحث عن عميل…', 'Search clients…')}"></label><span class="chip">${icon('plus')}${L('المجال', 'Industry')}</span><span class="chip">${icon('plus')}${L('البوابة', 'Portal')}</span></div>
-      <table class="tbl">
-        <colgroup><col><col style="width:136px"><col style="width:128px"><col style="width:96px"><col style="width:144px"><col style="width:128px"><col style="width:152px"><col style="width:72px"></colgroup>
+      <div class="toolbar"><label class="control search sm">${icon('search', 'sm')}<input data-search="clTbl" placeholder="${L('ابحث عن عميل…', 'Search clients…')}"></label><span class="sel sm">${ui.select('i', IND.map(i => [i[0], L(i[1], i[2])]), { ph: L('كل المجالات', 'All industries'), filter: 'clTbl', key: 'ind', cls: 'sm', icon: 'building-2' })}</span><span class="sel sm">${ui.select('p', [['on', L('مفعلة', 'Active')], ['inv', L('دعوة مرسلة', 'Invited')], ['off', L('مقفولة', 'Off')]], { ph: L('كل البوابات', 'Any portal status'), filter: 'clTbl', key: 'portal', cls: 'sm', icon: 'globe' })}</span></div>
+      <table class="tbl" id="clTbl">
+        <colgroup><col><col style="width:136px"><col style="width:128px"><col style="width:96px"><col style="width:144px"><col style="width:128px"><col style="width:152px"><col style="width:56px"></colgroup>
         <thead><tr><th>${L('العميل', 'Client')}</th><th>${L('المجال', 'Industry')}</th><th>${L('جهات الاتصال', 'Contacts')}</th><th>${L('المشاريع', 'Projects')}</th><th>${L('البوابة', 'Portal')}</th><th>${L('آخر زيارة', 'Last visit')}</th><th>${L('المشروع الحالي', 'Current project')}</th><th></th></tr></thead>
-        <tbody>${C.map(c => `<tr>
-          <td class="co"><a class="cell-co" href="ws-project.html">${ui.av(c[2], c[3], '')}<div><div class="nm">${c[0]}</div><div class="dm">${c[1]}</div></div></a></td>
-          <td class="sec">${c[4]}</td><td>${ui.stack(c[5])}</td><td><span class="t-strong">${c[6]}</span> <span class="t-cap muted">${L('نشط', 'active')}</span></td>
-          <td><span class="portal-st ${ps[c[7]][1]}">${icon(ps[c[7]][0])}${ps[c[7]][2]}</span></td><td class="sec">${c[8]}</td>
-          <td>${ui.tag(GL_HEALTH[c[10]][0], L(GL_HEALTH[c[10]][1], GL_HEALTH[c[10]][2]))}</td>
-          <td class="right"><button class="icon-btn sm">${icon('more')}</button></td></tr>`).join('')}</tbody>
+        <tbody>${C.map(c => clRow(L, ui, icon, c)).join('')}</tbody>
       </table>
     </section>`;
   }
