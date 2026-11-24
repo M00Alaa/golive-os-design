@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.hello{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--gl-space-6)}
+.hello .d{font:var(--gl-type-label);color:var(--gl-text-muted)}
+.pj{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.4fr) 96px 160px;align-items:center;gap:var(--gl-space-5);padding:var(--gl-space-3) var(--gl-space-6);min-height:68px}
+.pj + .pj{border-block-start:1px solid var(--gl-border-default)}
+.pj:hover{background:var(--gl-bg-hover)}
+.pj .nm{font:var(--gl-type-body-strong)}
+.seg6{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+.seg6 i{height:6px;border-radius:2px;background:var(--gl-bg-subtle)}
+.seg6 i.d{background:var(--gl-brand-primary)}
+.seg6 i.c{background:var(--gl-accent-default)}
+.seg6.blocked i.c{background:var(--gl-danger-solid)}
+.seg6.risk i.c{background:var(--gl-warning-solid)}
+.ph-l{display:flex;justify-content:space-between;font:var(--gl-type-caption);color:var(--gl-text-secondary);margin-bottom:6px}
+.wait{display:flex;gap:var(--gl-space-3);padding-block:var(--gl-space-3)}
+.wait + .wait{border-block-start:1px solid var(--gl-border-default)}
+.wait .t{font:var(--gl-type-body-strong)}
+.wait .m{font:var(--gl-type-caption);color:var(--gl-text-muted)}
+.cal{display:flex;flex-direction:column;align-items:center;justify-content:center;width:48px;height:52px;border-radius:var(--gl-radius-md);background:var(--gl-bg-subtle);flex:none}
+.cal b{font:600 18px/22px var(--gl-font-sans)}
+.cal span{font:var(--gl-type-caption);color:var(--gl-text-muted)}
+.cal.hot{background:var(--gl-accent-subtle)}
+.cal.hot b,.cal.hot span{color:var(--gl-accent-text)}
+.util{display:grid;grid-template-columns:132px minmax(0,1fr) 40px;align-items:center;gap:var(--gl-space-3);padding-block:6px;font:var(--gl-type-body-sm)}
+.util .p{font:var(--gl-type-label-sm);text-align:end;font-variant-numeric:tabular-nums}
+.blk td{height:60px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  shell: 'ws', nav: 'ws-home',
+  title: L => L('الرئيسية', 'Dashboard'),
+  render: (L, { icon, fwd, ui }) => {
+    const T = GL_TEAM, P = GL_PROJECTS, H = GL_HEALTH, PH = GL_PHASES;
+    const pm = k => ui.av(L(T[k][2], T[k][3]), T[k][4]);
+    const seg = p => `<div class="seg6 ${p[11]}">${PH.map((x, i) => `<i class="${i < p[7] ? 'd' : i === p[7] ? 'c' : ''}"></i>`).join('')}</div>`;
+    const waits = [
+      ['file-pen-line', 'warning', L('اعتماد وثيقة التصميم (Blueprint)', 'Sign-off: solution blueprint'), L('الريادة الطبية · متأخرة 3 أيام', 'Riyada Medical · 3 days overdue')],
+      ['file-spreadsheet', 'danger', L('ملف أرصدة المخازن الافتتاحية', 'Opening stock balances file'), L('دلتا للتوزيع · متأخر 5 أيام · Blocker', 'Delta Distribution · 5 days overdue · blocker')],
+      ['clipboard-list', 'info', L('نموذج صلاحيات المستخدمين', 'User roles & permissions form'), L('مصنع النور · مستحق بكرة', 'Al Nour Plastics · due tomorrow')],
+      ['file-pen-line', 'info', L('اعتماد سيناريوهات UAT', 'Sign-off: UAT scenarios'), L('مصنع النور · مستحق الخميس', 'Al Nour Plastics · due Thursday')]
+    ];
+    const B = [
+      [L('ملف الأرصدة الافتتاحية لسه موصلش', 'Opening balances file not received'), L('ترحيل بيانات المخازن', 'Inventory migration'), 'danger', L('عالي', 'High'), L('العميل', 'Client'), L('5 أيام', '5 days')],
+      [L('رخصة Odoo Enterprise للمستخدمين الإضافيين', 'Odoo Enterprise licences for extra users'), L('ترحيل بيانات المخازن', 'Inventory migration'), 'danger', L('عالي', 'High'), L('العميل', 'Client'), L('3 أيام', '3 days')],
+      [L('تأخير اعتماد الـ Blueprint', 'Blueprint sign-off delayed'), 'Odoo CRM', 'warning', L('متوسط', 'Medium'), L('العميل', 'Client'), L('3 أيام', '3 days')],
+      [L('تكامل بوابة الدفع مع POS', 'Payment gateway ↔ POS integration'), L('نقاط البيع POS', 'Odoo POS rollout'), 'warning', L('متوسط', 'Medium'), L('الفريق', 'Internal'), L('يوم', '1 day')]
+    ];
+    const util = [['ma', 92, 'warn'], ['ok', 78], ['rf', 85], ['me', 64], ['yt', 104, 'danger'], ['ha', 71]];
+    return `
+    <section class="hello">
+      <div><div class="d">${L('الثلاثاء، 24 نوفمبر', 'Tuesday, Nov 24')}</div><h1 class="t-h1 mt-1">${L('مساء الخير يا أحمد 👋', 'Good evening, Ahmed 👋')}</h1><p class="sec mt-1">${L('عندك إطلاقين الأسبوع ده، و4 حاجات مستنية العملاء.', 'Two go-lives this week, and 4 items waiting on clients.')}</p></div>
+      <div class="row gap-3"><button class="btn btn-outline">${icon('megaphone', 'sm')}${L('تحديث أسبوعي للعملاء', 'Weekly client update')}</button></div>
+    </section>
+    <section class="grid g-4">
+      ${ui.kpi(L('المشاريع النشطة', 'Active projects'), 'briefcase', '7', `<span class="tag success">5 ${L('في المسار', 'on track')}</span><span class="tag danger">1 ${L('متوقف', 'blocked')}</span>`)}
+      ${ui.kpi(L('إطلاقات خلال 30 يوم', 'Go-lives in 30 days'), 'rocket', '2', `<span>${L('بوابة HR · 28 نوف، ERP · 15 ديس', 'HR portal · Nov 28, ERP · Dec 15')}</span>`, ui.tone.accent)}
+      ${ui.kpi(L('مستني موافقة العملاء', 'Awaiting client sign-off'), 'file-pen-line', '9', `<span class="tag warning">${L('3 متأخرة', '3 overdue')}</span><span>${L('متوسط 2.4 يوم', 'avg 2.4 days')}</span>`, ui.tone.warning)}
+      ${ui.kpi(L('Blockers مفتوحة', 'Open blockers'), 'alert-triangle', '4', `<span class="delta good-down">${icon('trending-down')}-2</span><span>${L('عن الأسبوع اللي فات', 'vs last week')}</span>`, ui.tone.danger)}
+    </section>
+    <section class="grid g-12">
+      <div class="span-8 card">
+        <div class="card-head bordered"><div><h3 class="t-h3">${L('صحة المشاريع', 'Portfolio health')}</h3><p class="sub">${L('المرحلة الحالية لكل مشروع من 6 مراحل', 'Current phase of each project across 6 phases')}</p></div><a class="link" href="ws-projects.html">${L('كل المشاريع', 'All projects')}${fwd('xs')}</a></div>
+        ${P.slice(0, 6).map(p => `<a class="pj" href="ws-project.html">
+          <div class="row gap-3" style="min-width:0">${ui.av(L(p[4], p[5]), p[6], 'sm')}<div style="min-width:0"><div class="nm ell">${L(p[0], p[1])}</div><div class="cell-sub">${L(p[2], p[3])}</div></div></div>
+          <div><div class="ph-l"><span>${L(PH[p[7]][0], PH[p[7]][1])}</span><span class="num">${p[8]}%</span></div>${seg(p)}</div>
+          <div class="t-sm sec">${icon('calendar', 'xs')} ${L(p[9], p[10])}</div>
+          <div class="row between gap-2">${ui.tag(H[p[11]][0], L(H[p[11]][1], H[p[11]][2]))}${pm(p[12])}</div></a>`).join('')}
+      </div>
+      <aside class="span-4 side">
+        <div class="card"><div class="card-head"><div><h3 class="t-h3">${L('مستني العملاء', 'Waiting on clients')}</h3><p class="sub">${L('موافقات ومتطلبات مطلوبة من العملاء', 'Sign-offs and inputs due from clients')}</p></div></div>
+          <div class="card-body pt0">${waits.map(w => `<div class="wait"><span class="ic-tile" style="width:36px;height:36px;${ui.tone[w[1]]}">${icon(w[0], 'sm')}</span><div class="grow"><div class="t">${w[2]}</div><div class="m">${w[3]}</div></div></div>`).join('')}
+            <button class="btn btn-outline btn-sm mt-3" style="width:100%">${icon('bell', 'sm')}${L('ابعت تذكير للعملاء', 'Nudge clients')}</button></div></div>
+        <div class="card"><div class="card-head"><h3 class="t-h3">${L('إطلاقات قادمة', 'Upcoming go-lives')}</h3></div>
+          <div class="card-body pt0 stack gap-3">
+            <div class="row gap-3"><span class="cal hot"><b>28</b><span>${L('نوف', 'Nov')}</span></span><div class="grow"><div class="t-strong">${L('بوابة الموارد البشرية', 'HR portal')}</div><div class="t-cap muted">${L('الأمل للمقاولات · بعد 4 أيام', 'Al Amal Contracting · in 4 days')}</div></div>${ui.tag('success', '95%', false)}</div>
+            <div class="row gap-3"><span class="cal"><b>15</b><span>${L('ديس', 'Dec')}</span></span><div class="grow"><div class="t-strong">${L('تطبيق Odoo ERP', 'Odoo ERP rollout')}</div><div class="t-cap muted">${L('مصنع النور · بعد 21 يوم', 'Al Nour Plastics · in 21 days')}</div></div>${ui.tag('brand', '72%', false)}</div>
+          </div></div>
+      </aside>
+    </section>
+    <section class="grid g-12">
+      <div class="span-8 card table-wrap">
+        <div class="card-head bordered"><div><h3 class="t-h3">${L('Blockers ومخاطر مفتوحة', 'Open blockers & risks')}</h3><p class="sub">${L('مرتبة حسب التأثير على موعد الإطلاق', 'Sorted by impact on go-live date')}</p></div><button class="btn btn-outline btn-sm">${icon('plus')}${L('إضافة', 'Add')}</button></div>
+        <table class="tbl blk"><colgroup><col><col style="width:112px"><col style="width:104px"><col style="width:96px"></colgroup>
+          <thead><tr><th>${L('الـ Blocker', 'Blocker')}</th><th>${L('التأثير', 'Impact')}</th><th>${L('مستني مين', 'Waiting on')}</th><th>${L('مفتوح من', 'Open for')}</th></tr></thead>
+          <tbody>${B.map(b => `<tr><td><div class="nm t-strong ell">${b[0]}</div><div class="cell-sub">${b[1]}</div></td><td>${ui.tag(b[2], b[3])}</td><td class="sec">${b[4]}</td><td class="sec">${b[5]}</td></tr>`).join('')}</tbody></table>
+      </div>
+      <div class="span-4 card">
+        <div class="card-head"><div><h3 class="t-h3">${L('ضغط الفريق', 'Team load')}</h3><p class="sub">${L('الساعات المحجوزة الأسبوع ده', 'Booked hours this week')}</p></div><a class="link" href="ws-team.html">${L('الفريق', 'Team')}${fwd('xs')}</a></div>
+        <div class="card-body pt0">${util.map(u => `<div class="util"><span class="row gap-2" style="min-width:0">${pm(u[0])}<span class="ell">${L(T[u[0]][0], T[u[0]][1])}</span></span><div class="bar thin ${u[2] || ''}"><i style="width:${Math.min(u[1], 100)}%"></i></div><span class="p" style="${u[1] > 100 ? 'color:var(--gl-danger-fg)' : ''}">${u[1]}%</span></div>`).join('')}</div>
+      </div>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

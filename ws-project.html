@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.hero{padding:var(--gl-space-6) var(--gl-space-6) 0}
+.hero-top{display:flex;align-items:flex-start;gap:var(--gl-space-5)}
+.meta{display:flex;flex-wrap:wrap;gap:var(--gl-space-2) var(--gl-space-6);margin-top:var(--gl-space-3);font:var(--gl-type-body-sm);color:var(--gl-text-secondary)}
+.meta span{display:inline-flex;align-items:center;gap:6px}
+.meta svg.i{width:16px;height:16px;color:var(--gl-text-muted)}
+.hero .tabs{margin-top:var(--gl-space-6);border-block-end:0;margin-inline:calc(var(--gl-space-6) * -1);padding-inline:var(--gl-space-6);border-block-start:1px solid var(--gl-border-default)}
+.hero .tab{height:48px}
+/* gantt */
+.gantt{display:grid;grid-template-columns:184px minmax(0,1fr);font:var(--gl-type-body-sm)}
+.g-months{display:grid;grid-template-columns:repeat(6,1fr);border-block-end:1px solid var(--gl-border-default)}
+.g-months span{padding:0 var(--gl-space-2) var(--gl-space-2);font:var(--gl-type-label-sm);color:var(--gl-text-muted);border-inline-start:1px solid var(--gl-border-default)}
+.g-lab{display:flex;align-items:center;gap:var(--gl-space-2);height:44px;padding-inline-end:var(--gl-space-3);min-width:0}
+.g-lab .n{font:var(--gl-type-label);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-lab svg.i{width:16px;height:16px}
+.g-track{position:relative;height:44px;background-image:linear-gradient(to right,var(--gl-chart-grid) 1px,transparent 1px);background-size:calc(100% / 6) 100%}
+[dir="rtl"] .g-track{background-image:linear-gradient(to left,var(--gl-chart-grid) 1px,transparent 1px)}
+.g-bar{position:absolute;top:12px;height:20px;border-radius:6px;display:flex;align-items:center;padding-inline:var(--gl-space-2);font:var(--gl-type-label-sm);color:#fff;white-space:nowrap;overflow:hidden}
+.g-bar.done{background:var(--gl-brand-primary)}
+[data-theme="dark"] .g-bar.done{color:var(--gl-brand-950)}
+.g-bar.cur{background:var(--gl-bg-subtle);color:var(--gl-text-primary);border:1px solid var(--gl-border-strong);overflow:hidden}
+.g-bar.cur > i{position:absolute;inset-block:0;inset-inline-start:0;background:color-mix(in srgb,var(--gl-accent-default) 55%,transparent)}
+.g-bar.cur > span{position:relative}
+.g-bar.next{background:transparent;border:1.5px dashed var(--gl-border-strong);color:var(--gl-text-muted)}
+.g-ms{position:absolute;top:15px;width:14px;height:14px;transform:translateX(calc(-50% * var(--gl-flip))) rotate(45deg);background:var(--gl-accent-default);border:2px solid var(--gl-bg-surface);box-shadow:0 0 0 1px var(--gl-accent-600)}
+.g-today{position:absolute;inset-block:0;width:2px;background:var(--gl-danger-solid);z-index:2}
+.g-today b{position:absolute;top:-22px;inset-inline-start:-18px;font:var(--gl-type-label-sm);color:var(--gl-danger-fg);white-space:nowrap}
+.g-body{position:relative}
+/* requirements */
+.req-sum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gl-space-3);margin-bottom:var(--gl-space-4)}
+.req-sum div{padding:var(--gl-space-3);border-radius:var(--gl-radius-md);background:var(--gl-bg-subtle)}
+.req-sum b{display:block;font:600 20px/28px var(--gl-font-sans)}
+.req-sum span{font:var(--gl-type-caption);color:var(--gl-text-secondary)}
+.stackbar{display:flex;height:8px;border-radius:999px;overflow:hidden;gap:2px;margin-bottom:var(--gl-space-5)}
+.rq td{height:56px}
+.rid{font:500 12px/18px ui-monospace,Menlo,Consolas,monospace;color:var(--gl-text-muted);direction:ltr}
+/* kanban */
+.kb{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gl-space-4)}
+.kcol{background:var(--gl-bg-subtle);border-radius:var(--gl-radius-md);padding:var(--gl-space-3);display:flex;flex-direction:column;gap:var(--gl-space-2)}
+.kcol h4{font:var(--gl-type-label);display:flex;align-items:center;gap:var(--gl-space-2);padding:var(--gl-space-1) var(--gl-space-1) var(--gl-space-2)}
+.kcol h4 .n{font:var(--gl-type-label-sm);color:var(--gl-text-muted)}
+.kc{background:var(--gl-bg-surface);border:1px solid var(--gl-border-default);border-radius:var(--gl-radius-md);padding:var(--gl-space-3);box-shadow:var(--gl-shadow-xs);display:flex;flex-direction:column;gap:var(--gl-space-2)}
+.kc .t{font:var(--gl-type-label)}
+.kc .f{display:flex;align-items:center;justify-content:space-between;font:var(--gl-type-caption);color:var(--gl-text-muted)}
+.kc .f .avatar{width:22px;height:22px;font-size:10px}
+/* readiness */
+.ready{display:flex;align-items:center;gap:var(--gl-space-5)}
+.ring{position:relative;width:112px;height:112px;flex:none}
+.ring .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .c b{font:600 26px/30px var(--gl-font-sans);display:block}
+.ring .c span{font:var(--gl-type-caption);color:var(--gl-text-muted)}
+.rd{display:flex;flex-direction:column;gap:var(--gl-space-2);flex:1;min-width:0}
+.rd div{display:flex;align-items:center;gap:var(--gl-space-2);font:var(--gl-type-body-sm)}
+.rd svg.i{width:16px;height:16px}
+.risk{display:flex;gap:var(--gl-space-3);padding:var(--gl-space-4) var(--gl-space-6)}
+.risk + .risk{border-block-start:1px solid var(--gl-border-default)}
+.risk .t{font:var(--gl-type-body-strong)}
+.risk .d{font:var(--gl-type-body-sm);color:var(--gl-text-secondary);margin-top:2px}
+.risk .m{display:flex;align-items:center;gap:var(--gl-space-2);margin-top:var(--gl-space-2);flex-wrap:wrap}
+.sev{width:4px;border-radius:4px;flex:none}
+.ct{display:flex;align-items:center;gap:var(--gl-space-3);padding-block:var(--gl-space-3)}
+.ct + .ct{border-block-start:1px solid var(--gl-border-default)}
+.ct .t{font:var(--gl-type-label)}
+.ct .r{font:var(--gl-type-caption);color:var(--gl-text-muted)}
+.ct .row{margin-inline-start:auto}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  shell: 'ws', nav: 'ws-projects',
+  title: L => L('تطبيق Odoo ERP', 'Odoo ERP rollout'),
+  render: (L, { icon, fwd, ui }) => {
+    const T = GL_TEAM;
+    const av = (k, cls) => ui.av(L(T[k][2], T[k][3]), T[k][4], cls);
+    const months = L(['سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر', 'يناير', 'فبراير'], ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb']);
+    // [name, start%, width%, state, progress]
+    const G = [
+      [L('الاكتشاف', 'Discovery'), 0.5, 11, 'done'], [L('التصميم (Blueprint)', 'Design (Blueprint)'), 8, 10.5, 'done'], [L('البناء والتهيئة', 'Build & configure'), 16.5, 17, 'done'],
+      [L('ترحيل البيانات', 'Data migration'), 27, 16.5, 'done'], [L('اختبار القبول UAT', 'UAT'), 39, 13, 'cur', 56], [L('التدريب', 'Training'), 50, 6, 'next'], [L('الإطلاق والدعم', 'Go-live & hypercare'), 57.5, 17, 'next']
+    ];
+    const today = 46, golive = 57.5;
+    const rq = [
+      ['REQ-041', L('صلاحيات المستخدمين حسب القسم', 'User permissions by department'), L('العميل', 'Client'), 'warning', L('مستني العميل', 'Waiting on client'), L('بكرة', 'Tomorrow')],
+      ['REQ-038', L('قوالب الفواتير بالعربي والإنجليزي', 'Bilingual invoice templates'), L('منى', 'Mona'), 'info', L('قيد التنفيذ', 'In progress'), L('28 نوف', 'Nov 28')],
+      ['REQ-035', L('تكامل مع ميزان البوابة', 'Weighbridge integration at gate'), L('ياسمين', 'Yasmin'), 'danger', L('Blocker', 'Blocked'), L('26 نوف', 'Nov 26')],
+      ['REQ-029', L('تقرير تكلفة الإنتاج الشهري', 'Monthly production cost report'), L('محمود', 'Mahmoud'), 'success', L('معتمد', 'Approved'), L('20 نوف', 'Nov 20')]
+    ];
+    const ap = [
+      ['file-pen-line', L('سيناريوهات اختبار UAT', 'UAT test scenarios'), L('اتبعت لخالد منصور · من يومين', 'Sent to Khaled Mansour · 2 days ago'), 'warning', L('في الانتظار', 'Pending')],
+      ['file-pen-line', L('خطة الإطلاق (Cut-over)', 'Cut-over plan'), L('مسودة · هتتبعت الخميس', 'Draft · sending Thursday'), 'neutral', L('مسودة', 'Draft')],
+      ['check-circle', L('وثيقة التصميم (Blueprint) v2', 'Solution blueprint v2'), L('اعتمدها خالد منصور · 4 أكتوبر', 'Signed by Khaled Mansour · Oct 4'), 'success', L('معتمدة', 'Signed')]
+    ];
+    const kb = [
+      [L('للتنفيذ', 'To do'), 'circle', 14, [[L('إعداد حسابات مراكز التكلفة', 'Set up cost-centre accounts'), 'ha', L('27 نوف', 'Nov 27'), 'REQ-029'], [L('تجهيز بيئة التدريب', 'Prepare training environment'), 'me', L('1 ديس', 'Dec 1')]]],
+      [L('قيد التنفيذ', 'In progress'), 'circle-dot', 6, [[L('تنفيذ UAT دورة 2 مع قسم المشتريات', 'Run UAT cycle 2 with Purchasing'), 'ma', L('اليوم', 'Today'), '8/12'], [L('ربط ميزان البوابة بالمخزون', 'Weighbridge → inventory link'), 'yt', L('26 نوف', 'Nov 26'), '!']]],
+      [L('للمراجعة', 'In review'), 'eye', 3, [[L('قوالب الفواتير ثنائية اللغة', 'Bilingual invoice templates'), 'dm', L('28 نوف', 'Nov 28')]]]
+    ];
+    return `
+    <section class="card hero">
+      <nav class="crumbs"><a href="ws-projects.html">${L('المشاريع', 'Projects')}</a>${fwd('xs')}<span class="cur">${L('تطبيق Odoo ERP', 'Odoo ERP rollout')}</span></nav>
+      <div class="hero-top">
+        <span class="avatar lg av-teal">${L('ن', 'AN')}</span>
+        <div class="grow">
+          <div class="row gap-3 wrap"><h1 class="t-h1">${L('تطبيق Odoo ERP', 'Odoo ERP rollout')}</h1>${ui.tag('success', L('في المسار', 'On track'))}${ui.tag('accent', L('مرحلة UAT', 'UAT phase'), false)}</div>
+          <div class="meta"><span>${icon('building-2')}${L('مصنع النور للبلاستيك', 'Al Nour Plastics')}</span><span>${icon('layout-template')}${L('قالب: Odoo ERP قياسي', 'Playbook: Odoo ERP standard')}</span><span>${icon('banknote')}<span class="ltr">$48,000</span></span><span>${icon('calendar')}${L('1 سبتمبر ← 15 ديسمبر', 'Sep 1 → Dec 15')}</span><span>${icon('user')}${L('مديرة المشروع: منى عادل', 'PM: Mona Adel')}</span></div>
+        </div>
+        <div class="row gap-2">${ui.stack([[L('م', 'MA'), 'av-teal'], [L('ي', 'YT'), 'av-teal'], [L('م', 'ME'), 'av-amber'], [L('ح', 'HA'), 'av-blue'], ['+2', 'av-violet']])}
+          <a class="btn btn-outline" href="portal.html">${icon('external-link', 'sm')}${L('معاينة بوابة العميل', 'Preview client portal')}</a><button class="btn btn-primary">${icon('megaphone', 'sm')}${L('ابعت تحديث', 'Send update')}</button></div>
+      </div>
+      <div class="tabs"><span class="tab active">${L('نظرة عامة', 'Overview')}</span><span class="tab">${L('المتطلبات', 'Requirements')} <span class="badge">48</span></span><span class="tab">${L('الموافقات', 'Approvals')} <span class="badge">2</span></span><span class="tab">${L('المهام', 'Tasks')} <span class="badge">126</span></span><span class="tab">${L('المخاطر', 'Risks')} <span class="badge">3</span></span><span class="tab">${L('الملفات', 'Files')}</span><span class="tab">${L('النشاط', 'Activity')}</span></div>
+    </section>
+
+    <section class="card">
+      <div class="card-head"><div><h3 class="t-h3">${L('المراحل والمعالم', 'Phases & milestones')}</h3><p class="sub">${L('من توقيع العقد لحد انتهاء فترة الدعم بعد الإطلاق', 'From contract signature to end of hypercare')}</p></div>
+        <div class="row gap-4"><span class="legend"><i style="background:var(--gl-brand-primary)"></i>${L('مكتملة', 'Done')}</span><span class="legend"><i style="background:var(--gl-accent-default)"></i>${L('جارية', 'Current')}</span><span class="legend"><i style="border:1.5px dashed var(--gl-border-strong);background:var(--gl-bg-surface)"></i>${L('قادمة', 'Upcoming')}</span><span class="legend"><i style="background:var(--gl-accent-default);transform:rotate(45deg)"></i>${L('معلم', 'Milestone')}</span></div></div>
+      <div class="card-body pt0" style="padding-top:var(--gl-space-2)"><div class="gantt">
+        <div></div><div class="g-months">${months.map(m => `<span>${m}</span>`).join('')}</div>
+        <div>${G.map(g => `<div class="g-lab">${g[3] === 'done' ? icon('check-circle', 'yes') : g[3] === 'cur' ? icon('circle-dot', '') : icon('circle', 'muted')}<span class="n">${g[0]}</span></div>`).join('')}</div>
+        <div class="g-body">
+          ${G.map(g => `<div class="g-track"><span class="g-bar ${g[3]}" style="inset-inline-start:${g[1]}%;width:${g[2]}%">${g[3] === 'cur' ? `<i style="width:${g[4]}%"></i><span>${g[4]}%</span>` : ''}</span></div>`).join('')}
+          <span class="g-today" style="inset-inline-start:${today}%"><b>${L('النهارده', 'Today')}</b></span>
+          <span class="g-ms" style="inset-inline-start:18.5%;top:${44 * 1 + 15}px" title="Blueprint"></span>
+          <span class="g-ms" style="inset-inline-start:${golive}%;top:${44 * 6 + 15}px" title="Go-live"></span>
+        </div>
+      </div></div>
+    </section>
+
+    <section class="grid g-12">
+      <div class="span-8 mainc">
+        <div class="card table-wrap">
+          <div class="card-head"><div><h3 class="t-h3">${L('المتطلبات', 'Requirements')}</h3><p class="sub">${L('48 متطلب · 36 معتمد', '48 requirements · 36 approved')}</p></div><div class="row gap-2"><button class="btn btn-outline btn-sm">${icon('plus')}${L('متطلب', 'Requirement')}</button><a class="link" href="#">${L('الكل', 'All')}${fwd('xs')}</a></div></div>
+          <div class="card-body pt0" style="padding-bottom:0">
+            <div class="stackbar"><i style="flex:36;background:var(--gl-success-solid)"></i><i style="flex:7;background:var(--gl-info-solid)"></i><i style="flex:4;background:var(--gl-warning-solid)"></i><i style="flex:1;background:var(--gl-danger-solid)"></i></div>
+            <div class="req-sum"><div><b>36</b><span>${L('معتمد', 'Approved')}</span></div><div><b>7</b><span>${L('قيد التنفيذ', 'In progress')}</span></div><div><b>4</b><span>${L('مستني العميل', 'Waiting on client')}</span></div><div><b>1</b><span>Blocker</span></div></div>
+          </div>
+          <table class="tbl rq"><colgroup><col style="width:104px"><col><col style="width:168px"><col style="width:112px"></colgroup>
+            <thead><tr><th>${L('الرقم', 'ID')}</th><th>${L('المتطلب', 'Requirement')}</th><th>${L('الحالة', 'Status')}</th><th>${L('الموعد', 'Due')}</th></tr></thead>
+            <tbody>${rq.map(r => `<tr><td><span class="rid">${r[0]}</span></td><td><div class="t-strong ell">${r[1]}</div><div class="cell-sub">${L('المسؤول: ', 'Owner: ')}${r[2]}</div></td><td>${ui.tag(r[3], r[4])}</td><td class="sec">${r[5]}</td></tr>`).join('')}</tbody></table>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3 class="t-h3">${L('مهام المرحلة الحالية', 'Current phase tasks')}</h3><p class="sub">${L('اختبار القبول UAT · 23 مهمة', 'UAT · 23 tasks')}</p></div><button class="btn btn-outline btn-sm">${icon('plus')}${L('مهمة', 'Task')}</button></div>
+          <div class="card-body pt0"><div class="kb">${kb.map(c => `<div class="kcol"><h4>${icon(c[1], 'sm')}${c[0]}<span class="n">${c[2]}</span></h4>${c[3].map(k => `<div class="kc"><span class="t">${k[0]}</span><div class="f"><span class="row gap-2">${icon('calendar', 'xs')}${k[2]}${k[3] ? (k[3] === '!' ? `<span class="tag danger" style="height:20px">Blocker</span>` : `<span class="row gap-1">${icon(k[3].startsWith('REQ') ? 'link' : 'list-checks', 'xs')}<span class="ltr">${k[3]}</span></span>`) : ''}</span>${av(k[1])}</div></div>`).join('')}</div>`).join('')}</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head bordered"><div><h3 class="t-h3">${L('Blockers والمخاطر', 'Blockers & risks')}</h3><p class="sub">${L('1 blocker · 2 مخاطر تحت المراقبة', '1 blocker · 2 risks monitored')}</p></div><button class="btn btn-outline btn-sm">${icon('plus')}${L('إضافة', 'Add')}</button></div>
+          ${[['danger', 'Blocker', L('مورّد الميزان لسه مسلمش الـ API', 'Weighbridge vendor has not delivered API docs'), L('بيوقف REQ-035 واختبار الاستلام في UAT. صعّدنا لمدير المشتريات عند العميل.', 'Blocks REQ-035 and receiving tests in UAT. Escalated to client’s procurement manager.'), L('العميل', 'Client'), L('مفتوح من 3 أيام', 'Open 3 days'), 'yt'],
+             ['warning', L('خطر · متوسط', 'Risk · Medium'), L('توفر المستخدمين للتدريب في أسبوع الجرد', 'User availability for training during stock-take week'), L('ممكن نقسم التدريب على مجموعتين أو نقدمه يوم.', 'Mitigation: split training into two cohorts or start one day earlier.'), L('الفريق', 'Internal'), L('اتراجع امبارح', 'Reviewed yesterday'), 'me'],
+             ['info', L('خطر · منخفض', 'Risk · Low'), L('أداء التقارير مع 3 سنين بيانات تاريخية', 'Report performance with 3 years of history'), L('هنعمل اختبار أداء بعد ترحيل الدفعة الأخيرة.', 'Load test planned after the final migration batch.'), L('الفريق', 'Internal'), L('من أسبوع', '1 week ago'), 'ha']].map(r => `
+            <div class="risk"><span class="sev" style="background:var(--gl-${r[0]}-solid)"></span><div class="grow"><div class="row between gap-3"><span class="t">${r[2]}</span>${ui.tag(r[0], r[1], false)}</div><div class="d">${r[3]}</div><div class="m t-cap muted">${av(r[6])}<span>${L(T[r[6]][0], T[r[6]][1])}</span><span>·</span><span>${L('مستني:', 'Waiting on:')} ${r[4]}</span><span>·</span><span>${r[5]}</span></div></div></div>`).join('')}
+        </div>
+      </div>
+      <aside class="span-4 side">
+        <div class="card"><div class="card-head"><h3 class="t-h3">${L('جاهزية الإطلاق', 'Go-live readiness')}</h3>${ui.tag('brand', L('بعد 21 يوم', 'in 21 days'), false)}</div>
+          <div class="card-body pt0 ready"><div class="ring">${GLC.donut([{ v: 72, color: 'var(--gl-brand-primary)' }, { v: 28, color: 'transparent' }], 112, 12)}<div class="c"><div><b>72%</b><span>${L('جاهز', 'ready')}</span></div></div></div>
+            <div class="rd"><div>${icon('check-circle', 'yes')}${L('البيانات الأساسية اترحلت', 'Master data migrated')}</div><div>${icon('check-circle', 'yes')}${L('الصلاحيات متجهزة', 'Roles configured')}</div><div>${icon('circle-dot', '')}${L('UAT دورة 2 (8/12)', 'UAT cycle 2 (8/12)')}</div><div>${icon('circle', 'muted')}<span class="muted">${L('اعتماد خطة الإطلاق', 'Cut-over plan signed')}</span></div><div>${icon('circle', 'muted')}<span class="muted">${L('تدريب المستخدمين', 'End-user training')}</span></div></div></div></div>
+        <div class="card"><div class="card-head"><h3 class="t-h3">${L('الموافقات', 'Approvals')}</h3><a class="link" href="#">${L('الكل', 'All')}${fwd('xs')}</a></div>
+          <div class="card-body pt0">${ap.map(a => `<div class="ct"><span class="ic-tile" style="width:36px;height:36px;${a[3] === 'neutral' ? 'background:var(--gl-bg-subtle);color:var(--gl-text-secondary)' : ui.tone[a[3]]}">${icon(a[0], 'sm')}</span><div class="grow" style="min-width:0"><div class="t ell">${a[1]}</div><div class="r ell">${a[2]}</div></div></div>`).join('')}</div></div>
+        <div class="card"><div class="card-head"><h3 class="t-h3">${L('جهات اتصال العميل', 'Client contacts')}</h3><button class="icon-btn sm">${icon('plus')}</button></div>
+          <div class="card-body pt0">${[[L('خ', 'KM'), 'av-amber', L('خالد منصور', 'Khaled Mansour'), L('المدير المالي · صاحب القرار', 'CFO · Decision maker'), 'accent'], [L('ه', 'HS'), 'av-blue', L('هبة سليم', 'Heba Selim'), L('مديرة المشتريات · Key user', 'Procurement mgr · Key user')], [L('ط', 'TF'), 'av-violet', L('طارق فوزي', 'Tarek Fawzy'), L('مسؤول IT', 'IT lead')]].map(c => `<div class="ct">${ui.av(c[0], c[1], 'round')}<div style="min-width:0"><div class="t">${c[2]}</div><div class="r">${c[3]}</div></div><span class="row gap-1"><button class="icon-btn sm">${icon('mail')}</button><button class="icon-btn sm">${icon('phone')}</button></span></div>`).join('')}
+            <div class="callout brand mt-3" style="padding:var(--gl-space-3)">${icon('globe', 'sm')}<span>${L('البوابة مفعلة · آخر زيارة لخالد من ساعة', 'Portal active · Khaled visited 1h ago')}</span></div></div></div>
+        <div class="card"><div class="card-head"><h3 class="t-h3">${L('آخر الملفات', 'Recent files')}</h3><a class="link" href="#">${L('الكل', 'All')}${fwd('xs')}</a></div>
+          <div class="card-body pt0">${[['pdf', 'PDF', 'UAT_Scenarios_v3.pdf', '1.2 MB'], ['xls', 'XLS', 'Opening_Stock_Nov.xlsx', '840 KB'], ['doc', 'DOC', 'Blueprint_v2_signed.docx', '2.4 MB']].map(f => `<div class="ct"><span class="ftype ${f[0]}">${f[1]}</span><div style="min-width:0"><div class="t ltr ell" style="text-align:start">${f[2]}</div><div class="r">${f[3]}</div></div><button class="icon-btn sm" style="margin-inline-start:auto">${icon('download')}</button></div>`).join('')}</div></div>
+        <div class="card"><div class="card-head"><h3 class="t-h3">${L('النشاط', 'Activity')}</h3></div>
+          <div class="card-body pt0"><div class="tl">
+            <div class="tl-i"><div class="t"><b>${L('هبة سليم', 'Heba Selim')}</b> ${L('رفعت ملف أرصدة المخزون', 'uploaded the opening stock file')}</div><div class="d">${L('منذ ساعة · من بوابة العميل', '1h ago · via client portal')}</div></div>
+            <div class="tl-i warn"><div class="t"><b>${L('ياسمين طارق', 'Yasmin Tarek')}</b> ${L('علّمت REQ-035 كـ Blocker', 'flagged REQ-035 as blocker')}</div><div class="d">${L('منذ 3 أيام', '3 days ago')}</div></div>
+            <div class="tl-i"><div class="t"><b>${L('منى عادل', 'Mona Adel')}</b> ${L('بعتت سيناريوهات UAT للاعتماد', 'sent UAT scenarios for sign-off')}</div><div class="d">${L('منذ يومين', '2 days ago')}</div></div>
+            <div class="tl-i muted-dot"><div class="t">${L('اكتملت مرحلة ترحيل البيانات', 'Data migration phase completed')}</div><div class="d">${L('18 نوفمبر', 'Nov 18')}</div></div>
+          </div></div></div>
+      </aside>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

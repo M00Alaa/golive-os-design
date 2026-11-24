@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.tbl td.co a:hover .nm{color:var(--gl-brand-text)}
+.portal-st{display:inline-flex;align-items:center;gap:6px;font:var(--gl-type-body-sm)}
+.portal-st svg.i{width:16px;height:16px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  shell: 'ws', nav: 'ws-clients',
+  title: L => L('العملاء', 'Clients'),
+  render: (L, { icon, ui }) => {
+    const C = [
+      [L('مصنع النور للبلاستيك', 'Al Nour Plastics'), 'alnour-plastics.example', L('ن', 'AN'), 'av-teal', L('تصنيع', 'Manufacturing'), [[L('خ', 'KM'), 'av-amber'], [L('ه', 'HS'), 'av-blue'], [L('ط', 'TF'), 'av-violet']], 1, 'on', L('منذ ساعة', '1h ago'), '$48,000', 'ok'],
+      [L('دلتا للتوزيع', 'Delta Distribution'), 'delta-dist.example', L('د', 'DD'), 'av-blue', L('توزيع', 'Distribution'), [[L('س', 'SM'), 'av-teal'], [L('ع', 'AR'), 'av-amber']], 1, 'on', L('منذ 6 أيام', '6 days ago'), '$22,500', 'blocked'],
+      [L('الريادة الطبية', 'Riyada Medical'), 'riyada-med.example', L('ر', 'RM'), 'av-violet', L('رعاية صحية', 'Healthcare'), [[L('ن', 'NA'), 'av-blue']], 1, 'on', L('منذ 3 أيام', '3 days ago'), '$18,000', 'risk'],
+      [L('الأمل للمقاولات', 'Al Amal Contracting'), 'alamal.example', L('أ', 'AA'), 'av-amber', L('مقاولات', 'Construction'), [[L('م', 'MS'), 'av-violet'], [L('ر', 'RA'), 'av-teal']], 1, 'on', L('اليوم', 'Today'), '$15,600', 'ok'],
+      [L('سوق فريش', 'Souq Fresh'), 'souqfresh.example', L('س', 'SF'), 'av-teal', L('تجزئة', 'Retail'), [[L('أ', 'AK'), 'av-amber'], [L('ل', 'LM'), 'av-blue'], [L('ف', 'FH'), 'av-teal'], ['+1', 'av-violet']], 1, 'on', L('أمس', 'Yesterday'), '$26,000', 'ok'],
+      [L('كيان القابضة', 'Kayan Holding'), 'kayan.example', L('ك', 'KH'), 'av-blue', L('استثمار', 'Holding'), [[L('و', 'WS'), 'av-violet']], 1, 'inv', '—', '$31,000', 'kick'],
+      [L('أوربت للصلب', 'Orbit Steel'), 'orbit-steel.example', L('أ', 'OS'), 'av-violet', L('تصنيع', 'Manufacturing'), [[L('ج', 'GN'), 'av-teal'], [L('ش', 'SH'), 'av-amber']], 1, 'off', '—', '$54,000', 'kick'],
+      [L('وادي للأغذية', 'Wadi Foods'), 'wadi-foods.example', L('و', 'WF'), 'av-amber', L('أغذية', 'F&B'), [[L('ه', 'HZ'), 'av-blue']], 0, 'on', L('منذ شهر', '1 month ago'), '$19,800', 'done']
+    ];
+    const ps = { on: ['globe', 'yes', L('مفعلة', 'Active')], inv: ['mail', '', L('دعوة مرسلة', 'Invited')], off: ['ban', 'muted', L('مقفولة', 'Off')] };
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('العملاء', 'Clients')}</h1><p class="sub">${L('الشركات اللي بتنفذ لها، وجهات الاتصال ووصولهم لبوابة العميل', 'Companies you implement for, their contacts and client-portal access')}</p></div>
+      <div class="actions"><button class="btn btn-outline">${icon('download', 'sm')}${L('استيراد', 'Import')}</button><button class="btn btn-primary">${icon('plus', 'sm')}${L('عميل جديد', 'New client')}</button></div>
+    </div>
+    <section class="stat-strip">
+      ${ui.mini('building-2', '', '8', L('عملاء', 'Clients'))}
+      ${ui.mini('users', ui.tone.info, '17', L('جهة اتصال', 'Contacts'))}
+      ${ui.mini('globe', ui.tone.success, '6 / 10', L('بوابات مفعلة', 'Active portals'))}
+      ${ui.mini('smile', ui.tone.accent, '4.7', L('تقييم العملاء', 'Client rating'))}
+    </section>
+    <section class="card table-wrap">
+      <div class="toolbar"><label class="control search">${icon('search', 'sm')}<input placeholder="${L('ابحث عن عميل…', 'Search clients…')}"></label><span class="chip">${icon('plus')}${L('المجال', 'Industry')}</span><span class="chip">${icon('plus')}${L('البوابة', 'Portal')}</span></div>
+      <table class="tbl">
+        <colgroup><col><col style="width:136px"><col style="width:128px"><col style="width:96px"><col style="width:144px"><col style="width:128px"><col style="width:152px"><col style="width:72px"></colgroup>
+        <thead><tr><th>${L('العميل', 'Client')}</th><th>${L('المجال', 'Industry')}</th><th>${L('جهات الاتصال', 'Contacts')}</th><th>${L('المشاريع', 'Projects')}</th><th>${L('البوابة', 'Portal')}</th><th>${L('آخر زيارة', 'Last visit')}</th><th>${L('المشروع الحالي', 'Current project')}</th><th></th></tr></thead>
+        <tbody>${C.map(c => `<tr>
+          <td class="co"><a class="cell-co" href="ws-project.html">${ui.av(c[2], c[3], '')}<div><div class="nm">${c[0]}</div><div class="dm">${c[1]}</div></div></a></td>
+          <td class="sec">${c[4]}</td><td>${ui.stack(c[5])}</td><td><span class="t-strong">${c[6]}</span> <span class="t-cap muted">${L('نشط', 'active')}</span></td>
+          <td><span class="portal-st ${ps[c[7]][1]}">${icon(ps[c[7]][0])}${ps[c[7]][2]}</span></td><td class="sec">${c[8]}</td>
+          <td>${ui.tag(GL_HEALTH[c[10]][0], L(GL_HEALTH[c[10]][1], GL_HEALTH[c[10]][2]))}</td>
+          <td class="right"><button class="icon-btn sm">${icon('more')}</button></td></tr>`).join('')}</tbody>
+      </table>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

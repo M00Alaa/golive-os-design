@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.sec-card .card-head{border-block-end:1px solid var(--gl-border-default)}
+.logo-up{display:flex;align-items:center;gap:var(--gl-space-4)}
+.logo-up .avatar{width:64px;height:64px;font-size:24px;border-radius:var(--gl-radius-lg)}
+.prefix{display:flex;align-items:stretch;height:40px;border:1px solid var(--gl-border-default);border-radius:var(--gl-radius-md);overflow:hidden;background:var(--gl-bg-surface);box-shadow:var(--gl-shadow-xs);direction:ltr}
+.prefix span{display:flex;align-items:center;padding-inline:var(--gl-space-3);background:var(--gl-bg-subtle);color:var(--gl-text-muted);font:var(--gl-type-body-sm);border-inline-end:1px solid var(--gl-border-default)}
+.prefix input{flex:1;min-width:0;border:0;outline:0;padding-inline:var(--gl-space-3);background:transparent;font:var(--gl-type-body)}
+.prefix span.suf{border-inline-end:0;border-inline-start:1px solid var(--gl-border-default)}
+.pv{border:1px solid var(--gl-border-default);border-radius:var(--gl-radius-md);overflow:hidden;background:var(--gl-bg-canvas)}
+.pv-bar{display:flex;align-items:center;gap:var(--gl-space-2);padding:var(--gl-space-3);background:var(--gl-bg-surface);border-block-end:1px solid var(--gl-border-default);font:var(--gl-type-label-sm)}
+.pv-hero{margin:var(--gl-space-3);padding:var(--gl-space-4);border-radius:var(--gl-radius-md);background:linear-gradient(135deg,#7C2D12,#C2410C);color:#fff;font:var(--gl-type-label)}
+.pv-hero .bar{background:rgb(255 255 255 / .2);margin-top:var(--gl-space-3)}
+.pv-hero .bar > i{background:#FDBA74}
+.pv-rows{padding:0 var(--gl-space-3) var(--gl-space-3);display:flex;flex-direction:column;gap:6px}
+.pv-rows i{display:block;height:10px;border-radius:4px;background:var(--gl-bg-subtle)}
+.planbox{display:flex;align-items:center;gap:var(--gl-space-4);padding:var(--gl-space-4);border-radius:var(--gl-radius-md);background:var(--gl-brand-subtle);border:1px solid color-mix(in srgb,var(--gl-brand-primary) 18%,transparent)}
+.planbox .p{font:600 18px/26px var(--gl-font-sans)}
+.usage{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gl-space-5);margin-top:var(--gl-space-5)}
+.usage .top{display:flex;justify-content:space-between;margin-bottom:var(--gl-space-2);font:var(--gl-type-label)}
+.usage .top span:last-child{color:var(--gl-text-secondary);font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  shell: 'ws', nav: 'ws-settings',
+  title: L => L('إعدادات المساحة', 'Workspace settings'),
+  render: (L, { icon, ui }) => {
+    const sub = [['settings', L('عام', 'General'), 1], ['palette', L('الهوية وبوابة العميل', 'Branding & portal')], ['layout-template', L('افتراضيات المشاريع', 'Project defaults')], ['bell', L('الإشعارات', 'Notifications')], ['plug', L('التكاملات', 'Integrations')], ['credit-card', L('الخطة والفوترة', 'Plan & billing')]];
+    const sel = v => `<span class="control"><span class="val">${v}</span>${icon('chevron-down', 'sm')}</span>`;
+    const row = (t, d, ctl) => `<div class="set-row"><div><div class="t">${t}</div><div class="d">${d}</div></div><div class="ctl">${ctl}</div></div>`;
+    const usage = (l, u, t, unit, cls) => `<div><div class="top"><span>${l}</span><span class="ltr">${u}${unit || ''} / ${t}${unit || ''}</span></div><div class="bar thin ${cls || ''}"><i style="width:${u / t * 100}%"></i></div></div>`;
+    return `
+    <div class="page-head"><div><h1 class="t-h1">${L('إعدادات المساحة', 'Workspace settings')}</h1><p class="sub">${L('نيل سوفت للحلول · بتتطبق على كل المشاريع والأعضاء', 'NileSoft Solutions · applies to every project and member')}</p></div></div>
+    <section class="settings">
+      <nav class="subnav">${sub.map(s => `<a class="${s[2] ? 'on' : ''}" href="#">${icon(s[0])}<span>${s[1]}</span></a>`).join('')}</nav>
+      <div class="stack gap-6">
+        <div class="card sec-card">
+          <div class="card-head"><div><h3 class="t-h3">${L('بيانات الشركة', 'Company profile')}</h3><p class="sub">${L('بتظهر لعملائك في البوابة والإيميلات', 'Shown to your clients in the portal and emails')}</p></div></div>
+          <div class="card-body stack gap-6">
+            <div class="logo-up"><span class="avatar ws-logo">${L('ن', 'NS')}</span><div><div class="t-strong">${L('شعار الشركة', 'Company logo')}</div><div class="t-cap muted">${L('PNG أو SVG · مربع · 512px على الأقل', 'PNG or SVG · square · at least 512px')}</div><div class="row gap-2 mt-2"><button class="btn btn-outline btn-sm">${icon('upload')}${L('رفع شعار', 'Upload')}</button><button class="btn btn-ghost btn-sm">${L('إزالة', 'Remove')}</button></div></div></div>
+            <div class="form-grid">
+              <div class="field"><label>${L('اسم الشركة', 'Company name')}</label><span class="control"><input value="${L('نيل سوفت للحلول', 'NileSoft Solutions')}"></span></div>
+              <div class="field"><label>${L('رابط المساحة', 'Workspace URL')}</label><div class="prefix"><input value="nilesoft"><span class="suf">.golive.example</span></div></div>
+              <div class="field"><label>${L('لغة المساحة', 'Workspace language')}</label>${sel(L('العربية + English', 'Arabic + English'))}</div>
+              <div class="field"><label>${L('المنطقة الزمنية', 'Time zone')}</label>${sel(L('القاهرة (UTC+2)', 'Cairo (UTC+2)'))}</div>
+              <div class="field"><label>${L('أيام العمل', 'Working days')}</label>${sel(L('الأحد – الخميس', 'Sun – Thu'))}</div>
+              <div class="field"><label>${L('العملة الافتراضية للعقود', 'Default contract currency')}</label>${sel('EGP — ج.م')}</div>
+            </div>
+          </div>
+          <div class="sticky-save"><button class="btn btn-ghost">${L('إلغاء', 'Cancel')}</button><button class="btn btn-primary">${L('حفظ', 'Save')}</button></div>
+        </div>
+        <div class="card sec-card">
+          <div class="card-head"><div><h3 class="t-h3">${L('هوية بوابة العميل', 'Client portal branding')}</h3><p class="sub">${L('عميلك يشوف شعارك وألوانك، مش GoLive', 'Clients see your logo and colours, not GoLive')}</p></div>${ui.tag('brand', 'Growth', false)}</div>
+          <div class="card-body grid g-2" style="gap:var(--gl-space-8)">
+            <div class="stack gap-5">
+              <div class="field"><label>${L('اللون الأساسي', 'Primary colour')}</label><div class="swatch-pick"><i style="background:#0A8F78"></i><i class="on" style="background:#C2410C"></i><i style="background:#2563EB"></i><i style="background:#7C3AED"></i><i style="background:#0F172A"></i></div></div>
+              <div class="field"><label>${L('دومين مخصص', 'Custom domain')}</label><span class="control"><input class="ltr" value="portal.nilesoft.example"></span><span class="hint row gap-1" style="color:var(--gl-success-fg)">${icon('check-circle', 'xs')}${L('الـ DNS متظبط · شهادة SSL فعالة', 'DNS verified · SSL active')}</span></div>
+              ${row(L('إظهار «مدعوم من GoLive»', 'Show “Powered by GoLive”'), L('في أسفل البوابة', 'In the portal footer'), '<span class="switch"></span>')}
+            </div>
+            <div><div class="t-label sec" style="margin-bottom:var(--gl-space-2)">${L('معاينة', 'Preview')}</div><div class="pv"><div class="pv-bar"><span class="avatar ws-logo" style="width:22px;height:22px;font-size:10px;border-radius:6px">${L('ن', 'NS')}</span>${L('نيل سوفت · بوابة العميل', 'NileSoft · Client portal')}</div><div class="pv-hero">${L('تطبيق Odoo ERP · 72%', 'Odoo ERP rollout · 72%')}<div class="bar thin"><i style="width:72%"></i></div></div><div class="pv-rows"><i style="width:80%"></i><i style="width:60%"></i><i style="width:70%"></i></div></div></div>
+          </div>
+        </div>
+        <div class="card sec-card">
+          <div class="card-head"><div><h3 class="t-h3">${L('الإشعارات للعملاء', 'Client notifications')}</h3><p class="sub">${L('إيه اللي يتبعت لجهات اتصال العميل تلقائيًا', 'What client contacts receive automatically')}</p></div></div>
+          <div class="card-body" style="padding-block:var(--gl-space-2)">
+            ${row(L('تحديث أسبوعي بالتقدم', 'Weekly progress digest'), L('كل يوم أحد 9 الصبح بتوقيت القاهرة', 'Every Sunday 9:00 AM Cairo time'), '<span class="switch on"></span>')}
+            ${row(L('تذكير بالموافقات المتأخرة', 'Overdue sign-off reminders'), L('بعد يومين، وبعدها كل 3 أيام', 'After 2 days, then every 3 days'), '<span class="switch on"></span>')}
+            ${row(L('إشعار عند إغلاق مرحلة', 'Phase completed notice'), L('مع ملخص اللي اتعمل والخطوة الجاية', 'With a summary and next step'), '<span class="switch on"></span>')}
+            ${row(L('رسائل واتساب', 'WhatsApp messages'), L('محتاج ربط WhatsApp Business', 'Requires WhatsApp Business connection'), `<button class="btn btn-outline btn-sm">${icon('plug')}${L('ربط', 'Connect')}</button>`)}
+          </div>
+        </div>
+        <div class="card sec-card">
+          <div class="card-head"><div><h3 class="t-h3">${L('الخطة والاستخدام', 'Plan & usage')}</h3><p class="sub">${L('التجديد القادم 12 ديسمبر 2026', 'Renews Dec 12, 2026')}</p></div><button class="btn btn-outline btn-sm">${icon('receipt')}${L('الفواتير', 'Invoices')}</button></div>
+          <div class="card-body">
+            <div class="planbox"><span class="kpi-icon" style="background:var(--gl-brand-primary);color:var(--gl-text-on-brand)">${icon('layers')}</span><div class="grow"><div class="p">Growth</div><div class="t-sm sec">${L('$179 شهريًا · Visa •••• 4242', '$179 / month · Visa •••• 4242')}</div></div><button class="btn btn-primary btn-sm">${L('ترقية لـ Enterprise', 'Upgrade to Enterprise')}</button></div>
+            <div class="usage">${usage(L('المستخدمين', 'Users'), 10, 30)}${usage(L('المشاريع النشطة', 'Active projects'), 7, 10, '', 'warn')}${usage(L('التخزين', 'Storage'), 3.2, 10, ' GB')}</div>
+          </div>
+        </div>
+      </div>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

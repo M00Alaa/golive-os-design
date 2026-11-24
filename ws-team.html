@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.util{display:grid;grid-template-columns:minmax(0,1fr) 40px;align-items:center;gap:var(--gl-space-3)}
+.util .p{font:var(--gl-type-label-sm);text-align:end;font-variant-numeric:tabular-nums}
+.role{display:flex;gap:var(--gl-space-3);padding-block:var(--gl-space-3)}
+.role + .role{border-block-start:1px solid var(--gl-border-default)}
+.role .t{font:var(--gl-type-body-strong);display:flex;align-items:center;gap:var(--gl-space-2)}
+.role .d{font:var(--gl-type-caption);color:var(--gl-text-muted);margin-top:2px}
+.seats{display:flex;align-items:baseline;gap:6px}
+.seats b{font:var(--gl-type-kpi)}
+.skills{display:flex;gap:4px;flex-wrap:nowrap;overflow:hidden}
+.skills .tag{height:22px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  shell: 'ws', nav: 'ws-team',
+  title: L => L('الفريق والصلاحيات', 'Team & roles'),
+  render: (L, { icon, ui }) => {
+    const T = GL_TEAM;
+    const R = { owner: ['accent', L('مالك', 'Owner')], admin: ['violet', L('مسؤول', 'Admin')], pm: ['brand', L('مدير مشروع', 'Project manager')], consultant: ['info', L('استشاري', 'Consultant')], viewer: ['neutral', L('مشاهد', 'Viewer')] };
+    const rows = [
+      ['as', 'ahmed@nilesoft.example', 'owner', 7, 40, ['Odoo', L('مبيعات', 'Sales')]],
+      ['ma', 'mona@nilesoft.example', 'pm', 2, 92, ['Odoo', 'PMP']],
+      ['ok', 'omar@nilesoft.example', 'pm', 2, 78, ['Odoo', L('مخازن', 'Inventory')]],
+      ['rf', 'rana@nilesoft.example', 'pm', 2, 85, ['CRM', 'POS']],
+      ['me', 'mahmoud@nilesoft.example', 'consultant', 3, 64, ['MRP', L('محاسبة', 'Accounting')]],
+      ['yt', 'yasmin@nilesoft.example', 'consultant', 3, 104, ['Python', 'API']],
+      ['ha', 'hossam@nilesoft.example', 'consultant', 2, 71, ['SQL', L('ترحيل', 'Migration')]],
+      ['dm', 'dina@nilesoft.example', 'admin', 1, 48, [L('تدريب', 'Training'), 'HR']]
+    ];
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('الفريق والصلاحيات', 'Team & roles')}</h1><p class="sub">${L('أعضاء شركتك، أدوارهم وحجم الشغل على كل واحد', 'Your company’s members, their roles and workload')}</p></div>
+      <div class="actions"><button class="btn btn-primary">${icon('user-plus', 'sm')}${L('دعوة عضو', 'Invite member')}</button></div>
+    </div>
+    <section class="grid g-12" style="align-items:start">
+      <div class="span-8 card table-wrap">
+        <div class="tabs" style="padding-inline:var(--gl-space-6)"><span class="tab active">${L('الأعضاء', 'Members')} <span class="badge">8</span></span><span class="tab">${L('دعوات معلقة', 'Pending invites')} <span class="badge">2</span></span><span class="tab">${L('الضيوف', 'Guests')} <span class="badge">1</span></span></div>
+        <div class="toolbar"><label class="control search">${icon('search', 'sm')}<input placeholder="${L('ابحث بالاسم أو المهارة…', 'Search by name or skill…')}"></label><span class="chip">${icon('plus')}${L('الدور', 'Role')}</span></div>
+        <table class="tbl">
+          <colgroup><col><col style="width:168px"><col style="width:88px"><col style="width:152px"><col style="width:72px"></colgroup>
+          <thead><tr><th>${L('العضو', 'Member')}</th><th>${L('الدور', 'Role')}</th><th>${L('المشاريع', 'Projects')}</th><th>${L('الضغط الأسبوع ده', 'Load this week')}</th><th></th></tr></thead>
+          <tbody>${rows.map(r => `<tr>
+            <td><div class="cell-co">${ui.av(L(T[r[0]][2], T[r[0]][3]), T[r[0]][4], 'round')}<div><div class="nm">${L(T[r[0]][0], T[r[0]][1])}</div><div class="dm">${r[1]}</div></div></div></td>
+            <td>${ui.tag(R[r[2]][0], R[r[2]][1], false)}</td><td><span class="t-strong">${r[3]}</span></td>
+            <td><div class="util"><div class="bar thin ${r[4] > 100 ? 'danger' : r[4] > 90 ? 'warn' : ''}"><i style="width:${Math.min(r[4], 100)}%"></i></div><span class="p" style="${r[4] > 100 ? 'color:var(--gl-danger-fg)' : ''}">${r[4]}%</span></div></td>
+            <td class="right"><button class="icon-btn sm">${icon('more')}</button></td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+      <aside class="span-4 side">
+        <div class="card"><div class="card-head"><div><h3 class="t-h3">${L('المقاعد', 'Seats')}</h3><p class="sub">${L('خطة Growth', 'Growth plan')}</p></div><a class="btn btn-outline btn-sm" href="ws-settings.html">${L('ترقية', 'Upgrade')}</a></div>
+          <div class="card-body pt0"><div class="seats"><b>10</b><span class="muted">/ 30 ${L('مستخدم', 'users')}</span></div><div class="bar mt-3"><i style="width:33%"></i></div><p class="t-cap muted mt-2">${L('8 أعضاء + 2 دعوات معلقة · جهات اتصال العملاء مجانية', '8 members + 2 pending · client contacts are free')}</p></div></div>
+        <div class="card"><div class="card-head"><div><h3 class="t-h3">${L('الأدوار', 'Roles')}</h3><p class="sub">${L('صلاحيات كل دور داخل المساحة', 'What each role can do in the workspace')}</p></div></div>
+          <div class="card-body pt0">${[['crown', 'owner', L('كل حاجة، بما فيها الفوترة وحذف المساحة', 'Everything, including billing and deleting the workspace')], ['shield', 'admin', L('إدارة الأعضاء والقوالب والإعدادات', 'Manage members, playbooks and settings')], ['briefcase', 'pm', L('إنشاء مشاريع، دعوة العملاء وإرسال الموافقات', 'Create projects, invite clients, send sign-offs')], ['user-cog', 'consultant', L('تنفيذ المهام والمتطلبات في مشاريعه', 'Work on tasks and requirements in assigned projects')], ['eye', 'viewer', L('عرض فقط، مناسب للإدارة العليا', 'Read-only, ideal for leadership')]].map(r => `
+            <div class="role"><span class="ic-tile" style="width:36px;height:36px">${icon(r[0], 'sm')}</span><div><div class="t">${R[r[1]][1]}</div><div class="d">${r[2]}</div></div></div>`).join('')}</div></div>
+      </aside>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

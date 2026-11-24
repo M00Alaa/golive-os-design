@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.seg6{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+.seg6 i{height:6px;border-radius:2px;background:var(--gl-bg-subtle)}
+.seg6 i.d{background:var(--gl-brand-primary)}
+.seg6 i.c{background:var(--gl-accent-default)}
+.seg6.blocked i.c{background:var(--gl-danger-solid)}
+.seg6.risk i.c{background:var(--gl-warning-solid)}
+.ph-l{display:flex;justify-content:space-between;font:var(--gl-type-caption);color:var(--gl-text-secondary);margin-bottom:6px}
+.cnt{display:inline-flex;align-items:center;gap:4px;height:24px;padding-inline:6px;border-radius:var(--gl-radius-sm);font:var(--gl-type-label-sm);color:var(--gl-text-secondary);background:var(--gl-bg-subtle)}
+.cnt svg.i{width:13px;height:13px}
+.cnt.z{opacity:.45}
+.cnt.hot{background:var(--gl-danger-bg);color:var(--gl-danger-fg)}
+.tbl td.co a:hover .nm{color:var(--gl-brand-text)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  shell: 'ws', nav: 'ws-projects',
+  title: L => L('المشاريع', 'Projects'),
+  render: (L, { icon, ui }) => {
+    const T = GL_TEAM, H = GL_HEALTH, PH = GL_PHASES;
+    const P = GL_PROJECTS.concat([['تطبيق Odoo للمبيعات', 'Odoo Sales rollout', 'وادي للأغذية', 'Wadi Foods', 'و', 'WF', 'av-amber', 6, 100, '2 أكتوبر', 'Oct 2', 'done', 'rf', [0, 0, 0], '$19,800']]);
+    const cnt = (ic, n, title, hot) => `<span class="cnt ${n ? (hot ? 'hot' : '') : 'z'}" title="${title}">${icon(ic)}${n}</span>`;
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('المشاريع', 'Projects')}</h1><p class="sub">${L('كل مشاريع التنفيذ من توقيع العقد لحد الـ Go-live', 'Every implementation from signed contract to go-live')}</p></div>
+      <div class="actions"><div class="pills"><span class="pill active">${icon('list', 'sm')}${L('جدول', 'Table')}</span><span class="pill">${icon('kanban', 'sm')}${L('لوحة', 'Board')}</span><span class="pill">${icon('calendar-clock', 'sm')}${L('زمني', 'Timeline')}</span></div>
+        <button class="btn btn-primary">${icon('plus', 'sm')}${L('مشروع جديد', 'New project')}</button></div>
+    </div>
+    <section class="stat-strip">
+      ${ui.mini('briefcase', '', '7', L('مشاريع نشطة من 10', 'Active of 10 allowed'))}
+      ${ui.mini('banknote', ui.tone.success, '$215K', L('قيمة العقود النشطة', 'Active contract value'))}
+      ${ui.mini('calendar-check', ui.tone.info, '86%', L('بتتسلم في ميعادها (12 شهر)', 'On-time go-lives (12 mo)'))}
+      ${ui.mini('alert-triangle', ui.tone.warning, '2', L('مشاريع محتاجة تدخل', 'Projects need attention'))}
+    </section>
+    <section class="card table-wrap">
+      <div class="tabs" style="padding-inline:var(--gl-space-6)"><span class="tab active">${L('نشطة', 'Active')} <span class="badge">7</span></span><span class="tab">${L('محتاجة تدخل', 'Needs attention')} <span class="badge">2</span></span><span class="tab">${L('مكتملة', 'Completed')} <span class="badge">23</span></span><span class="tab">${L('مؤرشفة', 'Archived')}</span></div>
+      <div class="toolbar"><label class="control search">${icon('search', 'sm')}<input placeholder="${L('ابحث بالمشروع أو العميل…', 'Search project or client…')}"></label>
+        <span class="chip">${icon('plus')}${L('مدير المشروع', 'Project manager')}</span><span class="chip">${icon('plus')}${L('المرحلة', 'Phase')}</span><span class="chip">${icon('plus')}${L('القالب', 'Playbook')}</span>
+        <div class="end"><button class="btn btn-ghost btn-sm">${icon('sort')}${L('الأقرب إطلاقًا', 'Go-live soonest')}</button></div></div>
+      <table class="tbl">
+        <colgroup><col><col style="width:208px"><col style="width:112px"><col style="width:176px"><col style="width:136px"><col style="width:152px"><col style="width:72px"></colgroup>
+        <thead><tr><th>${L('المشروع', 'Project')}</th><th>${L('المرحلة', 'Phase')}</th><th>${L('الإطلاق', 'Go-live')}</th><th>${L('مفتوح', 'Open items')}</th><th>${L('المدير', 'PM')}</th><th>${L('الحالة', 'Health')}</th><th></th></tr></thead>
+        <tbody>${P.map(p => `<tr>
+          <td class="co"><a class="cell-co" href="ws-project.html">${ui.av(L(p[4], p[5]), p[6], 'sm')}<div><div class="nm">${L(p[0], p[1])}</div><div class="cell-sub">${L(p[2], p[3])} · <span class="ltr">${p[14]}</span></div></div></a></td>
+          <td><div class="ph-l"><span>${p[7] > 5 ? L('مكتمل', 'Done') : L(PH[p[7]][0], PH[p[7]][1])}</span><span class="num">${p[8]}%</span></div><div class="seg6 ${p[11]}">${PH.map((x, i) => `<i class="${i < p[7] ? 'd' : i === p[7] ? 'c' : ''}"></i>`).join('')}</div></td>
+          <td class="sec">${L(p[9], p[10])}</td>
+          <td><span class="row gap-1">${cnt('file-pen-line', p[13][0], L('موافقات', 'Approvals'))}${cnt('clipboard-list', p[13][1], L('متطلبات', 'Requirements'))}${cnt('alert-triangle', p[13][2], 'Blockers', 1)}</span></td>
+          <td><span class="row gap-2">${ui.av(L(T[p[12]][2], T[p[12]][3]), T[p[12]][4])}<span class="t-sm ell">${L(T[p[12]][0], T[p[12]][1]).split(' ')[0]}</span></span></td>
+          <td>${ui.tag(H[p[11]][0], L(H[p[11]][1], H[p[11]][2]))}</td>
+          <td class="right"><button class="icon-btn sm">${icon('more')}</button></td></tr>`).join('')}</tbody>
+      </table>
+      <div class="card-foot"><span class="t-sm muted">${L('7 نشطة · 1 مكتمل حديثًا', '7 active · 1 recently completed')}</span><span class="row gap-4 t-cap muted"><span class="row gap-1">${icon('file-pen-line', 'xs')}${L('موافقات', 'Approvals')}</span><span class="row gap-1">${icon('clipboard-list', 'xs')}${L('متطلبات من العميل', 'Client requirements')}</span><span class="row gap-1">${icon('alert-triangle', 'xs')}Blockers</span></span></div>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

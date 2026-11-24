@@ -245,3 +245,8 @@
 [data-theme="dark"] .chk.done .cb{color:var(--gl-neutral-950)}
 .chk.done .t{color:var(--gl-text-muted);text-decoration:line-through}
 .chk .t{font:var(--gl-type-body);flex:1;min-width:0}
+.av-stack{flex:none}
+.av-stack .avatar{flex:none}
+.avatar.sm.round,.avatar.round{border-radius:50%}
+.av-stack .avatar + .avatar{margin-inline-start:-6px}
+.set-row .ctl:has(> .switch){width:auto}
