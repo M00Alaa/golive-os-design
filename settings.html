@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.sec-card .card-head{border-block-end:1px solid var(--gl-border-default)}
+.danger-card{border-color:color-mix(in srgb,var(--gl-danger-solid) 35%,var(--gl-border-default))}
+.key{display:flex;align-items:center;gap:var(--gl-space-3);padding:var(--gl-space-3) var(--gl-space-4);border:1px solid var(--gl-border-default);border-radius:var(--gl-radius-md);background:var(--gl-bg-subtle)}
+.key code{font:500 13px/20px ui-monospace,Menlo,Consolas,monospace;direction:ltr;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:start}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  nav: 'settings',
+  title: L => L('الإعدادات', 'Settings'),
+  render: (L, { icon, ui }) => {
+    const sub = [['settings', L('عام', 'General'), 1], ['palette', L('الهوية والدومين', 'Branding & domain')], ['receipt', L('الفوترة والضرائب', 'Billing & tax')], ['mail', L('البريد والإشعارات', 'Email & notifications')], ['shield-check', L('الأمان', 'Security')], ['plug', L('التكاملات', 'Integrations')], ['webhook', L('API وWebhooks', 'API & webhooks')]];
+    const row = (t, d, ctl) => `<div class="set-row"><div><div class="t">${t}</div><div class="d">${d}</div></div><div class="ctl">${ctl}</div></div>`;
+    const sel = v => `<span class="control" style="width:100%"><span class="val">${v}</span>${icon('chevron-down', 'sm')}</span>`;
+    return `
+    <div class="page-head"><div><h1 class="t-h1">${L('إعدادات المنصة', 'Platform settings')}</h1><p class="sub">${L('إعدادات عامة بتأثر على كل الشركات المشتركة', 'Global settings that affect every subscribed company')}</p></div></div>
+    <section class="settings">
+      <nav class="subnav">${sub.map(s => `<a class="${s[2] ? 'on' : ''}" href="#">${icon(s[0])}<span>${s[1]}</span></a>`).join('')}<a href="#" style="color:var(--gl-danger-fg)">${icon('alert-triangle')}<span>${L('منطقة الخطر', 'Danger zone')}</span></a></nav>
+      <div class="stack gap-6">
+        <div class="card sec-card">
+          <div class="card-head"><div><h3 class="t-h3">${L('بيانات المنصة', 'Platform profile')}</h3><p class="sub">${L('بتظهر في الإيميلات والفواتير وصفحات التسجيل', 'Shown on emails, invoices and sign-up pages')}</p></div></div>
+          <div class="card-body"><div class="form-grid">
+            <div class="field"><label>${L('اسم المنصة', 'Platform name')}</label><span class="control"><input value="GoLive OS"></span></div>
+            <div class="field"><label>${L('بريد الدعم', 'Support email')}</label><span class="control">${icon('mail', 'sm')}<input class="ltr" value="support@golive.example"></span></div>
+            <div class="field"><label>${L('اللغة الافتراضية للشركات الجديدة', 'Default language for new companies')}</label>${sel(L('العربية (RTL)', 'Arabic (RTL)'))}</div>
+            <div class="field"><label>${L('المنطقة الزمنية', 'Time zone')}</label>${sel(L('القاهرة (UTC+2)', 'Cairo (UTC+2)'))}</div>
+            <div class="field"><label>${L('العملة', 'Currency')}</label>${sel('USD — $')}</div>
+            <div class="field"><label>${L('صيغة التاريخ', 'Date format')}</label>${sel('DD/MM/YYYY')}</div>
+          </div></div>
+          <div class="sticky-save"><button class="btn btn-ghost">${L('إلغاء', 'Cancel')}</button><button class="btn btn-primary">${L('حفظ التغييرات', 'Save changes')}</button></div>
+        </div>
+        <div class="card sec-card">
+          <div class="card-head"><div><h3 class="t-h3">${L('الأمان', 'Security')}</h3><p class="sub">${L('سياسات بتتطبق على فريق المنصة وعلى مسؤولي الشركات', 'Policies for platform staff and company admins')}</p></div>${ui.tag('success', L('قوي', 'Strong'))}</div>
+          <div class="card-body" style="padding-block:var(--gl-space-2)">
+            ${row(L('إلزام التحقق بخطوتين لفريق المنصة', 'Require 2FA for platform staff'), L('أي عضو من غير 2FA مش هيقدر يدخل بعد 7 أيام', 'Members without 2FA are locked out after 7 days'), '<span class="switch on"></span>')}
+            ${row(L('الدخول كمسؤول للشركة يحتاج سبب', 'Impersonation requires a reason'), L('السبب بيتسجل في سجل النشاط وبيتبعت إشعار للشركة', 'Logged to audit trail and the company is notified'), '<span class="switch on"></span>')}
+            ${row(L('مدة الجلسة', 'Session timeout'), L('تسجيل خروج تلقائي بعد عدم النشاط', 'Auto sign-out after inactivity'), sel(L('8 ساعات', '8 hours')))}
+            ${row(L('عناوين IP المسموحة للوحة الإدارة', 'Admin console IP allow-list'), L('اتركها فاضية للسماح من أي مكان', 'Leave empty to allow from anywhere'), `<span class="control" style="width:100%"><input class="ltr" placeholder="41.33.12.0/24"></span>`)}
+          </div>
+        </div>
+        <div class="card sec-card">
+          <div class="card-head"><div><h3 class="t-h3">${L('مفاتيح API', 'API keys')}</h3><p class="sub">${L('للتكامل مع أنظمة الفوترة والتقارير الداخلية', 'For internal billing and reporting integrations')}</p></div><button class="btn btn-outline btn-sm">${icon('plus')}${L('مفتاح جديد', 'New key')}</button></div>
+          <div class="card-body stack gap-3">
+            <div class="key">${icon('key-round', 'sm')}<code>gl_live_••••••••••••••••7f3a</code><span class="t-cap muted">${L('استخدام: منذ 4 د', 'Used 4m ago')}</span><button class="icon-btn sm">${icon('copy')}</button></div>
+            <div class="key">${icon('key-round', 'sm')}<code>gl_live_••••••••••••••••c21e</code><span class="t-cap muted">${L('استخدام: منذ 12 يوم', 'Used 12d ago')}</span><button class="icon-btn sm">${icon('copy')}</button></div>
+          </div>
+        </div>
+        <div class="card danger-card">
+          <div class="card-body row between gap-6"><div><div class="t-strong" style="color:var(--gl-danger-fg)">${L('وضع الصيانة', 'Maintenance mode')}</div><div class="t-sm sec">${L('كل الشركات هتشوف صفحة صيانة، ولوحة الإدارة بس هتفضل شغالة', 'All companies see a maintenance page; only this console stays available')}</div></div><button class="btn btn-outline" style="color:var(--gl-danger-fg)">${L('تفعيل الصيانة', 'Enable maintenance')}</button></div>
+        </div>
+      </div>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

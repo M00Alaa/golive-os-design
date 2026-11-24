@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.plan .meta{display:grid;grid-template-columns:1fr 1fr;gap:var(--gl-space-3);padding:var(--gl-space-4);border-radius:var(--gl-radius-md);background:var(--gl-bg-subtle)}
+.plan .meta .k{font:var(--gl-type-caption);color:var(--gl-text-muted)}
+.plan .meta .v{font:600 16px/24px var(--gl-font-sans);font-variant-numeric:tabular-nums}
+.plan-top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--gl-space-3)}
+.lim td{height:52px}
+.lim td.c,.lim th.c{text-align:center}
+.lim .grp td{height:36px;background:var(--gl-bg-subtle);font:var(--gl-type-overline);color:var(--gl-text-muted);text-transform:uppercase;letter-spacing:.4px}
+.cp{display:flex;align-items:center;gap:var(--gl-space-3);padding-block:var(--gl-space-3)}
+.cp + .cp{border-block-start:1px solid var(--gl-border-default)}
+.code-tag{font:600 12px/18px ui-monospace,Menlo,Consolas,monospace;padding:2px 8px;border-radius:var(--gl-radius-sm);background:var(--gl-bg-subtle);border:1px dashed var(--gl-border-strong);direction:ltr}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  nav: 'plans',
+  title: L => L('الخطط والأسعار', 'Plans & Pricing'),
+  render: (L, { icon, ui }) => {
+    const yes = icon('check', 'sm yes'), no = icon('minus', 'sm no');
+    const plan = (name, price, desc, subs, mrr, share, feats, pop, tagCls) => `
+      <article class="card plan ${pop ? 'pop' : ''}">
+        ${pop ? `<span class="tag accent ribbon" style="background:var(--gl-accent-default);color:var(--gl-brand-950)">${icon('star', 'xs')}${L('الأكثر اشتراكًا', 'Most popular')}</span>` : ''}
+        <div class="plan-top"><div><div class="row gap-2"><h3 class="t-h2">${name}</h3>${ui.tag('success', L('منشورة', 'Published'))}</div><p class="t-sm sec mt-1">${desc}</p></div><button class="icon-btn sm outline">${icon('pencil')}</button></div>
+        <div class="price">${price}</div>
+        <div class="meta"><div><div class="k">${L('شركات مشتركة', 'Subscribers')}</div><div class="v">${subs}</div></div><div><div class="k">${L('من الإيراد الشهري', 'Share of MRR')}</div><div class="v"><span class="ltr">${mrr}</span> <span class="t-cap muted">· ${share}</span></div></div></div>
+        <ul>${feats.map(f => `<li class="${f[1] ? '' : 'off'}">${icon(f[1] ? 'check' : 'minus')}<span>${f[0]}</span></li>`).join('')}</ul>
+      </article>`;
+    const per = `<span class="t-sm muted">${L('/ شهريًا للشركة', '/ month per company')}</span>`;
+    const rows = [
+      ['g', L('الحدود', 'Limits')],
+      [L('المستخدمين', 'Users'), '8', '30', L('بلا حدود', 'Unlimited')],
+      [L('المشاريع النشطة', 'Active projects'), '3', '10', L('بلا حدود', 'Unlimited')],
+      [L('بوابات العملاء', 'Client portals'), '3', '10', L('بلا حدود', 'Unlimited')],
+      [L('مساحة التخزين', 'Storage'), '2 GB', '10 GB', '100 GB'],
+      ['g', L('المزايا', 'Features')],
+      [L('قوالب تنفيذ جاهزة', 'Implementation playbooks'), 1, 1, 1],
+      [L('موافقات إلكترونية للعميل', 'Client e-sign-offs'), 1, 1, 1],
+      [L('هوية البوابة الخاصة', 'Custom portal branding'), 0, 1, 1],
+      [L('تقارير الربحية', 'Profitability reports'), 0, 1, 1],
+      [L('تسجيل دخول موحد SSO', 'SSO / SAML'), 0, 0, 1],
+      [L('API وWebhooks', 'API & webhooks'), 0, 1, 1],
+      [L('مدير نجاح مخصص', 'Dedicated success manager'), 0, 0, 1]
+    ];
+    const cell = v => v === 1 ? yes : v === 0 ? no : `<span class="t-strong">${v}</span>`;
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('الخطط والأسعار', 'Plans & Pricing')}</h1><p class="sub">${L('الخطط والحدود والفترة التجريبية والكوبونات · التعديلات للاشتراكات الجديدة بس', 'Plans, limits, trial and coupons · changes apply to new subscriptions only')}</p></div>
+      <div class="actions">
+        <div class="pills"><span class="pill active">${L('شهري', 'Monthly')}</span><span class="pill">${L('سنوي', 'Annual')} <span class="tag success" style="height:20px">-20%</span></span></div>
+        <button class="btn btn-outline">${icon('external-link', 'sm')}${L('صفحة الأسعار', 'Pricing page')}</button>
+        <button class="btn btn-primary">${icon('plus', 'sm')}${L('خطة جديدة', 'New plan')}</button>
+      </div>
+    </div>
+
+    <section class="plans">
+      ${plan('Starter', `<b>$79</b>${per}`, L('للفرق الصغيرة اللي بتبدأ أول مشاريعها', 'For small teams running their first projects'), '61', '$4,819', '26%',
+        [[L('حتى 8 مستخدمين', 'Up to 8 users'), 1], [L('3 مشاريع نشطة', '3 active projects'), 1], [L('بوابة العميل', 'Client portal'), 1], [L('هوية البوابة الخاصة', 'Custom branding'), 0]])}
+      ${plan('Growth', `<b>$179</b>${per}`, L('لشركات التنفيذ اللي بتدير مشاريع كتير بالتوازي', 'For implementers running many projects in parallel'), '64', '$11,456', '62%',
+        [[L('حتى 30 مستخدم', 'Up to 30 users'), 1], [L('10 مشاريع نشطة', '10 active projects'), 1], [L('هوية البوابة الخاصة', 'Custom branding'), 1], [L('تقارير الربحية', 'Profitability reports'), 1]], true)}
+      ${plan('Enterprise', `<b>${L('مخصص', 'Custom')}</b><span class="t-sm muted">${L('· يبدأ من $420', '· from $420')}</span>`, L('للشركات الكبيرة اللي محتاجة SSO ودعم مخصص', 'For larger firms needing SSO and dedicated support'), '5', '$2,145', '12%',
+        [[L('مستخدمين ومشاريع بلا حدود', 'Unlimited users & projects'), 1], [L('SSO / SAML', 'SSO / SAML'), 1], [L('مدير نجاح مخصص', 'Dedicated success manager'), 1], [L('اتفاقية SLA', 'Uptime SLA'), 1]])}
+    </section>
+
+    <section class="grid g-12">
+      <div class="span-8 card table-wrap">
+        <div class="card-head bordered"><div><h3 class="t-h3">${L('الحدود والمزايا', 'Limits & features')}</h3><p class="sub">${L('المرجع اللي بيتطبق عليه حساب الاستخدام في كل مساحة عمل', 'The source of truth for usage enforcement in every workspace')}</p></div><button class="btn btn-outline btn-sm">${icon('pencil')}${L('تعديل', 'Edit')}</button></div>
+        <table class="tbl lim">
+          <colgroup><col><col style="width:136px"><col style="width:136px"><col style="width:136px"></colgroup>
+          <thead><tr><th>${L('الميزة', 'Feature')}</th><th class="c">Starter</th><th class="c">Growth</th><th class="c">Enterprise</th></tr></thead>
+          <tbody>${rows.map(r => r[0] === 'g' ? `<tr class="grp"><td colspan="4">${r[1]}</td></tr>` : `<tr><td>${r[0]}</td><td class="c">${cell(r[1])}</td><td class="c">${cell(r[2])}</td><td class="c">${cell(r[3])}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+      <aside class="span-4 side">
+        <div class="card">
+          <div class="card-head"><div><h3 class="t-h3">${L('الفترة التجريبية', 'Free trial')}</h3><p class="sub">${L('بتبدأ تلقائيًا مع أي تسجيل جديد', 'Starts automatically on sign-up')}</p></div></div>
+          <div class="card-body pt0">
+            <div class="kv"><span class="k">${L('المدة', 'Length')}</span><span class="v">${L('14 يوم', '14 days')}</span></div>
+            <div class="kv"><span class="k">${L('الخطة أثناء التجربة', 'Trial plan')}</span><span class="v">Growth</span></div>
+            <div class="kv"><span class="k">${L('مطلوب كارت؟', 'Card required')}</span><span class="switch"></span></div>
+            <div class="kv"><span class="k">${L('نسبة التحويل (90 يوم)', 'Conversion (90d)')}</span><span class="v">${ui.tag('success', '38%', false)}</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3 class="t-h3">${L('الكوبونات', 'Coupons')}</h3><p class="sub">${L('3 نشطة', '3 active')}</p></div><button class="btn btn-outline btn-sm">${icon('plus')}${L('كوبون', 'Coupon')}</button></div>
+          <div class="card-body pt0">
+            ${[['LAUNCH30', L('خصم 30% لأول 3 شهور', '30% off first 3 months'), '41/100'], ['ODOOMEET', L('شهر مجاني · Growth', '1 month free · Growth'), '12/50'], ['PARTNER20', L('خصم 20% دائم للشركاء', '20% off forever · partners'), '7/∞']].map(c => `
+              <div class="cp"><span class="code-tag">${c[0]}</span><span class="grow t-sm ell">${c[1]}</span><span class="t-cap muted ltr">${c[2]}</span></div>`).join('')}
+          </div>
+        </div>
+      </aside>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

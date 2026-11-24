@@ -8,64 +8,100 @@
 <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/tokens.css">
 <link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
 <style>
-  .g-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--gl-space-8)}
-  .g-hero h1{font:var(--gl-type-display);letter-spacing:-.5px;margin-top:var(--gl-space-2)}
-  .g-hero p{color:var(--gl-text-secondary);font:var(--gl-type-body-lg);margin-top:var(--gl-space-2);max-width:640px}
-  .shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gl-space-6)}
-  .shot{display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .2s,transform .2s}
-  .shot:hover{box-shadow:var(--gl-shadow-lg);transform:translateY(-2px)}
-  .thumb{aspect-ratio:16/9;background:var(--gl-bg-subtle);border-block-end:1px solid var(--gl-border-default);overflow:hidden;display:block}
-  .thumb img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
-  .shot-body{padding:var(--gl-space-5) var(--gl-space-6) var(--gl-space-6);display:flex;flex-direction:column;gap:var(--gl-space-3)}
-  .shot-body .row.between{align-items:flex-start}
-  .variants{display:flex;flex-wrap:wrap;gap:var(--gl-space-2);margin-top:var(--gl-space-1)}
-  .soon{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gl-space-6)}
-  .soon .card{padding:var(--gl-space-6);display:flex;flex-direction:column;gap:var(--gl-space-3);border-style:dashed;box-shadow:none;background:transparent}
+.g-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--gl-space-8)}
+.g-hero h1{font:var(--gl-type-display);letter-spacing:-.5px;margin-top:var(--gl-space-2)}
+.g-hero p{color:var(--gl-text-secondary);font:var(--gl-type-body-lg);margin-top:var(--gl-space-2);max-width:680px}
+.jump{display:flex;flex-wrap:wrap;gap:var(--gl-space-2)}
+.shots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gl-space-6)}
+.shot{display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .2s,transform .2s}
+.shot:hover{box-shadow:var(--gl-shadow-lg);transform:translateY(-2px)}
+.thumb{aspect-ratio:16/10;background:var(--gl-bg-subtle);border-block-end:1px solid var(--gl-border-default);overflow:hidden;display:block}
+.thumb img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.shot-body{padding:var(--gl-space-4) var(--gl-space-5) var(--gl-space-5);display:flex;flex-direction:column;gap:var(--gl-space-3)}
+.shot-body h3{font:600 15px/22px var(--gl-font-sans)}
+.variants{display:flex;flex-wrap:wrap;gap:6px}
+.variants .btn{height:28px;padding-inline:var(--gl-space-2);font:var(--gl-type-label-sm)}
+.soon{border-style:dashed;box-shadow:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--gl-space-3);min-height:240px;text-align:center;padding:var(--gl-space-6)}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--gl-space-6)}
+.sec-head .n{font:var(--gl-type-label);color:var(--gl-text-muted)}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
 <script>
+window.GL_READY = ['admin'];
 GL.mount({
   doc: 'index',
   title: L => L('معرض التصميم', 'Design gallery'),
-  render: (L, { icon, fwd }) => {
+  render: (L, { icon }) => {
+    const READY = window.GL_READY || ['admin', 'ws', 'portal', 'auth'];
     const v = (href, label) => `<a class="btn btn-outline btn-sm" href="${href}">${label}</a>`;
-    const shot = (file, thumb, ic, title, desc, extra) => `
+    const shot = s => `
       <article class="card shot">
-        <a class="thumb" href="${file}"><img src="assets/thumbs/${thumb}.png" alt="${title}" loading="lazy"></a>
+        <a class="thumb" href="${s[0]}.html"><img src="assets/thumbs/${s[0]}-ar-light.png" alt="${s[2]}" loading="lazy"></a>
         <div class="shot-body">
-          <div class="row between gap-4"><div class="row gap-3"><span class="kpi-icon">${icon(ic)}</span><div><h3 class="t-h3" style="font-weight:600">${title}</h3><p class="t-sm sec">${desc}</p></div></div>
-            <a class="icon-btn sm outline" href="${file}">${icon('arrow-up-right', 'flip')}</a></div>
-          <div class="variants">${v(file + '?lang=ar&theme=light', 'AR · Light')}${v(file + '?lang=ar&theme=dark', 'AR · Dark')}${v(file + '?lang=en&theme=light', 'EN · Light')}${v(file + '?lang=en&theme=dark', 'EN · Dark')}${extra || ''}</div>
+          <div class="row between gap-3"><div class="row gap-3" style="min-width:0"><span class="kpi-icon">${icon(s[1])}</span><div style="min-width:0"><h3 class="ell">${s[2]}</h3><p class="t-cap muted ell">${s[3]}</p></div></div>
+            <a class="icon-btn sm outline" href="${s[0]}.html">${icon('arrow-up-right', 'flip')}</a></div>
+          <div class="variants">${v(s[0] + '.html?lang=ar&theme=light', 'AR')}${v(s[0] + '.html?lang=ar&theme=dark', 'AR · Dark')}${v(s[0] + '.html?lang=en&theme=light', 'EN')}${v(s[0] + '.html?lang=en&theme=dark', 'EN · Dark')}</div>
         </div>
       </article>`;
+    const SECTIONS = [
+      ['admin', 'Super Admin', L('لوحة إدارة المنصة', 'Platform admin console'), 'shield', [
+        ['dashboard', 'dashboard', L('نظرة عامة', 'Overview'), L('MRR، الشركات، التجارب والنشاط', 'MRR, companies, trials, activity')],
+        ['companies', 'building', L('قائمة الشركات', 'Companies'), L('فلاتر، حالات، جدول وترقيم', 'Filters, statuses, table, paging')],
+        ['company-360', 'activity', L('ملف الشركة 360', 'Company 360'), L('الاشتراك، الاستخدام، المشاريع والدعم', 'Subscription, usage, projects, support')],
+        ['plans', 'layers', L('الخطط والأسعار', 'Plans & Pricing'), L('الخطط، الحدود، التجربة والكوبونات', 'Plans, limits, trial, coupons')],
+        ['billing', 'credit-card', L('الاشتراكات والفواتير', 'Subscriptions & Billing'), L('MRR حسب الخطة، التحصيل والفواتير', 'MRR by plan, dunning, invoices')],
+        ['support', 'life-buoy', L('تذاكر الدعم', 'Support queue'), L('طوابير، أولويات وSLA', 'Views, priorities and SLAs')],
+        ['support-ticket', 'message', L('تفاصيل التذكرة', 'Ticket detail'), L('محادثة، ملاحظات داخلية وSLA', 'Thread, internal notes, SLA')],
+        ['staff', 'users', L('فريق المنصة والصلاحيات', 'Staff & roles'), L('الأعضاء، 2FA ومصفوفة الصلاحيات', 'Members, 2FA, permission matrix')],
+        ['audit-log', 'file-text', L('سجل النشاط', 'Audit log'), L('كل إجراء حساس على المنصة', 'Every sensitive platform action')],
+        ['settings', 'settings', L('الإعدادات', 'Settings'), L('عام، الأمان ومفاتيح API', 'General, security, API keys')]
+      ]],
+      ['ws', 'Company Workspace', L('مساحة عمل شركة التنفيذ', 'Implementer workspace'), 'briefcase', [
+        ['ws-dashboard', 'dashboard', L('الرئيسية', 'Dashboard'), L('صحة المشاريع، الموافقات والـ blockers', 'Portfolio health, approvals, blockers')],
+        ['ws-projects', 'briefcase', L('المشاريع', 'Projects'), L('جدول ولوحة حسب المرحلة', 'Table and phase board')],
+        ['ws-project', 'target', L('تفاصيل المشروع', 'Project detail'), L('المراحل، المتطلبات، الموافقات والمخاطر', 'Phases, requirements, approvals, risks')],
+        ['ws-templates', 'layout-template', L('قوالب التنفيذ', 'Playbooks'), L('مراحل ومهام جاهزة لكل نوع مشروع', 'Reusable phases & tasks per project type')],
+        ['ws-clients', 'building-2', L('العملاء', 'Clients'), L('العملاء، جهات الاتصال والبوابات', 'Clients, contacts, portals')],
+        ['ws-team', 'users', L('الفريق والصلاحيات', 'Team & roles'), L('الأعضاء، الأدوار والسعة', 'Members, roles, capacity')],
+        ['ws-settings', 'settings', L('إعدادات المساحة', 'Workspace settings'), L('الهوية، البوابة، الإشعارات والفوترة', 'Branding, portal, notifications, billing')]
+      ]],
+      ['portal', L('بوابة العميل', 'Client Portal'), L('اللي بيشوفه عميل شركة التنفيذ', 'What the implementer’s client sees'), 'users', [
+        ['portal', 'dashboard', L('الرئيسية', 'Portal home'), L('التقدم والمطلوب منك', 'Progress and what’s needed from you')],
+        ['portal-requirements', 'clipboard-list', L('المطلوب منك', 'Requests & forms'), L('نماذج وملفات مطلوب تسليمها', 'Forms and files to submit')],
+        ['portal-approvals', 'file-pen-line', L('الموافقات', 'Approvals'), L('مراجعة وتوقيع المستندات', 'Review and sign off documents')],
+        ['portal-files', 'folder', L('الملفات', 'Files'), L('ملفات المشروع المشتركة', 'Shared project files')],
+        ['portal-messages', 'message', L('الرسائل والتحديثات', 'Messages & updates'), L('تحديثات أسبوعية ومحادثة', 'Weekly updates and conversation')]
+      ]],
+      ['auth', L('التسجيل والإعداد', 'Registration & Onboarding'), L('من أول زيارة لحد أول مشروع', 'From first visit to first project'), 'user-plus', [
+        ['signup', 'user-plus', L('إنشاء حساب', 'Sign up'), L('تجربة مجانية 14 يوم', '14-day free trial')],
+        ['login', 'log-in', L('تسجيل الدخول', 'Log in'), L('بريد وكلمة سر أو Google', 'Email/password or Google')],
+        ['onboarding-workspace', 'building-2', L('١ · بيانات الشركة', '1 · Workspace'), L('الاسم، الرابط، النوع والحجم', 'Name, URL, focus and size')],
+        ['onboarding-invite', 'mail-plus', L('٢ · دعوة الفريق', '2 · Invite team'), L('إيميلات وأدوار', 'Emails and roles')],
+        ['onboarding-plan', 'layers', L('٣ · اختيار الخطة', '3 · Choose plan'), L('Starter / Growth / Enterprise', 'Starter / Growth / Enterprise')],
+        ['ws-welcome', 'party-popper', L('٤ · أول تشغيل', '4 · First run'), L('قائمة البداية ومساحة فاضية', 'Getting-started checklist, empty workspace')],
+        ['empty-states', 'inbox', L('الحالات الفاضية', 'Empty states'), L('لكل قائمة في المنتج', 'For every list in the product')]
+      ]]
+    ];
+    const total = SECTIONS.reduce((a, s) => a + (READY.includes(s[0]) ? s[4].length : 0), 0);
     return `
     <section class="g-hero">
-      <div><span class="tag accent">${L('المرحلة الأولى', 'Phase 1')}</span><h1>${L('معرض تصميم GoLive OS', 'GoLive OS design gallery')}</h1>
-        <p>${L('نموذج HTML/CSS عالي الدقة لنظام التصميم وشاشات Super Admin. كل شاشة بتدعم العربي والإنجليزي والوضع الفاتح والغامق من الأزرار اللي فوق.', 'A high-fidelity HTML/CSS prototype of the design system and Super Admin screens. Every screen supports Arabic, English, light and dark from the toggles above.')}</p></div>
-      <a class="btn btn-primary" href="dashboard.html">${icon('rocket', 'sm')}${L('افتح لوحة الإدارة', 'Open admin console')}</a>
+      <div><span class="tag accent">${L(`${total} شاشة`, `${total} screens`)}</span><h1>${L('معرض تصميم GoLive OS', 'GoLive OS design gallery')}</h1>
+        <p>${L('نموذج HTML/CSS عالي الدقة لكل أسطح المنتج: لوحة إدارة المنصة، مساحة عمل الشركة، بوابة العميل، والتسجيل. كل شاشة بالعربي والإنجليزي وفاتح وغامق.', 'A high-fidelity HTML/CSS prototype of every product surface: platform admin, company workspace, client portal and onboarding. Every screen in Arabic, English, light and dark.')}</p>
+        <div class="jump mt-4">${SECTIONS.map(s => `<a class="btn btn-outline btn-sm" href="#${s[0]}">${icon(s[3], 'sm')}${s[1]}</a>`).join('')}<a class="btn btn-outline btn-sm" href="design-system.html">${icon('palette', 'sm')}${L('نظام التصميم', 'Design system')}</a></div></div>
     </section>
-    <section class="ds-sec">
-      <header><div class="t-over">Super Admin</div><h2>${L('شاشات لوحة إدارة المنصة', 'Platform admin screens')}</h2></header>
-      <div class="shots">
-        ${shot('dashboard.html', 'dashboard-ar-light', 'dashboard', L('نظرة عامة', 'Overview dashboard'), L('MRR، الشركات، الفترات التجريبية والنشاط', 'MRR, companies, trials and live activity'))}
-        ${shot('companies.html', 'companies-ar-light', 'building', L('قائمة الشركات', 'Companies list'), L('فلاتر، تبويبات حالة، جدول وترقيم', 'Filters, status tabs, table and pagination'))}
-        ${shot('company-360.html', 'company-360-ar-light', 'activity', L('ملف الشركة 360', 'Company 360'), L('الاشتراك، الاستخدام، المشاريع، الدعم والخط الزمني', 'Subscription, usage, projects, support and timeline'))}
-        ${shot('design-system.html', 'design-system-ar-light', 'palette', L('نظام التصميم', 'Design system'), L('المتغيرات، الخطوط، المسافات وكل المكونات', 'Tokens, type, spacing and every component'))}
-      </div>
-    </section>
-    <section class="ds-sec">
-      <header><div class="t-over">${L('قريبًا', 'Next')}</div><h2>${L('المراحل الجاية', 'Coming next')}</h2></header>
-      <div class="soon">
-        <div class="card"><span class="kpi-icon">${icon('briefcase')}</span><h3 class="t-h3">${L('مساحة عمل الشركة', 'Company workspace')}</h3><p class="t-sm sec">${L('المشاريع، المتطلبات، الموافقات والـ blockers', 'Projects, requirements, approvals and blockers')}</p></div>
-        <div class="card"><span class="kpi-icon">${icon('users')}</span><h3 class="t-h3">${L('بوابة العميل', 'Client portal')}</h3><p class="t-sm sec">${L('متابعة التقدم والموافقة على المتطلبات', 'Track progress and sign off requirements')}</p></div>
-        <div class="card"><span class="kpi-icon">${icon('user-plus')}</span><h3 class="t-h3">${L('التسجيل والإعداد', 'Sign-up & onboarding')}</h3><p class="t-sm sec">${L('إنشاء الحساب واختيار الخطة وأول مشروع', 'Account, plan selection and first project')}</p></div>
-      </div>
-    </section>`;
+    ${SECTIONS.map(s => `
+    <section class="ds-sec" id="${s[0]}">
+      <header class="sec-head"><div><div class="t-over">${s[1]}</div><h2>${s[2]}</h2></div><span class="n">${READY.includes(s[0]) ? L(`${s[4].length} شاشات`, `${s[4].length} screens`) : L('قيد التصميم', 'In progress')}</span></header>
+      <div class="shots">${READY.includes(s[0]) ? s[4].map(shot).join('') : `<div class="card soon"><span class="kpi-icon">${icon(s[3])}</span><h3 class="t-h3">${s[2]}</h3><p class="t-sm sec">${L('شغالين عليها دلوقتي، هتظهر هنا أول ما تخلص', 'Being designed now — will appear here when ready')}</p></div>`}</div>
+    </section>`).join('')}`;
   }
 });
 </script>

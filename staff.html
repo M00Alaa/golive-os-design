@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.role-card{display:flex;align-items:center;gap:var(--gl-space-3);padding:var(--gl-space-3) var(--gl-space-4);border:1px solid var(--gl-border-default);border-radius:var(--gl-radius-md)}
+.role-card.on{border-color:var(--gl-brand-primary);background:color-mix(in srgb,var(--gl-brand-subtle) 60%,transparent)}
+.role-card .n{margin-inline-start:auto;font:var(--gl-type-label-sm);color:var(--gl-text-muted)}
+.perm th{white-space:nowrap}
+.perm .grp td{height:36px;background:var(--gl-bg-subtle);font:var(--gl-type-overline);color:var(--gl-text-muted);text-transform:uppercase;letter-spacing:.4px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  nav: 'staff',
+  title: L => L('فريق المنصة', 'Platform Staff'),
+  render: (L, { icon, ui }) => {
+    const roles = { owner: ['accent', L('مالك', 'Owner')], admin: ['brand', L('مسؤول', 'Admin')], support: ['info', L('دعم فني', 'Support')], billing: ['violet', L('مالية', 'Billing')], ro: ['neutral', L('قراءة فقط', 'Read-only')] };
+    const S = [
+      [L('محمد علاء', 'Mohamed Alaa'), 'mohamed@golive.example', L('م', 'MA'), 'av-solid', 'owner', 1, L('الآن', 'Now'), 'active'],
+      [L('هند نبيل', 'Hend Nabil'), 'hend@golive.example', L('ه', 'HN'), 'av-violet', 'support', 1, L('منذ 5 د', '5m ago'), 'active'],
+      [L('يوسف فريد', 'Youssef Farid'), 'youssef@golive.example', L('ي', 'YF'), 'av-teal', 'support', 1, L('منذ ساعة', '1h ago'), 'active'],
+      [L('نورهان رشاد', 'Nourhan Rashad'), 'nourhan@golive.example', L('ن', 'NR'), 'av-amber', 'billing', 1, L('أمس', 'Yesterday'), 'active'],
+      [L('كريم عادل', 'Karim Adel'), 'karim@golive.example', L('ك', 'KA'), 'av-blue', 'admin', 0, L('منذ 3 أيام', '3 days ago'), 'active'],
+      [L('ليلى حسن', 'Laila Hassan'), 'laila@golive.example', L('ل', 'LH'), 'av-teal', 'ro', 0, '—', 'invited']
+    ];
+    const P = [
+      ['g', L('الشركات', 'Companies')],
+      [L('عرض الشركات وملف 360', 'View companies & 360'), 1, 1, 1, 1, 1],
+      [L('الدخول كمسؤول للشركة', 'Log in as company admin'), 1, 1, 1, 0, 0],
+      [L('تعليق أو حذف شركة', 'Suspend or delete company'), 1, 1, 0, 0, 0],
+      ['g', L('الفوترة', 'Billing')],
+      [L('عرض الفواتير', 'View invoices'), 1, 1, 0, 1, 1],
+      [L('استرداد وخصومات', 'Refunds & credits'), 1, 0, 0, 1, 0],
+      [L('تعديل الخطط والأسعار', 'Edit plans & pricing'), 1, 0, 0, 0, 0],
+      ['g', L('الدعم والنظام', 'Support & system')],
+      [L('الرد على التذاكر', 'Reply to tickets'), 1, 1, 1, 0, 0],
+      [L('إدارة فريق المنصة', 'Manage platform staff'), 1, 0, 0, 0, 0]
+    ];
+    const ck = v => v ? icon('check-circle', 'sm yes') : icon('minus', 'sm no');
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('فريق المنصة والصلاحيات', 'Platform staff & roles')}</h1><p class="sub">${L('مين يقدر يدخل لوحة الإدارة وإيه اللي يقدر يعمله', 'Who can access the admin console and what they can do')}</p></div>
+      <div class="actions"><button class="btn btn-outline">${icon('shield-check', 'sm')}${L('سياسة الأمان', 'Security policy')}</button><button class="btn btn-primary">${icon('user-plus', 'sm')}${L('دعوة عضو', 'Invite member')}</button></div>
+    </div>
+    <section class="card table-wrap">
+      <div class="toolbar"><label class="control search">${icon('search', 'sm')}<input placeholder="${L('ابحث بالاسم أو البريد…', 'Search name or email…')}"></label><span class="chip">${icon('plus')}${L('الدور', 'Role')}</span>
+        <div class="end"><span class="callout info" style="padding:6px 12px;align-items:center">${icon('info', 'sm')}<span>${L('2 أعضاء من غير تحقق بخطوتين', '2 members without 2FA')}</span></span></div></div>
+      <table class="tbl">
+        <colgroup><col><col style="width:140px"><col style="width:152px"><col style="width:144px"><col style="width:128px"><col style="width:80px"></colgroup>
+        <thead><tr><th>${L('العضو', 'Member')}</th><th>${L('الدور', 'Role')}</th><th>${L('التحقق بخطوتين', '2FA')}</th><th>${L('آخر نشاط', 'Last active')}</th><th>${L('الحالة', 'Status')}</th><th></th></tr></thead>
+        <tbody>${S.map(s => `<tr><td><div class="cell-co">${ui.av(s[2], s[3], 'round')}<div><div class="nm">${s[0]}</div><div class="dm">${s[1]}</div></div></div></td>
+          <td>${ui.tag(roles[s[4]][0], roles[s[4]][1], false)}</td>
+          <td>${s[5] ? `<span class="cell-ic yes t-sm">${icon('shield-check', 'sm')}${L('مفعّل', 'Enabled')}</span>` : `<span class="cell-ic t-sm" style="color:var(--gl-warning-fg)">${icon('alert-triangle', 'sm')}${L('غير مفعّل', 'Not set')}</span>`}</td>
+          <td class="sec">${s[6]}</td><td>${s[7] === 'active' ? ui.tag('success', L('نشط', 'Active')) : ui.tag('info', L('دعوة مرسلة', 'Invited'))}</td>
+          <td class="right"><button class="icon-btn sm">${icon('more')}</button></td></tr>`).join('')}</tbody>
+      </table>
+    </section>
+    <section class="grid g-12">
+      <div class="span-4 card">
+        <div class="card-head"><div><h3 class="t-h3">${L('الأدوار', 'Roles')}</h3><p class="sub">${L('5 أدوار · 1 مخصص', '5 roles · 1 custom')}</p></div><button class="btn btn-outline btn-sm">${icon('plus')}${L('دور', 'Role')}</button></div>
+        <div class="card-body pt0 stack gap-2">${Object.entries(roles).map(([k, r], i) => `<div class="role-card ${k === 'support' ? 'on' : ''}"><span class="ic-tile" style="width:32px;height:32px">${icon(['crown', 'shield', 'headset', 'wallet', 'eye'][i], 'sm')}</span><span class="t-strong">${r[1]}</span><span class="n">${[1, 1, 2, 1, 1][i]} ${L('عضو', i === 2 ? 'members' : 'member')}</span></div>`).join('')}</div>
+      </div>
+      <div class="span-8 card table-wrap">
+        <div class="card-head bordered"><div><h3 class="t-h3">${L('مصفوفة الصلاحيات', 'Permission matrix')}</h3><p class="sub">${L('الأدوار الأساسية مقفولة، تقدر تنسخها لدور مخصص', 'System roles are locked; duplicate one to customise')}</p></div><button class="btn btn-outline btn-sm">${icon('copy')}${L('نسخ دور', 'Duplicate role')}</button></div>
+        <table class="tbl perm">
+          <colgroup><col><col style="width:84px"><col style="width:84px"><col style="width:84px"><col style="width:84px"><col style="width:96px"></colgroup>
+          <thead><tr><th>${L('الصلاحية', 'Permission')}</th>${Object.values(roles).map(r => `<th class="c">${r[1]}</th>`).join('')}</tr></thead>
+          <tbody>${P.map(r => r[0] === 'g' ? `<tr class="grp"><td colspan="6">${r[1]}</td></tr>` : `<tr><td>${r[0]}</td>${r.slice(1).map(v => `<td class="c">${ck(v)}</td>`).join('')}</tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.act{display:flex;align-items:center;gap:var(--gl-space-2);min-width:0}
+.act .ic{width:28px;height:28px;border-radius:var(--gl-radius-sm);display:grid;place-items:center;flex:none}
+.act .ic svg.i{width:15px;height:15px}
+.ip{font:500 12px/18px ui-monospace,Menlo,Consolas,monospace;color:var(--gl-text-muted);direction:ltr;unicode-bidi:isolate}
+.day td{height:36px;background:var(--gl-bg-subtle);font:var(--gl-type-label-sm);color:var(--gl-text-secondary)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  nav: 'audit',
+  title: L => L('سجل النشاط', 'Audit log'),
+  render: (L, { icon, ui }) => {
+    const E = [
+      ['d', L('اليوم · 24 نوفمبر 2026', 'Today · Nov 24, 2026')],
+      ['6:41 PM', [L('م', 'MA'), 'av-solid', L('محمد علاء', 'Mohamed Alaa')], 'pencil', 'info', L('عدّل حدود خطة Growth', 'Updated Growth plan limits'), L('الخطط', 'Plans'), '41.33.12.8'],
+      ['5:02 PM', [L('ه', 'HN'), 'av-violet', L('هند نبيل', 'Hend Nabil')], 'log-in', 'warning', L('دخلت كمسؤول على نيل سوفت', 'Impersonated NileSoft admin'), L('نيل سوفت للحلول', 'NileSoft Solutions'), '156.204.7.90'],
+      ['3:18 PM', [L('ن', 'NR'), 'av-amber', L('نورهان رشاد', 'Nourhan Rashad')], 'receipt', 'violet', L('أصدرت استرداد $79', 'Issued $79 refund'), 'INV-2026-1168', '197.45.2.14'],
+      ['1:55 PM', ['', 'av-teal', L('النظام', 'System')], 'alert-triangle', 'danger', L('فشل تحصيل دفعة', 'Payment collection failed'), L('مدار للتقنية', 'Madar Tech'), '—'],
+      ['11:09 AM', [L('م', 'MA'), 'av-solid', L('محمد علاء', 'Mohamed Alaa')], 'user-plus', 'success', L('دعا ليلى حسن (قراءة فقط)', 'Invited Laila Hassan (Read-only)'), L('فريق المنصة', 'Platform staff'), '41.33.12.8'],
+      ['d', L('أمس · 23 نوفمبر 2026', 'Yesterday · Nov 23, 2026')],
+      ['9:47 PM', [L('ك', 'KA'), 'av-blue', L('كريم عادل', 'Karim Adel')], 'ban', 'danger', L('علّق حساب تجريبي مخالف', 'Suspended abusive trial'), 'spam-co.example', '102.40.9.3'],
+      ['4:30 PM', [L('ي', 'YF'), 'av-teal', L('يوسف فريد', 'Youssef Farid')], 'check-circle', 'success', L('حل التذكرة #4790', 'Resolved ticket #4790'), L('نيل سوفت للحلول', 'NileSoft Solutions'), '156.204.7.91'],
+      ['10:02 AM', [L('م', 'MA'), 'av-solid', L('محمد علاء', 'Mohamed Alaa')], 'key-round', 'info', L('أنشأ مفتاح API جديد', 'Created a new API key'), L('الإعدادات', 'Settings'), '41.33.12.8']
+    ];
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('سجل النشاط', 'Audit log')}</h1><p class="sub">${L('كل إجراء حساس على المنصة، محفوظ لمدة سنتين وغير قابل للتعديل', 'Every sensitive action on the platform — retained 2 years, immutable')}</p></div>
+      <div class="actions"><button class="btn btn-outline">${icon('download', 'sm')}${L('تصدير', 'Export')}</button></div>
+    </div>
+    <section class="card table-wrap">
+      <div class="toolbar"><label class="control search">${icon('search', 'sm')}<input placeholder="${L('ابحث في الأحداث…', 'Search events…')}"></label>
+        <span class="chip on">${L('آخر 7 أيام', 'Last 7 days')}${icon('chevron-down')}</span><span class="chip">${icon('plus')}${L('المستخدم', 'Actor')}</span><span class="chip">${icon('plus')}${L('نوع الحدث', 'Event type')}</span><span class="chip">${icon('plus')}${L('الشركة', 'Company')}</span></div>
+      <table class="tbl compact">
+        <colgroup><col style="width:112px"><col style="width:200px"><col><col style="width:220px"><col style="width:152px"></colgroup>
+        <thead><tr><th>${L('الوقت', 'Time')}</th><th>${L('المستخدم', 'Actor')}</th><th>${L('الحدث', 'Event')}</th><th>${L('الهدف', 'Target')}</th><th>IP</th></tr></thead>
+        <tbody>${E.map(e => e[0] === 'd' ? `<tr class="day"><td colspan="5">${e[1]}</td></tr>` : `<tr>
+          <td class="sec ltr num">${e[0]}</td>
+          <td><div class="cell-co">${e[1][0] ? ui.av(e[1][0], e[1][1]) : `<span class="avatar sm round" style="background:var(--gl-bg-subtle);color:var(--gl-text-muted)">${icon('server', 'xs')}</span>`}<span class="nm">${e[1][2]}</span></div></td>
+          <td><div class="act"><span class="ic" style="${ui.tone[e[3]]}">${icon(e[2])}</span><span class="ell">${e[4]}</span></div></td>
+          <td class="sec">${e[5]}</td><td><span class="ip">${e[6]}</span></td></tr>`).join('')}</tbody>
+      </table>
+      <div class="card-foot"><span class="t-sm muted">${L('عرض 8 من 2,431 حدث', 'Showing 8 of 2,431 events')}</span><button class="btn btn-ghost btn-sm">${L('الأقدم', 'Older')}${icon('chevron-right', 'sm flip')}</button></div>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

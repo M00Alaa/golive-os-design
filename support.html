@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.sla{display:inline-flex;align-items:center;gap:6px;font:var(--gl-type-label-sm);font-variant-numeric:tabular-nums}
+.sla svg.i{width:14px;height:14px}
+.sla.ok{color:var(--gl-success-fg)}.sla.warn{color:var(--gl-warning-fg)}.sla.bad{color:var(--gl-danger-fg)}
+.subj a:hover .nm{color:var(--gl-brand-text)}
+.subj .nm{font:var(--gl-type-body-strong);overflow:hidden;text-overflow:ellipsis}
+.unread td:first-child{box-shadow:inset calc(3px * var(--gl-flip,1)) 0 0 var(--gl-accent-default)}
+[dir="rtl"] .unread td:first-child{box-shadow:inset -3px 0 0 var(--gl-accent-default)}
+.views{display:flex;flex-direction:column;gap:2px}
+.views a{display:flex;align-items:center;gap:var(--gl-space-3);height:36px;padding-inline:var(--gl-space-3);border-radius:var(--gl-radius-md);font:var(--gl-type-label);color:var(--gl-text-secondary)}
+.views a.on{background:var(--gl-brand-subtle);color:var(--gl-brand-text)}
+.views a .n{margin-inline-start:auto;font:var(--gl-type-label-sm);color:var(--gl-text-muted)}
+.views a.on .n{color:var(--gl-brand-text)}
+.layout{display:grid;grid-template-columns:200px minmax(0,1fr);gap:var(--gl-space-6);align-items:start}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  nav: 'support',
+  title: L => L('الدعم الفني', 'Support'),
+  render: (L, { icon, ui }) => {
+    const pr = { u: ['var(--gl-danger-solid)', L('عاجلة', 'Urgent')], h: ['var(--gl-warning-solid)', L('عالية', 'High')], m: ['var(--gl-info-solid)', L('متوسطة', 'Medium')], l: ['var(--gl-neutral-400)', L('منخفضة', 'Low')] };
+    const stt = { open: ['info', L('مفتوحة', 'Open')], pend: ['warning', L('بانتظار العميل', 'Waiting')], prog: ['brand', L('قيد المعالجة', 'In progress')], new: ['accent', L('جديدة', 'New')] };
+    const T = [
+      ['#4821', L('مشكلة في استيراد بيانات العملاء', 'Customer data import fails'), L('نيل سوفت للحلول', 'NileSoft Solutions'), 'u', L('خطأ تقني', 'Bug'), [L('ه', 'HN'), 'av-violet'], ['bad', L('متبقي 18 د', '18m left')], L('منذ 12 د', '12m ago'), 'prog', 1],
+      ['#4824', L('البوابة لا تظهر لعميل جديد', 'Portal not visible for new client'), L('سحابة الأهرام', 'Ahram Cloud'), 'h', L('بوابة العميل', 'Client portal'), null, ['warn', L('متبقي 1س 40د', '1h 40m left')], L('منذ 25 د', '25m ago'), 'new', 1],
+      ['#4819', L('طلب تصدير كل المشاريع Excel', 'Export all projects to Excel'), L('بوابة الشرق للاستشارات', 'Sharq Gate Consulting'), 'm', L('طلب ميزة', 'Feature request'), [L('ي', 'YF'), 'av-teal'], ['ok', L('متبقي 6س', '6h left')], L('منذ ساعة', '1h ago'), 'open', 0],
+      ['#4815', L('الفاتورة فيها رقم ضريبي غلط', 'Wrong tax ID on invoice'), L('مدار للتقنية', 'Madar Tech'), 'h', L('الفوترة', 'Billing'), [L('ن', 'NR'), 'av-amber'], ['ok', L('متبقي 3س', '3h left')], L('منذ ساعتين', '2h ago'), 'pend', 0],
+      ['#4807', L('طلب زيادة حد المشاريع', 'Request to raise project limit'), L('نيل سوفت للحلول', 'NileSoft Solutions'), 'm', L('الحساب', 'Account'), [L('ي', 'YF'), 'av-teal'], ['ok', L('متبقي 9س', '9h left')], L('أمس', 'Yesterday'), 'pend', 0],
+      ['#4802', L('مزامنة Google Calendar بتتأخر', 'Google Calendar sync delayed'), L('رؤية للأنظمة المتكاملة', 'Roya Integrated Systems'), 'l', L('التكاملات', 'Integrations'), null, ['ok', L('متبقي يومين', '2d left')], L('أمس', 'Yesterday'), 'new', 0],
+      ['#4798', L('ازاي أضيف عميل للبوابة؟', 'How do I add a client to the portal?'), L('أفق الرقمية', 'Ofoq Digital'), 'l', L('سؤال', 'Question'), [L('ه', 'HN'), 'av-violet'], ['ok', L('متبقي يومين', '2d left')], L('منذ يومين', '2 days ago'), 'prog', 0]
+    ];
+    const views = [['inbox', L('كل المفتوحة', 'All open'), 12, 1], ['user', L('المسندة لي', 'Assigned to me'), 4], ['circle-dot', L('غير مسندة', 'Unassigned'), 3], ['timer', L('قرب تخطي الـ SLA', 'SLA at risk'), 2], ['hourglass', L('بانتظار العميل', 'Waiting on customer'), 5], ['check-circle', L('اتحلت', 'Resolved'), 318]];
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('الدعم الفني', 'Support')}</h1><p class="sub">${L('تذاكر الشركات المشتركة مع الـ SLA حسب الخطة', 'Tickets from subscribed companies, with plan-based SLAs')}</p></div>
+      <div class="actions"><button class="btn btn-outline">${icon('settings', 'sm')}${L('قواعد الـ SLA', 'SLA rules')}</button><button class="btn btn-primary">${icon('plus', 'sm')}${L('تذكرة جديدة', 'New ticket')}</button></div>
+    </div>
+    <section class="stat-strip">
+      ${ui.mini('inbox', '', '12', L('تذاكر مفتوحة', 'Open tickets'))}
+      ${ui.mini('timer', ui.tone.danger, '2', L('قرب تخطي الـ SLA', 'At risk of SLA breach'))}
+      ${ui.mini('clock', ui.tone.info, L('1س 12د', '1h 12m'), L('متوسط أول رد', 'Avg. first response'))}
+      ${ui.mini('smile', ui.tone.success, '96%', L('رضا العملاء (30 يوم)', 'CSAT (30 days)'))}
+    </section>
+    <section class="layout">
+      <nav class="views">${views.map(v => `<a class="${v[3] ? 'on' : ''}" href="#">${icon(v[0], 'sm')}<span>${v[1]}</span><span class="n">${v[2]}</span></a>`).join('')}
+        <div class="divider" style="margin-block:var(--gl-space-3)"></div>
+        <div class="t-over muted" style="padding:0 var(--gl-space-3) var(--gl-space-2)">${L('حسب التصنيف', 'By category')}</div>
+        ${[[L('خطأ تقني', 'Bug'), 4], [L('الفوترة', 'Billing'), 2], [L('بوابة العميل', 'Client portal'), 3], [L('أسئلة', 'Questions'), 3]].map(c => `<a href="#">${icon('tag', 'sm')}<span>${c[0]}</span><span class="n">${c[1]}</span></a>`).join('')}
+      </nav>
+      <div class="card table-wrap">
+        <div class="toolbar"><label class="control search">${icon('search', 'sm')}<input placeholder="${L('ابحث في التذاكر…', 'Search tickets…')}"></label>
+          <span class="chip">${icon('plus')}${L('الأولوية', 'Priority')}</span><span class="chip">${icon('plus')}${L('المسؤول', 'Assignee')}</span><span class="chip">${icon('plus')}${L('الخطة', 'Plan')}</span>
+          <div class="end"><button class="btn btn-ghost btn-sm">${icon('sort')}${L('الأقرب للـ SLA', 'SLA soonest')}</button></div></div>
+        <table class="tbl">
+          <colgroup><col><col style="width:96px"><col style="width:64px"><col style="width:144px"><col style="width:152px"><col style="width:112px"></colgroup>
+          <thead><tr><th>${L('التذكرة', 'Ticket')}</th><th>${L('الأولوية', 'Priority')}</th><th>${L('المسؤول', 'Owner')}</th><th>${L('الـ SLA', 'SLA')}</th><th>${L('الحالة', 'Status')}</th><th>${L('آخر تحديث', 'Updated')}</th></tr></thead>
+          <tbody>${T.map(t => `<tr class="${t[9] ? 'unread' : ''}">
+            <td class="subj"><a href="support-ticket.html"><div class="nm">${t[1]}</div><div class="cell-sub"><span class="ltr">${t[0]}</span> · ${t[2]} · ${t[4]}</div></a></td>
+            <td><span class="prio"><i style="background:${pr[t[3]][0]}"></i>${pr[t[3]][1]}</span></td>
+            <td>${t[5] ? ui.av(t[5][0], t[5][1]) : `<span class="avatar sm round" style="border:1.5px dashed var(--gl-border-strong);color:var(--gl-text-muted)">${icon('user', 'xs')}</span>`}</td>
+            <td><span class="sla ${t[6][0]}">${icon('timer')}${t[6][1]}</span></td>
+            <td>${ui.tag(stt[t[8]][0], stt[t[8]][1])}</td><td class="sec t-sm">${t[7]}</td></tr>`).join('')}</tbody>
+        </table>
+        <div class="card-foot"><span class="t-sm muted">${L('عرض 7 من 12', 'Showing 7 of 12')}</span><button class="btn btn-ghost btn-sm">${L('عرض المزيد', 'Load more')}</button></div>
+      </div>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>
