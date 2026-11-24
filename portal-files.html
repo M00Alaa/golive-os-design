@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="assets/screens.css">
 <style>
 .fold{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gl-space-4)}
+.fo.active{border-color:var(--gl-brand-primary);box-shadow:0 0 0 3px var(--gl-focus-ring, rgb(10 143 120 / .15))}
 .fo{display:flex;align-items:center;gap:var(--gl-space-3);padding:var(--gl-space-4)}
 .fo .t{font:var(--gl-type-body-strong)}
 .fo .m{font:var(--gl-type-caption);color:var(--gl-text-muted)}
@@ -24,10 +25,22 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
 GL.mount({
   shell: 'portal', nav: 'p-files',
   title: L => L('الملفات', 'Files'),
+  modals: {
+    up: { icon: 'upload', title: L => L('رفع ملف', 'Upload a file'), sub: L => L('هيوصل لفريق نيل سوفت فورًا', 'The NileSoft team is notified right away'),
+      body: (L, { ui }) => `<div data-upload><div class="dropzone" data-file="Customer_Balances_Nov.xlsx" style="cursor:pointer;padding:var(--gl-space-6)"><span class="ic-tile">${GL.icon('cloud-upload')}</span><div class="t-strong">${L('اختار ملف من جهازك', 'Choose a file')}</div><div class="t-cap muted">${L('حتى 500 MB', 'Up to 500 MB')}</div></div><div class="row gap-2 wrap mt-3" data-files hidden></div></div>
+        ${ui.field(L('المرحلة', 'Phase'), ui.select('ph', [['mig', L('ترحيل البيانات', 'Data migration')], ['uat', L('اختبار القبول', 'UAT')], ['disc', L('الاكتشاف', 'Discovery')]], { req: 1, ph: L('اختار المرحلة', 'Choose a phase') }), { req: 1 })}
+        ${ui.field(L('ملاحظة للفريق', 'Note for the team'), ui.textarea('n', { rows: 3 }), { opt: L('اختياري', 'optional') })}`,
+      submit: L => L('رفع', 'Upload'), submitIcon: 'upload',
+      add: { table: 'fTbl', prepend: true, row: (v, L) => `<tr data-row data-type="xls" data-cat="${v.ph}" data-ctx='{"name":"Customer_Balances_Nov.xlsx"}'><td><div class="cell-co"><span class="ftype xls">XLS</span><div style="min-width:0"><span class="fn" data-f="name">Customer_Balances_Nov.xlsx</span></div></div></td><td><span class="row gap-2">${GL.ui.av(L('خ', 'KM'), 'av-amber')}<span class="t-sm ell">${L('أنت', 'You')}</span></span></td><td class="sec">${{ mig: L('ترحيل البيانات', 'Data migration'), uat: L('اختبار القبول', 'UAT'), disc: L('الاكتشاف', 'Discovery') }[v.ph]}</td><td class="sec ltr num">240 KB</td><td class="sec">${L('دلوقتي', 'Just now')}</td><td>${GL.ui.tag('info', L('قيد المراجعة', 'In review'))}</td><td class="right">${GL.ui.menuBtn('f')}</td></tr>` },
+      toast: L => [L('اترفع الملف', 'File uploaded'), 'Customer_Balances_Nov.xlsx'] },
+    ren: { size: 'sm', icon: 'pencil', title: L => L('إعادة تسمية', 'Rename file'), body: (L, { ui }) => ui.field(L('اسم الملف', 'File name'), ui.input('name', { req: 1, ltr: 1 }), { req: 1 }), submit: L => L('حفظ', 'Save'), toast: (L, v) => [L('اتغير الاسم', 'Renamed'), v.name] }
+  },
+  menus: { f: [{ icon: 'download', ar: 'تحميل', en: 'Download', toast: (L, n) => `success|${L('جاري التحميل', 'Downloading')}|${n}` }, { icon: 'eye', ar: 'معاينة', en: 'Preview', toast: (L, n) => `info|${L('فتح المعاينة', 'Opening preview')}|${n}` }, { icon: 'pencil', ar: 'إعادة تسمية', en: 'Rename', open: 'ren' }, { icon: 'link', ar: 'نسخ اللينك', en: 'Copy link', toast: (L, n) => `success|${L('اتنسخ اللينك', 'Link copied')}|${n}` }, '-', { icon: 'trash-2', ar: 'حذف', en: 'Delete', del: 1, danger: 1 }] },
   render: (L, { icon, ui }) => {
     const F = [
       ['pdf', 'PDF', 'UAT_Scenarios_v3.pdf', L('منى عادل', 'Mona Adel'), 'av-teal', L('م', 'MA'), L('اختبار القبول', 'UAT'), '1.2 MB', L('22 نوف', 'Nov 22'), 'warning', L('محتاج توقيع', 'Needs sign-off')],
@@ -38,24 +51,25 @@ GL.mount({
       ['zip', 'ZIP', 'Legacy_ERP_Export_2023-2026.zip', L('طارق فوزي', 'Tarek Fawzy'), 'av-violet', L('ط', 'TF'), L('ترحيل البيانات', 'Data migration'), '148 MB', L('10 أكت', 'Oct 10')],
       ['pdf', 'PDF', 'Project_Plan_Signed.pdf', L('منى عادل', 'Mona Adel'), 'av-teal', L('م', 'MA'), L('الاكتشاف', 'Discovery'), '640 KB', L('2 سبت', 'Sep 2'), 'success', L('معتمد', 'Signed')]
     ];
+    const PK = { [L('اختبار القبول', 'UAT')]: 'uat', [L('ترحيل البيانات', 'Data migration')]: 'mig', [L('التصميم', 'Design')]: 'sign', [L('الاكتشاف', 'Discovery')]: 'disc' };
     return `
     <div class="page-head">
       <div><h1 class="t-h1">${L('ملفات المشروع', 'Project files')}</h1><p class="sub">${L('كل الملفات اللي بينك وبين فريق التنفيذ في مكان واحد', 'Everything shared between you and the implementation team')}</p></div>
-      <div class="actions"><button class="btn btn-primary">${icon('upload', 'sm')}${L('رفع ملف', 'Upload')}</button></div>
+      <div class="actions"><button type="button" class="btn btn-primary" data-open="up">${icon('upload', 'sm')}${L('رفع ملف', 'Upload')}</button></div>
     </div>
-    <section class="fold">${[['folder', L('مستندات معتمدة', 'Signed documents'), L('6 ملفات', '6 files'), 'success'], ['database', L('ترحيل البيانات', 'Data migration'), L('14 ملف · 212 MB', '14 files · 212 MB'), 'warning'], ['clipboard-list', L('اختبار القبول', 'UAT'), L('5 ملفات', '5 files'), 'info'], ['users', L('التدريب', 'Training'), L('قريبًا', 'Coming soon'), 'violet']].map(f => `<div class="card fo"><span class="ic-tile" style="${ui.tone[f[3]]}">${icon(f[0])}</span><div><div class="t">${f[1]}</div><div class="m">${f[2]}</div></div></div>`).join('')}</section>
+    <section class="fold" data-tabs="fold" data-filter-table="fTbl">${[['folder', L('مستندات معتمدة', 'Signed documents'), L('6 ملفات', '6 files'), 'success'], ['database', L('ترحيل البيانات', 'Data migration'), L('14 ملف · 212 MB', '14 files · 212 MB'), 'warning'], ['clipboard-list', L('اختبار القبول', 'UAT'), L('5 ملفات', '5 files'), 'info'], ['users', L('التدريب', 'Training'), L('قريبًا', 'Coming soon'), 'violet']].map((f, i) => `<div class="card fo" style="cursor:pointer" data-tab="${['sign', 'mig', 'uat', 'train'][i]}"><span class="ic-tile" style="${ui.tone[f[3]]}">${icon(f[0])}</span><div><div class="t">${f[1]}</div><div class="m">${f[2]}</div></div></div>`).join('')}</section>
     <section class="card table-wrap">
-      <div class="toolbar"><label class="control search">${icon('search', 'sm')}<input placeholder="${L('ابحث في الملفات…', 'Search files…')}"></label><span class="chip">${icon('plus')}${L('المرحلة', 'Phase')}</span><span class="chip">${icon('plus')}${L('النوع', 'Type')}</span>
+      <div class="toolbar"><label class="control search">${icon('search', 'sm')}<input data-search="fTbl" placeholder="${L('ابحث في الملفات…', 'Search files…')}"></label><span class="sel sm">${ui.select('t', [['pdf', 'PDF'], ['xls', 'Excel'], ['doc', 'Word'], ['img', L('صور', 'Images')], ['zip', 'ZIP']], { ph: L('كل الأنواع', 'All types'), filter: 'fTbl', key: 'type', cls: 'sm', icon: 'file' })}</span><button type="button" class="btn btn-ghost btn-sm" data-clear-filters="fTbl">${L('كل الملفات', 'All files')} <span class="badge soft" data-count="fTbl">7</span></button>
         <div class="end"><span class="t-cap muted">${L('مستخدم 412 MB من 10 GB', '412 MB of 10 GB used')}</span></div></div>
-      <table class="tbl">
+      <table class="tbl" id="fTbl">
         <colgroup><col><col style="width:184px"><col style="width:152px"><col style="width:96px"><col style="width:104px"><col style="width:152px"><col style="width:72px"></colgroup>
         <thead><tr><th>${L('الملف', 'File')}</th><th>${L('شاركه', 'Shared by')}</th><th>${L('المرحلة', 'Phase')}</th><th>${L('الحجم', 'Size')}</th><th>${L('التاريخ', 'Date')}</th><th>${L('الحالة', 'Status')}</th><th></th></tr></thead>
-        <tbody>${F.map(f => `<tr><td><div class="cell-co"><span class="ftype ${f[0]}">${f[1]}</span><div style="min-width:0"><span class="fn">${f[2]}</span></div></div></td>
+        <tbody>${F.map(f => `<tr data-row data-type="${f[0]}" data-cat="${PK[f[6]]}${f[9] === 'success' && f[10] !== L('اتراجع', 'Reviewed') ? ' sign' : ''}" data-ctx='{"name":"${f[2]}"}'><td><div class="cell-co"><span class="ftype ${f[0]}">${f[1]}</span><div style="min-width:0"><span class="fn" data-f="name">${f[2]}</span></div></div></td>
           <td><span class="row gap-2">${ui.av(f[5], f[4])}<span class="t-sm ell">${f[3]}</span></span></td><td class="sec">${f[6]}</td><td class="sec ltr num">${f[7]}</td><td class="sec">${f[8]}</td>
-          <td>${f[9] ? ui.tag(f[9], f[10]) : '<span class="muted">—</span>'}</td><td class="right"><button class="icon-btn sm">${icon('download')}</button></td></tr>`).join('')}</tbody>
+          <td>${f[9] ? ui.tag(f[9], f[10]) : '<span class="muted">—</span>'}</td><td class="right"><span class="row gap-1" style="justify-content:flex-end"><button type="button" class="icon-btn sm" data-toast="success|${L('جاري التحميل', 'Downloading')}|${f[2]}">${icon('download')}</button>${ui.menuBtn('f')}</span></td></tr>`).join('')}</tbody>
       </table>
     </section>
-    <div class="dropzone"><span class="ic-tile">${icon('cloud-upload')}</span><div class="t-strong">${L('اسحب ملفات هنا عشان تشاركها مع الفريق', 'Drop files here to share them with the team')}</div><div class="t-cap muted">${L('حتى 500 MB للملف · ملفاتك بتتحفظ مشفرة', 'Up to 500 MB per file · encrypted at rest')}</div></div>`;
+    <div class="dropzone" data-open="up" style="cursor:pointer"><span class="ic-tile">${icon('cloud-upload')}</span><div class="t-strong">${L('اسحب ملفات هنا عشان تشاركها مع الفريق', 'Drop files here to share them with the team')}</div><div class="t-cap muted">${L('حتى 500 MB للملف · ملفاتك بتتحفظ مشفرة', 'Up to 500 MB per file · encrypted at rest')}</div></div>`;
   }
 });
 </script>

@@ -35,10 +35,19 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
 GL.mount({
   shell: 'portal', nav: 'p-msg',
   title: L => L('الرسائل والتحديثات', 'Messages & updates'),
+  me: L => [L('خ', 'KM'), 'av-amber', L('خالد منصور', 'Khaled Mansour')],
+  modals: {
+    new: { icon: 'message', title: L => L('رسالة جديدة', 'New message'), sub: L => L('بتبدأ محادثة جديدة مع فريق التنفيذ', 'Starts a new thread with the implementation team'),
+      body: (L, { ui }) => `${ui.field(L('الموضوع', 'Subject'), ui.input('subj', { req: 1, ph: L('مثلًا: سؤال عن فواتير الضريبة', 'e.g. Question about tax invoices') }), { req: 1 })}${ui.field(L('موجهة لـ', 'To'), ui.select('to', [L('كل الفريق', 'Whole team'), L('منى عادل (مديرة المشروع)', 'Mona Adel (PM)'), L('ياسمين خليل (مطورة)', 'Yasmin Khalil (developer)')]))}${ui.field(L('الرسالة', 'Message'), ui.textarea('body', { req: 1, rows: 5 }), { req: 1 })}`,
+      submit: L => L('إرسال', 'Send'), submitIcon: 'send',
+      add: { table: 'mList', prepend: true, row: (v, L) => `<div class="mi" data-row style="cursor:pointer"><span class="ic-tile" style="width:36px;height:36px;background:var(--gl-bg-subtle);color:var(--gl-text-secondary)">${GL.icon('message', 'sm')}</span><div class="grow" style="min-width:0"><div class="t"><span class="ell">${v.subj.replace(/</g, '&lt;')}</span><small>${L('دلوقتي', 'Now')}</small></div><div class="p">${L('أنت', 'You')}: ${v.body.replace(/</g, '&lt;')}</div></div></div>` },
+      toast: L => [L('اتبعتت رسالتك', 'Message sent'), L('الفريق بيرد عادة خلال ساعتين', 'The team usually replies within 2 hours')] }
+  },
   render: (L, { icon, ui }) => {
     const M = [
       ['megaphone', 'brand', L('التحديث الأسبوعي #12', 'Weekly update #12'), L('الأحد', 'Sun'), L('خلصنا ترحيل الأصناف وبدأنا UAT دورة 2. محتاجين منك 4 حاجات…', 'Finished product migration and started UAT cycle 2. We need 4 things from you…'), 1, 1],
@@ -50,12 +59,12 @@ GL.mount({
     return `
     <div class="page-head">
       <div><h1 class="t-h1">${L('الرسائل والتحديثات', 'Messages & updates')}</h1><p class="sub">${L('تحديثات أسبوعية من الفريق ومحادثات حسب الموضوع — بدل الواتساب والإيميلات المتفرقة', 'Weekly updates and topic threads — instead of scattered WhatsApp and email')}</p></div>
-      <div class="actions"><button class="btn btn-primary">${icon('plus', 'sm')}${L('رسالة جديدة', 'New message')}</button></div>
+      <div class="actions"><button type="button" class="btn btn-primary" data-open="new">${icon('plus', 'sm')}${L('رسالة جديدة', 'New message')}</button></div>
     </div>
     <section class="grid g-12" style="align-items:start">
       <aside class="span-4 card ml">
-        <div class="toolbar" style="padding:var(--gl-space-3) var(--gl-space-4)"><label class="control search grow" style="width:auto">${icon('search', 'sm')}<input placeholder="${L('ابحث…', 'Search…')}"></label></div>
-        ${M.map(m => `<div class="mi ${m[6] ? 'on' : ''}"><span class="ic-tile" style="width:36px;height:36px;${m[1] === 'success' ? ui.tone.success : m[1] ? '' : 'background:var(--gl-bg-subtle);color:var(--gl-text-secondary)'}">${icon(m[0], 'sm')}</span><div class="grow" style="min-width:0"><div class="t"><span class="ell">${m[2]}</span><small>${m[3]}</small></div><div class="p">${m[4]}</div></div>${m[5] && !m[6] ? '<span class="dot-u"></span>' : ''}</div>`).join('')}
+        <div class="toolbar" style="padding:var(--gl-space-3) var(--gl-space-4)"><label class="control search grow" style="width:auto">${icon('search', 'sm')}<input data-search="mList" placeholder="${L('ابحث…', 'Search…')}"></label></div>
+        <div id="mList" data-pick>${M.map(m => `<div class="mi ${m[6] ? 'on' : ''}" data-row style="cursor:pointer"><span class="ic-tile" style="width:36px;height:36px;${m[1] === 'success' ? ui.tone.success : m[1] ? '' : 'background:var(--gl-bg-subtle);color:var(--gl-text-secondary)'}">${icon(m[0], 'sm')}</span><div class="grow" style="min-width:0"><div class="t"><span class="ell">${m[2]}</span><small>${m[3]}</small></div><div class="p">${m[4]}</div></div>${m[5] && !m[6] ? '<span class="dot-u"></span>' : ''}</div>`).join('')}</div>
       </aside>
       <div class="span-8 stack gap-6">
         <article class="card post">
@@ -65,12 +74,12 @@ GL.mount({
           <div><h4 class="yes">${icon('check-circle', 'sm')}${L('خلصنا الأسبوع ده', 'Done this week')}</h4><ul><li>${L('ترحيل كل بيانات الأصناف (4,812 صنف) بدون أخطاء', 'Migrated all 4,812 product records with zero errors')}</li><li>${L('UAT دورة 1 مع المبيعات والمخازن — 31 سيناريو نجحوا من 34', 'UAT cycle 1 with Sales & Inventory — 31 of 34 scenarios passed')}</li></ul></div>
           <div><h4 style="color:var(--gl-accent-text)">${icon('hand-helping', 'sm')}${L('محتاجين منك', 'Needed from you')}</h4><ul><li>${L('نموذج صلاحيات المستخدمين — قبل الأربع', 'User permissions form — by Wednesday')}</li><li>${L('توقيع سيناريوهات UAT v3 — قبل الخميس', 'Sign UAT scenarios v3 — by Thursday')}</li></ul></div>
           <div class="callout warning">${icon('alert-triangle', 'sm')}<span>${L('Blocker: مورّد الميزان لسه مبعتش الـ API docs. لو اتأخر بعد الأربع، هنأجل ربط الميزان لبعد الإطلاق من غير ما يأثر على الموعد.', 'Blocker: the weighbridge vendor hasn’t sent API docs. If it slips past Wednesday we’ll move that link to after go-live without affecting the date.')}</span></div>
-          <div class="row between"><div class="reacts"><span>👍 3</span><span>🎉 1</span><span>${icon('smile', 'xs')}</span></div><span class="t-cap muted">${L('شافه خالد، هبة وطارق', 'Seen by Khaled, Heba and Tarek')}</span></div>
+          <div class="row between"><div class="reacts" data-multi><span class="opt" style="cursor:pointer">👍 3</span><span class="opt" style="cursor:pointer">🎉 1</span><span data-toast="info|${L('التفاعلات', 'Reactions')}|👍 🎉 ❤️ 👏" style="cursor:pointer">${icon('smile', 'xs')}</span></div><span class="t-cap muted">${L('شافه خالد، هبة وطارق', 'Seen by Khaled, Heba and Tarek')}</span></div>
         </article>
-        <div class="card"><div class="card-body thread">
+        <div class="card"><div class="card-body thread"><div class="stack gap-4" id="thr">
           <div class="msg mine">${ui.av(L('خ', 'KM'), 'av-amber', 'round')}<div class="bubble"><div class="hd"><b>${L('خالد منصور', 'Khaled Mansour')}</b><span>· 10:14 AM</span></div><div class="bd">${L('تمام يا منى، هبعت النموذج النهارده بالليل. بالنسبة للميزان، موافق على التأجيل لو احتجنا.', 'Thanks Mona — I’ll send the form tonight. On the weighbridge, I’m fine with deferring if needed.')}</div></div></div>
           <div class="msg">${ui.av(L('م', 'MA'), 'av-teal', 'round')}<div class="bubble"><div class="hd"><b>${L('منى عادل', 'Mona Adel')}</b><span>· 10:31 AM</span></div><div class="bd">${L('ممتاز، هسجّل قرار التأجيل كموافقة صغيرة عشان يبقى موثق 👌', 'Great — I’ll log the deferral as a small sign-off so it’s documented 👌')}</div></div></div>
-          <div class="composer"><div class="ta">${L('اكتب رد…', 'Write a reply…')}</div><div class="bar2"><button class="icon-btn sm">${icon('paperclip')}</button><button class="icon-btn sm">${icon('smile')}</button><div class="end"><button class="btn btn-primary btn-sm">${icon('send', 'sm flip')}${L('إرسال', 'Send')}</button></div></div></div>
+          </div><div class="composer" data-composer><textarea class="ta" rows="2" placeholder="${L('اكتب رد… Ctrl+Enter للإرسال', 'Write a reply… Ctrl+Enter to send')}"></textarea><div class="row gap-2 wrap" data-files hidden style="padding:0 var(--gl-space-4) var(--gl-space-2)"></div><div class="bar2"><button type="button" class="icon-btn sm" data-file="Stock_Count_Branch2.xlsx">${icon('paperclip')}</button><button type="button" class="icon-btn sm" data-insert="👍">${icon('smile')}</button><div class="end"><button type="button" class="btn btn-primary btn-sm" data-send="thr">${icon('send', 'sm flip')}${L('إرسال', 'Send')}</button></div></div></div>
         </div></div>
       </div>
     </section>`;

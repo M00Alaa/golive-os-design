@@ -35,10 +35,28 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
+document.addEventListener('keydown', e => {
+  const i = e.target.closest && e.target.closest('[data-cmt]'); if (!i || e.key !== 'Enter' || !i.value.trim()) return;
+  const L = GL.L, d = document.createElement('div'); d.className = 'msg flash';
+  d.innerHTML = `${GL.ui.av(L('خ', 'KM'), 'av-amber', 'round')}<div class="grow"><div class="t-cap muted"><b style="color:var(--gl-text-primary)">${L('أنت', 'You')}</b> · v3 · ${L('دلوقتي', 'now')}</div><div class="t-sm"></div></div>`;
+  d.querySelector('.t-sm').textContent = i.value; document.getElementById('cmts').appendChild(d); i.value = '';
+  const n = document.querySelector('[data-cn]'); n.textContent = +n.textContent + 1; GLI.toast('success', L('اتضاف تعليقك', 'Comment added'), L('منى عادل هيوصلها إشعار', 'Mona Adel will be notified'));
+});
 GL.mount({
   shell: 'portal', nav: 'p-appr',
   title: L => L('الموافقات', 'Approvals'),
+  modals: {
+    chg: { icon: 'pencil', title: L => L('طلب تعديل', 'Request changes'), sub: L => L('سيناريوهات اختبار UAT · v3', 'UAT test scenarios · v3'),
+      body: (L, { ui }) => `${ui.field(L('القسم المعني', 'Section'), ui.select('sec', [L('المبيعات', 'Sales'), L('المشتريات', 'Purchasing'), L('المخازن', 'Inventory'), L('المستند كله', 'Whole document')], { val: L('المستند كله', 'Whole document') }))}${ui.field(L('إيه اللي محتاج يتعدل؟', 'What needs to change?'), ui.textarea('why', { req: 1, min: 10, rows: 4, ph: L('مثلًا: ناقص سيناريو لخصم الكمية…', 'e.g. missing a quantity-discount scenario…') }), { req: 1, hint: L('10 حروف على الأقل', 'At least 10 characters') })}${ui.field(L('الأولوية', 'Priority'), `<div class="row gap-2" data-pick><span class="opt on" data-val="p" data-value="n">${L('عادية', 'Normal')}</span><span class="opt" data-value="h">${L('عاجلة', 'Urgent')}</span></div>`)}`,
+      submit: L => L('إرسال الطلب', 'Send request'), submitIcon: 'send', onSubmit: () => { const c = document.querySelector('[data-cur] .m'); if (c) c.innerHTML = GL.ui.tag('info', GL.L('طلبت تعديل', 'Changes requested'), false); }, toast: L => [L('اتبعت طلب التعديل', 'Change request sent'), L('منى عادل هترفع v4', 'Mona Adel will upload v4')] }
+  },
+  confirms: {
+    sign: { icon: 'signature', title: L => L('اعتماد وتوقيع v3؟', 'Approve & sign v3?'), text: L => L('التوقيع ملزم وبيتسجل باسمك (خالد منصور) والوقت والـ IP. مينفعش يتلغي بعد كده.', 'The signature is binding and recorded with your name (Khaled Mansour), time and IP. It can’t be undone.'), btn: L => L('توقيع', 'Sign'),
+      run: L => { const b = document.getElementById('signbox'); b.innerHTML = `<div class="t-strong">${L('التوقيع', 'Sign-off')}</div><div class="sig">${L('خالد منصور', 'Khaled Mansour')}</div><div class="callout success">${GL.icon('check-circle', 'sm')}<span>${L('اتوقّع 24 نوف 2026 · 2:14 م (القاهرة) · IP 41.33.x.x', 'Signed Nov 24, 2026 · 2:14 PM (Cairo) · IP 41.33.x.x')}</span></div><button type="button" class="btn btn-outline" data-toast="success|${L('جاري التحميل', 'Downloading')}|${L('شهادة التوقيع', 'Signature certificate')}">${GL.icon('download', 'sm')}${L('تحميل شهادة التوقيع', 'Download certificate')}</button>`; b.classList.add('flash'); const c = document.querySelector('[data-cur] .m'); if (c) c.innerHTML = GL.ui.tag('success', GL.L('معتمدة', 'Signed'), false); document.querySelector('[data-pend]').innerHTML = GL.ui.tag('warning', GL.L('1 مستني', '1 pending'), false); },
+      toast: L => [L('اتوقّع المستند', 'Document signed'), L('نسخة موقّعة اتبعتت لإيميلك', 'A signed copy was emailed to you')] }
+  },
   render: (L, { icon, ui }) => {
     const A = [
       [L('سيناريوهات اختبار UAT', 'UAT test scenarios'), 'v3', L('اتبعتت من يومين · مستحق الخميس', 'Sent 2 days ago · due Thursday'), 'warning', L('مستني توقيعك', 'Awaiting you'), 1],
@@ -53,12 +71,12 @@ GL.mount({
     </div>
     <section class="grid g-12" style="align-items:start">
       <aside class="span-4 card al">
-        <div class="card-head bordered"><h3 class="t-h3">${L('كل المستندات', 'All documents')}</h3>${ui.tag('warning', L('2 مستنيين', '2 pending'), false)}</div>
-        ${A.map(a => `<div class="ai ${a[5] ? 'on' : ''}"><span class="ic-tile" style="width:36px;height:36px;${a[3] === 'success' ? ui.tone.success : ui.tone.accent}">${icon(a[3] === 'success' ? 'check-circle' : 'file-pen-line', 'sm')}</span><div class="grow" style="min-width:0"><div class="t">${a[0]} <span class="vtag">${a[1]}</span></div><div class="m">${ui.tag(a[3], a[4], false)}<span>${a[2]}</span></div></div></div>`).join('')}
+        <div class="card-head bordered"><h3 class="t-h3">${L('كل المستندات', 'All documents')}</h3><span data-pend>${ui.tag('warning', L('2 مستنيين', '2 pending'), false)}</span></div>
+        <div data-pick>${A.map(a => `<div class="ai ${a[5] ? 'on' : ''}" style="cursor:pointer" ${a[5] ? 'data-cur' : ''}><span class="ic-tile" style="width:36px;height:36px;${a[3] === 'success' ? ui.tone.success : ui.tone.accent}">${icon(a[3] === 'success' ? 'check-circle' : 'file-pen-line', 'sm')}</span><div class="grow" style="min-width:0"><div class="t">${a[0]} <span class="vtag">${a[1]}</span></div><div class="m">${ui.tag(a[3], a[4], false)}<span>${a[2]}</span></div></div></div>`).join('')}</div>
       </aside>
       <div class="span-8 card">
         <div class="card-head"><div><div class="row gap-2"><h3 class="t-h2">${L('سيناريوهات اختبار UAT', 'UAT test scenarios')}</h3><span class="vtag">v3 · 18 ${L('صفحة', 'pages')}</span></div><p class="sub">${L('من منى عادل · آخر تعديل: إضافة سيناريوهات المرتجعات بناءً على تعليقك', 'From Mona Adel · Changes: added returns scenarios based on your comment')}</p></div>
-          <div class="row gap-2"><button class="icon-btn sm outline">${icon('download')}</button><button class="icon-btn sm outline">${icon('external-link')}</button></div></div>
+          <div class="row gap-2"><button type="button" class="icon-btn sm outline" data-toast="success|${L('جاري التحميل', 'Downloading')}|UAT-AN-2026-v3.pdf">${icon('download')}</button><button type="button" class="icon-btn sm outline" data-toast="info|${L('فتح في تبويب جديد', 'Opened in a new tab')}|">${icon('external-link')}</button></div></div>
         <div class="doc-v"><div class="paper">
           <div class="row between"><span class="avatar ws-logo sm">${L('ن', 'NS')}</span><span class="t-cap muted ltr">UAT-AN-2026 · v3</span></div>
           <h3>${L('سيناريوهات اختبار القبول — المبيعات والمشتريات', 'Acceptance test scenarios — Sales & Purchasing')}</h3>
@@ -72,16 +90,16 @@ GL.mount({
         </div></div>
         <div class="grid g-2" style="gap:0">
           <div class="signbox" style="border-inline-end:1px solid var(--gl-border-default)">
-            <div class="t-strong">${L('تعليقات', 'Comments')} <span class="badge soft">2</span></div>
+            <div class="t-strong">${L('تعليقات', 'Comments')} <span class="badge soft" data-cn>2</span></div><div class="stack gap-3" id="cmts">
             <div class="msg">${ui.av(L('خ', 'KM'), 'av-amber', 'round')}<div class="grow"><div class="t-cap muted"><b style="color:var(--gl-text-primary)">${L('أنت', 'You')}</b> · v2 · 18 ${L('نوف', 'Nov')}</div><div class="t-sm">${L('محتاجين سيناريو للمرتجع الجزئي.', 'We need a partial-return scenario.')}</div></div></div>
             <div class="msg">${ui.av(L('م', 'MA'), 'av-teal', 'round')}<div class="grow"><div class="t-cap muted"><b style="color:var(--gl-text-primary)">${L('منى عادل', 'Mona Adel')}</b> · v3 · 22 ${L('نوف', 'Nov')}</div><div class="t-sm">${L('اتضاف S-07 ✔', 'Added as S-07 ✔')}</div></div></div>
-            <span class="control">${icon('message', 'sm')}<input placeholder="${L('اكتب تعليق…', 'Add a comment…')}"></span>
+            </div><span class="control">${icon('message', 'sm')}<input data-cmt placeholder="${L('اكتب تعليق واضغط Enter…', 'Add a comment and press Enter…')}"></span>
           </div>
-          <div class="signbox">
+          <div class="signbox" id="signbox">
             <div class="t-strong">${L('التوقيع', 'Sign-off')}</div>
             <div class="sig">${L('خالد منصور', 'Khaled Mansour')}</div>
             <label class="check t-sm"><span class="box on">${icon('check')}</span>${L('راجعت المستند وموافق على محتواه بالنيابة عن مصنع النور', 'I reviewed this document and approve it on behalf of Al Nour Plastics')}</label>
-            <div class="row gap-2"><button class="btn btn-outline grow">${icon('pencil', 'sm')}${L('طلب تعديل', 'Request changes')}</button><button class="btn btn-primary grow">${icon('file-pen-line', 'sm')}${L('اعتماد وتوقيع', 'Approve & sign')}</button></div>
+            <div class="row gap-2"><button type="button" class="btn btn-outline grow" data-open="chg">${icon('pencil', 'sm')}${L('طلب تعديل', 'Request changes')}</button><button type="button" class="btn btn-primary grow" data-confirm="sign">${icon('file-pen-line', 'sm')}${L('اعتماد وتوقيع', 'Approve & sign')}</button></div>
           </div>
         </div>
       </div>

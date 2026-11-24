@@ -44,6 +44,7 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
 GL.mount({
   shell: 'ws', nav: 'ws-home', fresh: true,
@@ -51,7 +52,7 @@ GL.mount({
   render: (L, { icon, fwd }) => `
     <section class="welcome">
       <div style="position:relative;z-index:1"><span class="tag accent">${icon('party-popper', 'xs')}${L('مساحة العمل جاهزة', 'Workspace ready')}</span><h1 class="mt-3">${L('أهلًا بيك في GoLive يا أحمد!', 'Welcome to GoLive, Ahmed!')}</h1><p>${L('مساحة نيل سوفت اتعملت، و3 دعوات اتبعتت لفريقك. يلا نطلق أول مشروع.', 'NileSoft’s workspace is live and 3 invites are on their way. Let’s launch your first project.')}</p>
-        <div class="row gap-3 mt-6"><a class="btn btn-accent" href="ws-projects.html">${icon('plus', 'sm')}${L('أنشئ أول مشروع', 'Create first project')}</a><button class="btn" style="background:rgb(255 255 255 / .1);color:#fff;border-color:rgb(255 255 255 / .2)">${icon('play', 'sm')}${L('شوف جولة في دقيقتين', 'Watch a 2-min tour')}</button></div></div>
+        <div class="row gap-3 mt-6"><a class="btn btn-accent" href="ws-projects.html">${icon('plus', 'sm')}${L('أنشئ أول مشروع', 'Create first project')}</a><button type="button" data-toast="info|${L('الجولة بتبدأ', 'Starting the tour')}|${L('دقيقتين بس', 'Just 2 minutes')}" class="btn" style="background:rgb(255 255 255 / .1);color:#fff;border-color:rgb(255 255 255 / .2)">${icon('play', 'sm')}${L('شوف جولة في دقيقتين', 'Watch a 2-min tour')}</button></div></div>
       <div class="gs"><div class="row between"><span class="t-strong" style="color:#fff">${L('خطوات البداية', 'Getting started')}</span><span class="t-label" style="color:var(--gl-accent-300)">2 / 6</span></div><div class="bar thin"><i style="width:33%"></i></div><div class="t-cap mt-3" style="color:var(--gl-brand-200)">${L('خلص الخطوات وخد شهر إضافي مجانًا 🎁', 'Finish all steps to earn a free extra month 🎁')}</div></div>
     </section>
     <section class="grid g-12" style="align-items:start">
@@ -70,7 +71,7 @@ GL.mount({
         <div class="card"><div class="empty">
           <div class="ghost-rows"><div><span class="sq"></span><span class="grow"><i style="width:60%"></i></span><i style="width:56px"></i></div><div><span class="sq"></span><span class="grow"><i style="width:45%"></i></span><i style="width:56px"></i></div></div>
           <span class="empty-ic">${icon('briefcase')}</span><h3 class="t-h3">${L('لسه مفيش مشاريع', 'No projects yet')}</h3><p>${L('ابدأ من قالب جاهز وفي دقايق هيبقى عندك خطة كاملة تشاركها مع عميلك.', 'Start from a playbook and in minutes you’ll have a full plan to share with your client.')}</p>
-          <div class="row gap-2"><a class="btn btn-primary btn-sm" href="ws-projects.html">${icon('plus')}${L('مشروع جديد', 'New project')}</a><button class="btn btn-outline btn-sm">${icon('download')}${L('استيراد من Excel', 'Import from Excel')}</button></div></div></div>
+          <div class="row gap-2"><a class="btn btn-primary btn-sm" href="ws-projects.html">${icon('plus')}${L('مشروع جديد', 'New project')}</a><button type="button" class="btn btn-outline btn-sm" data-href="ws-clients.html?open=import">${icon('download')}${L('استيراد من Excel', 'Import from Excel')}</button></div></div></div>
         <div class="card"><div class="card-head"><div><h3 class="t-h3">${L('قوالب مقترحة لكم', 'Suggested playbooks')}</h3><p class="sub">${L('بناءً على Odoo ERP وCRM', 'Based on Odoo ERP and CRM')}</p></div></div>
           <div class="card-body pt0">${[['layers', '', L('Odoo ERP قياسي', 'Odoo ERP standard'), L('6 مراحل · 16 أسبوع', '6 phases · 16 weeks')], ['users', 'info', 'Odoo CRM ' + L('سريع', 'quick-start'), L('4 مراحل · 6 أسابيع', '4 phases · 6 weeks')]].map(t => `<a class="tpl-q" href="ws-templates.html"><span class="ic-tile" style="width:36px;height:36px">${icon(t[0], 'sm')}</span><div class="grow"><div class="t-strong">${t[2]}</div><div class="t-cap muted">${t[3]}</div></div>${fwd('sm')}</a>`).join('')}</div></div>
       </div>

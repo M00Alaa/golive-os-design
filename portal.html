@@ -47,10 +47,18 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
 GL.mount({
   shell: 'portal', nav: 'p-home',
   title: L => L('بوابة العميل', 'Client portal'),
+  modals: {
+    call: { icon: 'calendar', title: L => L('احجز مكالمة مع منى عادل', 'Book a call with Mona Adel'), sub: L => L('30 دقيقة · Google Meet · بتوقيت القاهرة', '30 min · Google Meet · Cairo time'),
+      body: (L, { ui }) => `${ui.field(L('اختار ميعاد', 'Pick a slot'), `<div class="grid g-3" style="gap:var(--gl-space-2)" data-pick data-req-group>${[L('الأربع 25 · 11:00 ص', 'Wed 25 · 11:00 AM'), L('الأربع 25 · 2:30 م', 'Wed 25 · 2:30 PM'), L('الخميس 26 · 10:00 ص', 'Thu 26 · 10:00 AM'), L('الخميس 26 · 1:00 م', 'Thu 26 · 1:00 PM'), L('الأحد 29 · 12:00 م', 'Sun 29 · 12:00 PM'), L('الأحد 29 · 3:00 م', 'Sun 29 · 3:00 PM')].map(t => `<span class="opt" style="justify-content:center">${t}</span>`).join('')}</div>`, { req: 1 })}
+        ${ui.field(L('الموضوع', 'Topic'), ui.select('t', [L('مراجعة UAT', 'UAT review'), L('ميزان البوابة', 'Weighbridge integration'), L('التدريب', 'Training'), L('حاجة تانية', 'Something else')], { req: 1, ph: L('اختار', 'Choose') }), { req: 1 })}
+        ${ui.field(L('ملاحظات', 'Notes'), ui.textarea('n', { rows: 2 }), { opt: L('اختياري', 'optional') })}`,
+      submit: L => L('تأكيد الحجز', 'Confirm booking'), toast: L => [L('اتحجزت المكالمة', 'Call booked'), L('الدعوة وصلت على إيميلك', 'An invite is in your inbox')] }
+  },
   render: (L, { icon, fwd, ui }) => {
     const N = [
       ['clipboard-list', 'info', L('نموذج صلاحيات المستخدمين حسب القسم', 'User permissions by department'), L('نموذج · 12 سؤال', 'Form · 12 questions'), L('مستحق بكرة', 'Due tomorrow'), 'warning', L('ابدأ', 'Start'), 'portal-requirements.html'],
@@ -86,7 +94,7 @@ GL.mount({
         <div class="card"><div class="card-head"><h3 class="t-h3">${L('فريقك في نيل سوفت', 'Your NileSoft team')}</h3></div>
           <div class="card-body pt0 stack gap-4">
             <div class="pm">${ui.av(L('م', 'MA'), 'av-teal', 'round')}<div class="grow"><div class="t-strong">${L('منى عادل', 'Mona Adel')}</div><div class="t-cap muted">${L('مديرة المشروع · بترد عادة خلال ساعة', 'Project manager · usually replies within 1h')}</div></div></div>
-            <div class="row gap-2"><a class="btn btn-primary btn-sm grow" href="portal-messages.html">${icon('message', 'sm')}${L('ابعت رسالة', 'Message')}</a><button class="btn btn-outline btn-sm grow">${icon('calendar', 'sm')}${L('احجز مكالمة', 'Book a call')}</button></div>
+            <div class="row gap-2"><a class="btn btn-primary btn-sm grow" href="portal-messages.html">${icon('message', 'sm')}${L('ابعت رسالة', 'Message')}</a><button type="button" class="btn btn-outline btn-sm grow" data-open="call">${icon('calendar', 'sm')}${L('احجز مكالمة', 'Book a call')}</button></div>
             <div class="divider"></div>
             <div class="row gap-2">${ui.stack([[L('ي', 'YT'), 'av-teal'], [L('م', 'ME'), 'av-amber'], [L('ح', 'HA'), 'av-blue']])}<span class="t-cap muted">${L('ياسمين، محمود وحسام شغالين معاك كمان', 'Yasmin, Mahmoud and Hossam also on your project')}</span></div>
           </div></div>

@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="assets/screens.css">
 <style>
 .wbody{padding:var(--gl-space-8);display:flex;flex-direction:column;gap:var(--gl-space-5)}
+.inv .err{display:none}
 .inv{display:grid;grid-template-columns:minmax(0,1fr) 200px 40px;gap:var(--gl-space-3);align-items:center}
 .inv-h{font:var(--gl-type-label-sm);color:var(--gl-text-muted)}
 .link-box{display:flex;align-items:center;gap:var(--gl-space-3);padding:var(--gl-space-4);border-radius:var(--gl-radius-md);background:var(--gl-bg-subtle)}
@@ -23,25 +24,30 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
 GL.mount({
   shell: 'wizard', step: 1,
   title: L => L('دعوة الفريق', 'Invite your team'),
-  render: (L, { icon }) => {
+  modals: {
+    bulk: { icon: 'list-plus', title: L => L('إضافة كذا إيميل', 'Add many at once'), sub: L => L('إيميل في كل سطر أو مفصولين بفاصلة', 'One per line or comma-separated'), body: (L, { ui }) => `${ui.field(L('الإيميلات', 'Emails'), ui.textarea('list', { req: 1, rows: 5, val: 'hossam@nilesoft.example\nrana@nilesoft.example' }), { req: 1 })}${ui.field(L('الدور', 'Role'), ui.select('r', [L('استشاري', 'Consultant'), L('مدير مشروع', 'Project manager'), L('مطور', 'Developer')]))}`,
+      submit: L => L('إضافة', 'Add'), onSubmit: v => { const c = document.getElementById('invRows'); v.list.split(/[\n,]+/).map(x => x.trim()).filter(Boolean).forEach(em => { const n = c.lastElementChild.cloneNode(true); n.querySelector('input').value = em; n.querySelector('select').value = v.r; c.appendChild(n); GLI.flash(n); }); document.querySelectorAll('[data-rows-n="invRows"]').forEach(x => { x.textContent = c.children.length; }); }, toast: L => [L('اتضافوا للقائمة', 'Added to the list'), ''] }
+  },
+  render: (L, { icon, ui }) => {
     const rows = [['mona@nilesoft.example', L('مدير مشروع', 'Project manager')], ['omar@nilesoft.example', L('مدير مشروع', 'Project manager')], ['yasmin@nilesoft.example', L('استشاري', 'Consultant')], ['', L('استشاري', 'Consultant')]];
     return `
     <div class="wiz-head"><span class="t-over" style="color:var(--gl-brand-text)">${L('خطوة 2 من 4', 'Step 2 of 4')}</span><h1>${L('ادعُ فريقك', 'Invite your team')}</h1><p>${L('المشاريع بتنجح لما الكل شايف نفس الصورة. تقدر تضيف أعضاء أكتر في أي وقت.', 'Projects succeed when everyone sees the same picture. You can add more people any time.')}</p></div>
-    <div class="card">
+    <div class="card" data-form>
       <div class="wbody">
         <div class="inv inv-h"><span>${L('الإيميل', 'Email')}</span><span>${L('الدور', 'Role')}</span><span></span></div>
-        ${rows.map(r => `<div class="inv"><span class="control ${r[0] ? '' : 'is-focus'}">${icon('mail', 'sm')}<input class="ltr" ${r[0] ? `value="${r[0]}"` : `placeholder="name@nilesoft.example"`}></span><span class="control"><span class="val">${r[1]}</span>${icon('chevron-down', 'sm')}</span><button class="icon-btn">${icon(r[0] ? 'x' : 'plus')}</button></div>`).join('')}
-        <button class="btn btn-ghost btn-sm" style="align-self:flex-start">${icon('plus')}${L('إضافة كذا إيميل مرة واحدة', 'Add many at once')}</button>
+        <div class="stack gap-3" id="invRows">${rows.map(r => `<div class="inv" data-row><span class="control">${icon('mail', 'sm')}<input name="e" type="email" class="ltr" ${r[0] ? `value="${r[0]}"` : ''} placeholder="name@nilesoft.example"></span>${ui.select('r', [L('مدير مشروع', 'Project manager'), L('استشاري', 'Consultant'), L('مطور', 'Developer'), L('أدمن', 'Admin')], { val: r[1] })}<button type="button" class="icon-btn" data-rm title="${L('إزالة', 'Remove')}">${icon('x')}</button></div>`).join('')}</div>
+        <div class="row gap-2"><button type="button" class="btn btn-outline btn-sm" data-clone="invRows">${icon('plus')}${L('إضافة شخص', 'Add person')}</button><button type="button" class="btn btn-ghost btn-sm" data-open="bulk">${icon('list-plus')}${L('إضافة كذا إيميل مرة واحدة', 'Add many at once')}</button></div>
         <div class="divider"></div>
         <div><div class="t-strong">${L('أو شارك لينك الدعوة', 'Or share an invite link')}</div><div class="t-sm sec mt-1">${L('أي حد بإيميل @nilesoft.example يقدر ينضم كاستشاري', 'Anyone with an @nilesoft.example email can join as Consultant')}</div></div>
-        <div class="link-box">${icon('link', 'sm')}<code>https://nilesoft.golive.example/join/7Hq2-xK9p</code><button class="btn btn-outline btn-sm">${icon('copy')}${L('نسخ', 'Copy')}</button><span class="switch on"></span></div>
+        <div class="link-box">${icon('link', 'sm')}<code>https://nilesoft.golive.example/join/7Hq2-xK9p</code><button type="button" class="btn btn-outline btn-sm" data-toast="success|${L('اتنسخ اللينك', 'Link copied')}|">${icon('copy')}${L('نسخ', 'Copy')}</button><span class="switch on" data-label="${L('لينك الدعوة', 'Invite link')}"></span></div>
         <div class="callout info">${icon('info', 'sm')}<span>${L('جهات اتصال العملاء مش بتتحسب من المقاعد. هتدعوهم من جوه كل مشروع.', 'Client contacts don’t use seats — you’ll invite them from inside each project.')}</span></div>
       </div>
-      <div class="wiz-foot"><a class="btn btn-ghost" href="onboarding-workspace.html">${icon('arrow-left', 'sm flip')}${L('رجوع', 'Back')}</a><div class="row gap-2"><a class="btn btn-ghost" href="onboarding-plan.html">${L('تخطي دلوقتي', 'Skip for now')}</a><a class="btn btn-primary" href="onboarding-plan.html">${icon('send', 'sm flip')}${L('ابعت 3 دعوات', 'Send 3 invites')}</a></div></div>
+      <div class="wiz-foot"><a class="btn btn-ghost" href="onboarding-workspace.html">${icon('arrow-left', 'sm flip')}${L('رجوع', 'Back')}</a><div class="row gap-2"><a class="btn btn-ghost" href="onboarding-plan.html">${L('تخطي دلوقتي', 'Skip for now')}</a><a class="btn btn-primary" href="#" data-step="onboarding-plan.html">${icon('send', 'sm flip')}${L('ابعت الدعوات', 'Send invites')} (<span data-rows-n="invRows">4</span>)</a></div></div>
     </div>`;
   }
 });

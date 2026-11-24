@@ -33,6 +33,7 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
 GL.mount({
   doc: 'empty',
@@ -42,7 +43,7 @@ GL.mount({
       ${illus ? `<div class="illus"><i></i><i></i><span>${icon(ic)}</span></div>` : `<span class="empty-ic ${cls}">${icon(ic)}</span>`}
       <h3 class="t-h3">${title}</h3><p>${text}</p>${actions ? `<div class="row gap-2 mt-1">${actions}</div>` : ''}</div></div>`;
     const P = (t, ic, href) => `<a class="btn btn-primary btn-sm" href="${href || '#'}">${ic ? icon(ic) : ''}${t}</a>`;
-    const O = (t, ic) => `<button class="btn btn-outline btn-sm">${ic ? icon(ic) : ''}${t}</button>`;
+    const O = (t, ic) => `<button type="button" class="btn btn-outline btn-sm" data-toast="info|${t}|">${ic ? icon(ic) : ''}${t}</button>`;
     return `
     <section class="ds-sec"><header><div class="t-over">${L('التسجيل والإعداد', 'Onboarding')}</div><h2>${L('الحالات الفاضية', 'Empty states')}</h2><p>${L('كل قائمة في المنتج ليها حالة فاضية بتشرح الفايدة وبتدي خطوة واضحة واحدة. نفس الشكل في الوضع الفاتح والغامق وفي العربي والإنجليزي.', 'Every list in the product has an empty state that explains the value and offers one clear next step. Same pattern in light/dark and Arabic/English.')}</p></header>
       <div class="es-grid">

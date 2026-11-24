@@ -100,7 +100,7 @@
     const t = typeof m.title === 'function' ? m.title(L, ctx) : m.title;
     const sub = typeof m.sub === 'function' ? m.sub(L, ctx) : m.sub;
     const body = m.body(L, h);
-    const foot = m.foot ? m.foot(L, h) : `<button type="button" class="btn btn-ghost" data-close>${L('إلغاء', 'Cancel')}</button><button type="submit" class="btn ${m.danger ? 'btn-danger' : 'btn-primary'}">${m.submitIcon ? icon(m.submitIcon, m.submitIcon === 'send' ? 'sm flip' : 'sm') : ''}${typeof m.submit === 'function' ? m.submit(L, ctx) : (m.submit || L('حفظ', 'Save'))}</button>`;
+    const foot = m.foot ? m.foot(L, h) : (m.footExtra ? m.footExtra(L) : '') + `<button type="button" class="btn btn-ghost" data-close>${L('إلغاء', 'Cancel')}</button><button type="submit" class="btn ${m.danger ? 'btn-danger' : 'btn-primary'}">${m.submitIcon ? icon(m.submitIcon, m.submitIcon === 'send' ? 'sm flip' : 'sm') : ''}${typeof m.submit === 'function' ? m.submit(L, ctx) : (m.submit || L('حفظ', 'Save'))}</button>`;
     const ov = overlay(`<form class="ov-form" novalidate>
       <header class="ov-head">${m.icon ? `<span class="ic-tile" style="${m.tone ? GL.ui.tone[m.tone] : ''}">${icon(m.icon)}</span>` : ''}<div class="grow"><h2 class="t-h2">${t}</h2>${sub ? `<p class="t-sm sec mt-1">${sub}</p>` : ''}</div><button type="button" class="icon-btn sm" data-close>${icon('x')}</button></header>
       <div class="ov-body">${body}</div>
@@ -133,6 +133,7 @@
     if (tc) tc.addEventListener('input', () => { ok.disabled = tc.value.trim() !== tc.dataset.typeConfirm; });
     ok.onclick = () => { closeOverlay(ov); onOk(); };
   }
+  function cnt(c) { if (!c || !c.id) return; const n = $$(':scope > [data-row]', c).length; $$(`[data-rows-n="${c.id}"]`).forEach(x => { x.textContent = n; }); }
   function flash(el) { if (!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
   function addRow(tableId, html, prepend) {
     const tb = document.getElementById(tableId); if (!tb) return;
@@ -218,8 +219,10 @@
     }
     if ((el = q('[data-toast]'))) { e.preventDefault(); const [k, a, b] = el.dataset.toast.split('|'); toast(k, a, b); closeMenus(); return; }
     if ((el = q('[data-insert]'))) { const ta = $('[data-composer] textarea'); if (ta) { ta.value = el.dataset.insert; ta.focus(); } closeMenus(); return; }
-    if ((el = q('[data-file]'))) { e.preventDefault(); const c = el.closest('[data-composer]'); const box = c && $('[data-files]', c); if (box) { const n = el.dataset.file; const d = document.createElement('span'); d.className = 'att'; d.innerHTML = icon('file', 'sm') + `<span class="ltr">${n}</span><span class="muted">240 KB</span><button class="icon-btn sm" type="button" data-rm>${icon('x', 'xs')}</button>`; box.appendChild(d); box.hidden = false; } return; }
-    if ((el = q('[data-rm]'))) { e.preventDefault(); const it = el.closest('.att,[data-row],.chip'); if (it) it.remove(); return; }
+    if ((el = q('[data-file]'))) { e.preventDefault(); const c = el.closest('[data-composer],[data-upload]'); const box = c && $('[data-files]', c); if (box) { const n = el.dataset.file; const d = document.createElement('span'); d.className = 'att'; d.innerHTML = icon('file', 'sm') + `<span class="ltr">${n}</span><span class="muted">240 KB</span><button class="icon-btn sm" type="button" data-rm>${icon('x', 'xs')}</button>`; box.appendChild(d); box.hidden = false; if (!el.closest('[data-composer]')) toast('success', L('اترفع الملف', 'File uploaded'), n); } return; }
+    if ((el = q('[data-eye]'))) { e.preventDefault(); const i = el.parentElement.querySelector('input'); const show = i.type === 'password'; i.type = show ? 'text' : 'password'; el.innerHTML = icon(show ? 'eye-off' : 'eye'); return; }
+    if ((el = q('[data-clone]'))) { e.preventDefault(); const c = document.getElementById(el.dataset.clone); const rows = $$(':scope > [data-row]', c); const src = rows[rows.length - 1]; if (!src) return; const n = src.cloneNode(true); $$('input,textarea', n).forEach(i => { i.value = ''; }); $$('.is-error', n).forEach(x => x.classList.remove('is-error')); $$('.err', n).forEach(x => x.remove()); c.appendChild(n); flash(n); const f = $('input', n); if (f) f.focus(); cnt(c); return; }
+    if ((el = q('[data-rm]'))) { e.preventDefault(); const it = el.closest('.att,[data-row],.chip'); if (it) { const c = it.parentElement; if (c.id && $$(':scope > [data-row]', c).length <= 1) { $$('input', it).forEach(i => { i.value = ''; }); return; } it.remove(); cnt(c); } return; }
     if ((el = q('[data-href]'))) { location.href = el.dataset.href; return; }
     if ((el = q('[data-clear-filters]'))) { const id = el.dataset.clearFilters; $$(`[data-search="${id}"],[data-col-filter="${id}"]`).forEach(f => { f.value = ''; }); const tc = $(`[data-filter-table="${id}"]`); if (tc) { UI[tc.dataset.tabs] = 'all'; applyTabs(document); } filterTable(id); return; }
     if ((el = q('[data-send]'))) { e.preventDefault(); send(el); return; }
@@ -227,7 +230,7 @@
     if ((el = q('[data-step]'))) { e.preventDefault(); const f = el.closest('[data-form]'); if (f && !validate(f)) return; location.href = el.dataset.step; return; }
     if ((el = q('.switch')) && !el.hasAttribute('data-static')) { el.classList.toggle('on'); const lbl = el.dataset.label; toast('success', el.classList.contains('on') ? L('اتفعّل', 'Turned on') : L('اتقفل', 'Turned off'), lbl || ''); return; }
     if ((el = q('thead .box'))) { const tb = el.closest('table'); const on = !el.classList.contains('on'); el.classList.toggle('on', on); el.innerHTML = on ? icon('check') : ''; $$('tbody [data-row]:not([hidden]) .box', tb).forEach(b => { b.classList.toggle('on', on); b.innerHTML = on ? icon('check') : ''; b.closest('tr').classList.toggle('sel', on); }); bulk(tb); return; }
-    if ((el = q('tbody .box'))) { const on = !el.classList.contains('on'); el.classList.toggle('on', on); el.innerHTML = on ? icon('check') : ''; el.closest('tr').classList.toggle('sel', on); bulk(el.closest('table')); return; }
+    if ((el = q('tbody .box')) && !el.closest('.mtx')) { const on = !el.classList.contains('on'); el.classList.toggle('on', on); el.innerHTML = on ? icon('check') : ''; el.closest('tr').classList.toggle('sel', on); bulk(el.closest('table')); return; }
     if ((el = q('.check')) && !q('a')) { const b = $('.box', el); if (b) { e.preventDefault(); const on = !b.classList.contains('on'); b.classList.toggle('on', on); b.innerHTML = on ? icon('check') : ''; } return; }
     if ((el = q('.mtx .box, .opt .box'))) { /* handled by .opt below */ }
     if ((el = q('.opt'))) {

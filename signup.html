@@ -19,26 +19,27 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
 GL.mount({
   shell: 'auth',
   title: L => L('إنشاء حساب', 'Sign up'),
-  render: (L, { icon }) => {
+  render: (L, { icon, ui }) => {
     const G = `<svg class="g-logo" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.2-2.1 3.5-5.1 3.5-8.7Z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6H1.3a12 12 0 0 0 0 10.8l4-3.1Z"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1c.9-2.9 3.6-4.9 6.7-4.9Z"/></svg>`;
     const MS = `<svg class="g-logo" viewBox="0 0 24 24"><path fill="#F25022" d="M1 1h10.5v10.5H1z"/><path fill="#7FBA00" d="M12.5 1H23v10.5H12.5z"/><path fill="#00A4EF" d="M1 12.5h10.5V23H1z"/><path fill="#FFB900" d="M12.5 12.5H23V23H12.5z"/></svg>`;
     return `
-    <div class="stack gap-6">
+    <div class="stack gap-6" data-form>
       <div><span class="tag brand">${icon('sparkles', 'xs')}${L('تجربة مجانية 14 يوم · من غير كارت', '14-day free trial · no card')}</span><h1 class="auth-h mt-3">${L('ابدأ مساحة عمل شركتك', 'Start your company workspace')}</h1><p class="sec mt-1">${L('في أقل من دقيقتين تبقى جاهز تضيف أول مشروع وتدعو عميلك.', 'In under two minutes you’ll be ready to add a project and invite your client.')}</p></div>
-      <div class="oauth"><button class="btn btn-outline">${G}Google</button><button class="btn btn-outline">${MS}Microsoft</button></div>
+      <div class="oauth"><button type="button" class="btn btn-outline" data-toast="info|${L('بنحولك لـ Google', 'Redirecting to Google')}|">${G}Google</button><button type="button" class="btn btn-outline" data-toast="info|${L('بنحولك لـ Microsoft', 'Redirecting to Microsoft')}|">${MS}Microsoft</button></div>
       <div class="or">${L('أو بالإيميل', 'or with email')}</div>
       <div class="stack gap-4">
-        <div class="field"><label>${L('اسمك بالكامل', 'Full name')}</label><span class="control">${icon('user', 'sm')}<input value="${L('أحمد سامي', 'Ahmed Samy')}"></span></div>
-        <div class="field"><label>${L('إيميل الشغل', 'Work email')}</label><span class="control is-focus">${icon('mail', 'sm')}<input class="ltr" value="ahmed@nilesoft.example"></span></div>
-        <div class="field"><label>${L('كلمة السر', 'Password')}</label><span class="control">${icon('lock', 'sm')}<input type="password" value="golive-2026!"><button class="icon-btn sm" style="margin-inline-end:-8px">${icon('eye')}</button></span>
-          <div class="pw-meter"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div><span class="hint">${L('قوية · 12 حرف أو أكتر مع رقم ورمز', 'Strong · 12+ characters with a number and symbol')}</span></div>
+        ${ui.field(L('اسمك بالكامل', 'Full name'), ui.input('name', { req: 1, min: 3, icon: 'user', val: L('أحمد سامي', 'Ahmed Samy') }), { req: 1 })}
+        ${ui.field(L('إيميل الشغل', 'Work email'), ui.input('email', { req: 1, type: 'email', ltr: 1, icon: 'mail', val: 'ahmed@nilesoft.example' }), { req: 1 })}
+        <div class="field"><label>${L('كلمة السر', 'Password')} <span class="req">*</span></label><span class="control">${icon('lock', 'sm')}<input name="pw" type="password" data-pw data-req data-min="8" value="golive-2026!"><button type="button" class="icon-btn sm" data-eye style="margin-inline-end:-8px">${icon('eye')}</button></span>
+          <div class="pw-meter"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div><span class="hint pw-hint">${L('قوية · 12 حرف أو أكتر مع رقم ورمز', 'Strong · 12+ characters with a number and symbol')}</span></div>
       </div>
-      <label class="check t-sm"><span class="box on">${icon('check')}</span><span class="sec">${L('موافق على', 'I agree to the')} <a class="link" href="#">${L('الشروط', 'Terms')}</a> ${L('و', 'and')} <a class="link" href="#">${L('سياسة الخصوصية', 'Privacy Policy')}</a></span></label>
-      <a class="btn btn-primary block" href="onboarding-workspace.html">${L('إنشاء الحساب', 'Create account')}${icon('arrow-right', 'sm flip')}</a>
+      <div data-req-group><label class="check t-sm"><span class="box on">${icon('check')}</span><span class="sec">${L('موافق على', 'I agree to the')} <a class="link" href="#">${L('الشروط', 'Terms')}</a> ${L('و', 'and')} <a class="link" href="#">${L('سياسة الخصوصية', 'Privacy Policy')}</a></span></label></div>
+      <a class="btn btn-primary block" href="#" data-step="onboarding-workspace.html">${L('إنشاء الحساب', 'Create account')}${icon('arrow-right', 'sm flip')}</a>
       <p class="t-sm sec" style="text-align:center">${L('عندك حساب؟', 'Already have an account?')} <a class="link" href="login.html">${L('سجّل دخول', 'Log in')}</a></p>
     </div>`;
   }

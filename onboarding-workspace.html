@@ -28,28 +28,29 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
 GL.mount({
   shell: 'wizard', step: 0,
   title: L => L('بيانات الشركة', 'Workspace details'),
-  render: (L, { icon }) => `
+  render: (L, { icon, ui }) => `
     <div class="wiz-head"><span class="t-over" style="color:var(--gl-brand-text)">${L('خطوة 1 من 4', 'Step 1 of 4')}</span><h1>${L('عرّفنا على شركتك', 'Tell us about your company')}</h1><p>${L('هنستخدم البيانات دي عشان نجهزلك قوالب تنفيذ مناسبة وبوابة عميل باسم شركتك.', 'We’ll use this to set up matching playbooks and a client portal in your company’s name.')}</p></div>
-    <div class="card wcard">
+    <div class="card wcard" data-form>
       <div class="wbody">
-        <div class="row gap-4"><span class="avatar ws-logo" style="width:64px;height:64px;font-size:24px;border-radius:var(--gl-radius-lg)">${L('ن', 'NS')}</span><div><div class="t-strong">${L('شعار الشركة', 'Company logo')} <span class="t-cap muted">(${L('اختياري', 'optional')})</span></div><div class="row gap-2 mt-2"><button class="btn btn-outline btn-sm">${icon('upload')}${L('رفع', 'Upload')}</button></div></div></div>
+        <div class="row gap-4"><span class="avatar ws-logo" style="width:64px;height:64px;font-size:24px;border-radius:var(--gl-radius-lg)">${L('ن', 'NS')}</span><div><div class="t-strong">${L('شعار الشركة', 'Company logo')} <span class="t-cap muted">(${L('اختياري', 'optional')})</span></div><div class="row gap-2 mt-2"><button type="button" class="btn btn-outline btn-sm" data-toast="success|${L('اترفع الشعار', 'Logo uploaded')}|nilesoft-logo.svg">${icon('upload')}${L('رفع', 'Upload')}</button></div></div></div>
         <div class="form-grid">
-          <div class="field"><label>${L('اسم الشركة', 'Company name')}</label><span class="control"><input value="${L('نيل سوفت للحلول', 'NileSoft Solutions')}"></span></div>
-          <div class="field"><label>${L('رابط مساحة العمل', 'Workspace URL')}</label><div class="prefix"><input value="nilesoft"><span>.golive.example</span></div><span class="hint row gap-1" style="color:var(--gl-success-fg)">${icon('check-circle', 'xs')}${L('الرابط متاح', 'Available')}</span></div>
+          ${ui.field(L('اسم الشركة', 'Company name'), ui.input('co', { req: 1, min: 2, val: L('نيل سوفت للحلول', 'NileSoft Solutions') }), { req: 1 })}
+          <div class="field"><label>${L('رابط مساحة العمل', 'Workspace URL')} <span class="req">*</span></label><div class="prefix"><input name="slug" data-req value="nilesoft"><span>.golive.example</span></div><span class="hint row gap-1" style="color:var(--gl-success-fg)">${icon('check-circle', 'xs')}${L('الرابط متاح', 'Available')}</span></div>
         </div>
         <div class="field"><label>${L('بتنفذوا إيه أساسًا؟', 'What do you mainly implement?')}</label>
-          <div class="focus-opts">${[['layers', 'Odoo ERP', 1], ['users', 'CRM · Odoo / Zoho', 1], ['database', 'Dynamics 365'], ['briefcase', 'SAP Business One'], ['user-check', L('موارد بشرية ورواتب', 'HR & payroll')], ['plus', L('حاجة تانية', 'Something else')]].map(o => `<label class="opt ${o[2] ? 'on' : ''}"><span class="box ${o[2] ? 'on' : ''}">${o[2] ? icon('check') : ''}</span><span class="ic-tile" style="width:32px;height:32px">${icon(o[0], 'sm')}</span><span class="t t-sm ell">${o[1]}</span></label>`).join('')}</div></div>
-        <div class="field"><label>${L('حجم فريقكم', 'Team size')}</label><div class="size-pills">${['1–4', '5–10', '11–25', '26–50', '50+'].map((s, i) => `<span class="${i === 3 ? 'on' : ''}">${s}</span>`).join('')}</div></div>
+          <div class="focus-opts" data-multi data-req-group>${[['layers', 'Odoo ERP', 1], ['users', 'CRM · Odoo / Zoho', 1], ['database', 'Dynamics 365'], ['briefcase', 'SAP Business One'], ['user-check', L('موارد بشرية ورواتب', 'HR & payroll')], ['plus', L('حاجة تانية', 'Something else')]].map(o => `<label class="opt ${o[2] ? 'on' : ''}"><span class="box ${o[2] ? 'on' : ''}">${o[2] ? icon('check') : ''}</span><span class="ic-tile" style="width:32px;height:32px">${icon(o[0], 'sm')}</span><span class="t t-sm ell">${o[1]}</span></label>`).join('')}</div></div>
+        <div class="field"><label>${L('حجم فريقكم', 'Team size')}</label><div class="size-pills" data-pick>${['1–4', '5–10', '11–25', '26–50', '50+'].map((s, i) => `<span class="${i === 3 ? 'on' : ''}">${s}</span>`).join('')}</div></div>
         <div class="form-grid">
-          <div class="field"><label>${L('لغة البوابة لعملائك', 'Client portal language')}</label><span class="control"><span class="val">${L('العربية + English', 'Arabic + English')}</span>${icon('chevron-down', 'sm')}</span></div>
-          <div class="field"><label>${L('الدولة والمنطقة الزمنية', 'Country & time zone')}</label><span class="control"><span class="val">${L('مصر · القاهرة (UTC+2)', 'Egypt · Cairo (UTC+2)')}</span>${icon('chevron-down', 'sm')}</span></div>
+          ${ui.field(L('لغة البوابة لعملائك', 'Client portal language'), ui.select('lang', [L('العربية + English', 'Arabic + English'), L('العربية فقط', 'Arabic only'), 'English only'], { icon: 'languages' }))}
+          ${ui.field(L('الدولة والمنطقة الزمنية', 'Country & time zone'), ui.select('tz', [L('مصر · القاهرة (UTC+2)', 'Egypt · Cairo (UTC+2)'), L('السعودية · الرياض (UTC+3)', 'Saudi Arabia · Riyadh (UTC+3)'), L('الإمارات · دبي (UTC+4)', 'UAE · Dubai (UTC+4)')], { icon: 'globe' }))}
         </div>
       </div>
-      <div class="wiz-foot"><a class="btn btn-ghost" href="signup.html">${icon('arrow-left', 'sm flip')}${L('رجوع', 'Back')}</a><a class="btn btn-primary" href="onboarding-invite.html">${L('متابعة', 'Continue')}${icon('arrow-right', 'sm flip')}</a></div>
+      <div class="wiz-foot"><a class="btn btn-ghost" href="signup.html">${icon('arrow-left', 'sm flip')}${L('رجوع', 'Back')}</a><a class="btn btn-primary" href="#" data-step="onboarding-invite.html">${L('متابعة', 'Continue')}${icon('arrow-right', 'sm flip')}</a></div>
     </div>`
 });
 </script>

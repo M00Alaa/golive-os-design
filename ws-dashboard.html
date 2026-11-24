@@ -43,10 +43,32 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
 GL.mount({
   shell: 'ws', nav: 'ws-home',
   title: L => L('الرئيسية', 'Dashboard'),
+  modals: {
+    upd: { kind: 'drawer', size: 'lg', icon: 'megaphone', title: L => L('تحديث أسبوعي للعملاء', 'Weekly client update'), sub: L => L('بيتبعت لجهات اتصال العميل وبيظهر في البوابة', 'Sent to client contacts and posted in their portal'),
+      body: (L, { ui }) => `${ui.field(L('المشروع', 'Project'), ui.select('p', [L('تطبيق Odoo ERP — مصنع النور', 'Odoo ERP rollout — Al Nour Plastics'), L('ترحيل بيانات المخازن — دلتا', 'Inventory migration — Delta'), L('Odoo CRM — الريادة', 'Odoo CRM — Riyada')], { icon: 'briefcase' }))}
+        ${ui.field(L('حالة المشروع', 'Status'), `<div class="row gap-2" data-pick><span class="opt on" data-val="h" data-value="on">${L('في المسار', 'On track')}</span><span class="opt" data-value="risk">${L('معرض للخطر', 'At risk')}</span><span class="opt" data-value="blk">${L('متوقف', 'Blocked')}</span></div>`)}
+        ${ui.field(L('خلصنا الأسبوع ده', 'Done this week'), ui.textarea('done', { req: 1, rows: 3, val: L('• ترحيل كل بيانات الأصناف (4,812 صنف)\n• UAT دورة 1 — 31 من 34 سيناريو نجحوا', '• Migrated all 4,812 products\n• UAT cycle 1 — 31 of 34 scenarios passed') }), { req: 1 })}
+        ${ui.field(L('محتاجين من العميل', 'Needed from the client'), ui.textarea('need', { rows: 3, val: L('• نموذج صلاحيات المستخدمين — قبل الأربع', '• User permissions form — by Wednesday') }))}
+        ${ui.field(L('الأسبوع الجاي', 'Next week'), ui.textarea('next', { rows: 2, ph: L('اكتب الخطة…', 'Write the plan…') }), { opt: L('اختياري', 'optional') })}
+        <label class="check t-sm"><span class="box on">${GL.icon('check')}</span>${L('ابعت نسخة على واتساب كمان', 'Also send a WhatsApp copy')}</label>`,
+      footExtra: L => `<button type="button" class="btn btn-outline" style="margin-inline-end:auto" data-toast="success|${L('اتحفظت كمسودة', 'Saved as draft')}|">${L('حفظ كمسودة', 'Save draft')}</button>`,
+      submit: L => L('نشر وإرسال', 'Publish & send'), submitIcon: 'send', toast: L => [L('اتنشر التحديث', 'Update published'), L('اتبعت لـ 4 جهات اتصال في مصنع النور', 'Sent to 4 contacts at Al Nour Plastics')] },
+    nudge: { icon: 'bell', title: L => L('ابعت تذكير للعملاء', 'Nudge clients'), sub: L => L('تذكير واحد لكل جهة اتصال باللي مستني منها', 'One reminder per contact listing what’s pending'),
+      body: (L, { ui }) => `<div class="stack gap-2" data-multi data-req-group>${[[L('الريادة الطبية', 'Riyada Medical'), L('اعتماد Blueprint · متأخر 3 أيام', 'Blueprint sign-off · 3 days late'), 1], [L('دلتا للتوزيع', 'Delta Distribution'), L('ملف الأرصدة · متأخر 5 أيام', 'Balances file · 5 days late'), 1], [L('مصنع النور', 'Al Nour Plastics'), L('صلاحيات + UAT · مستحق قريب', 'Permissions + UAT · due soon')]].map(c => `<label class="opt ${c[2] ? 'on' : ''}"><span class="box ${c[2] ? 'on' : ''}">${c[2] ? GL.icon('check') : ''}</span><span><span class="t">${c[0]}</span><br><span class="d">${c[1]}</span></span></label>`).join('')}</div>
+        ${ui.field(L('القناة', 'Channel'), ui.select('ch', [L('إيميل + إشعار البوابة', 'Email + portal'), L('واتساب', 'WhatsApp'), L('الكل', 'All channels')]))}`,
+      submit: L => L('إرسال التذكير', 'Send reminders'), submitIcon: 'send', toast: L => [L('اتبعتت التذكيرات', 'Reminders sent'), L('هنبلغك لما حد يرد', 'We’ll tell you when someone responds')] },
+    blk: { icon: 'alert-triangle', tone: 'danger', title: L => L('Blocker جديد', 'New blocker'),
+      body: (L, { ui }) => `${ui.field(L('الوصف', 'Description'), ui.input('name', { req: 1, ph: L('مثلًا: مستنيين بيانات الموردين', 'e.g. Waiting on supplier data') }), { req: 1 })}<div class="form-grid">${ui.field(L('المشروع', 'Project'), ui.select('p', [L('تطبيق Odoo ERP', 'Odoo ERP rollout'), L('ترحيل بيانات المخازن', 'Inventory migration'), 'Odoo CRM'], { req: 1, ph: L('اختار', 'Choose') }), { req: 1 })}${ui.field(L('التأثير', 'Impact'), ui.select('imp', [['danger', L('عالي', 'High')], ['warning', L('متوسط', 'Medium')], ['info', L('منخفض', 'Low')]], { val: 'warning' }))}${ui.field(L('مستني مين', 'Waiting on'), ui.select('who', [L('العميل', 'Client'), L('الفريق', 'Internal'), L('طرف تالت', 'Third party')]))}${ui.field(L('المسؤول', 'Owner'), ui.select('own', [L('منى عادل', 'Mona Adel'), L('عمر خالد', 'Omar Khaled'), L('ياسمين خليل', 'Yasmin Khalil')]))}</div>`,
+      submit: L => L('إضافة', 'Add blocker'), add: { table: 'blkTbl', prepend: true, row: (v, L) => `<tr data-row><td><div class="nm t-strong ell" data-f="name">${v.name.replace(/</g, '&lt;')}</div><div class="cell-sub">${v.p}</div></td><td>${GL.ui.tag(v.imp, { danger: L('عالي', 'High'), warning: L('متوسط', 'Medium'), info: L('منخفض', 'Low') }[v.imp])}</td><td class="sec">${v.who}</td><td class="sec">${L('دلوقتي', 'Now')}</td><td class="right">${GL.ui.menuBtn('blk')}</td></tr>` },
+      toast: L => [L('اتضاف الـ Blocker', 'Blocker added'), L('اتبلغ مدير المشروع', 'The PM was notified'), 'warning'] }
+  },
+  menus: { blk: [{ icon: 'external-link', ar: 'افتح المشروع', en: 'Open project', href: 'ws-project.html?tab=prj:risks' }, { icon: 'bell', ar: 'ابعت تذكير', en: 'Send reminder', toast: (L, n) => `success|${L('اتبعت التذكير', 'Reminder sent')}|${n}` }, { icon: 'check-circle', ar: 'اتحل', en: 'Mark resolved', confirm: 'res' }, '-', { icon: 'trash-2', ar: 'حذف', en: 'Delete', del: 1, danger: 1 }] },
+  confirms: { res: { icon: 'check-circle', title: (L, c) => L('تقفل الـ Blocker ده؟', 'Resolve this blocker?'), text: (L, c) => c.name, btn: L => L('اتحل', 'Resolve'), run: (L, c, row) => { row.classList.add('leaving'); setTimeout(() => row.remove(), 300); }, toast: L => [L('اتقفل الـ Blocker', 'Blocker resolved'), ''] } },
   render: (L, { icon, fwd, ui }) => {
     const T = GL_TEAM, P = GL_PROJECTS, H = GL_HEALTH, PH = GL_PHASES;
     const pm = k => ui.av(L(T[k][2], T[k][3]), T[k][4]);
@@ -67,7 +89,7 @@ GL.mount({
     return `
     <section class="hello">
       <div><div class="d">${L('الثلاثاء، 24 نوفمبر', 'Tuesday, Nov 24')}</div><h1 class="t-h1 mt-1">${L('مساء الخير يا أحمد 👋', 'Good evening, Ahmed 👋')}</h1><p class="sec mt-1">${L('عندك إطلاقين الأسبوع ده، و4 حاجات مستنية العملاء.', 'Two go-lives this week, and 4 items waiting on clients.')}</p></div>
-      <div class="row gap-3"><button class="btn btn-outline">${icon('megaphone', 'sm')}${L('تحديث أسبوعي للعملاء', 'Weekly client update')}</button></div>
+      <div class="row gap-3"><button type="button" class="btn btn-outline" data-open="upd">${icon('megaphone', 'sm')}${L('تحديث أسبوعي للعملاء', 'Weekly client update')}</button></div>
     </section>
     <section class="grid g-4">
       ${ui.kpi(L('المشاريع النشطة', 'Active projects'), 'briefcase', '7', `<span class="tag success">5 ${L('في المسار', 'on track')}</span><span class="tag danger">1 ${L('متوقف', 'blocked')}</span>`)}
@@ -87,7 +109,7 @@ GL.mount({
       <aside class="span-4 side">
         <div class="card"><div class="card-head"><div><h3 class="t-h3">${L('مستني العملاء', 'Waiting on clients')}</h3><p class="sub">${L('موافقات ومتطلبات مطلوبة من العملاء', 'Sign-offs and inputs due from clients')}</p></div></div>
           <div class="card-body pt0">${waits.map(w => `<div class="wait"><span class="ic-tile" style="width:36px;height:36px;${ui.tone[w[1]]}">${icon(w[0], 'sm')}</span><div class="grow"><div class="t">${w[2]}</div><div class="m">${w[3]}</div></div></div>`).join('')}
-            <button class="btn btn-outline btn-sm mt-3" style="width:100%">${icon('bell', 'sm')}${L('ابعت تذكير للعملاء', 'Nudge clients')}</button></div></div>
+            <button type="button" class="btn btn-outline btn-sm mt-3" style="width:100%" data-open="nudge">${icon('bell', 'sm')}${L('ابعت تذكير للعملاء', 'Nudge clients')}</button></div></div>
         <div class="card"><div class="card-head"><h3 class="t-h3">${L('إطلاقات قادمة', 'Upcoming go-lives')}</h3></div>
           <div class="card-body pt0 stack gap-3">
             <div class="row gap-3"><span class="cal hot"><b>28</b><span>${L('نوف', 'Nov')}</span></span><div class="grow"><div class="t-strong">${L('بوابة الموارد البشرية', 'HR portal')}</div><div class="t-cap muted">${L('الأمل للمقاولات · بعد 4 أيام', 'Al Amal Contracting · in 4 days')}</div></div>${ui.tag('success', '95%', false)}</div>
@@ -97,10 +119,10 @@ GL.mount({
     </section>
     <section class="grid g-12">
       <div class="span-8 card table-wrap">
-        <div class="card-head bordered"><div><h3 class="t-h3">${L('Blockers ومخاطر مفتوحة', 'Open blockers & risks')}</h3><p class="sub">${L('مرتبة حسب التأثير على موعد الإطلاق', 'Sorted by impact on go-live date')}</p></div><button class="btn btn-outline btn-sm">${icon('plus')}${L('إضافة', 'Add')}</button></div>
-        <table class="tbl blk"><colgroup><col><col style="width:112px"><col style="width:104px"><col style="width:96px"></colgroup>
-          <thead><tr><th>${L('الـ Blocker', 'Blocker')}</th><th>${L('التأثير', 'Impact')}</th><th>${L('مستني مين', 'Waiting on')}</th><th>${L('مفتوح من', 'Open for')}</th></tr></thead>
-          <tbody>${B.map(b => `<tr><td><div class="nm t-strong ell">${b[0]}</div><div class="cell-sub">${b[1]}</div></td><td>${ui.tag(b[2], b[3])}</td><td class="sec">${b[4]}</td><td class="sec">${b[5]}</td></tr>`).join('')}</tbody></table>
+        <div class="card-head bordered"><div><h3 class="t-h3">${L('Blockers ومخاطر مفتوحة', 'Open blockers & risks')}</h3><p class="sub">${L('مرتبة حسب التأثير على موعد الإطلاق', 'Sorted by impact on go-live date')}</p></div><button type="button" class="btn btn-outline btn-sm" data-open="blk">${icon('plus')}${L('إضافة', 'Add')}</button></div>
+        <table class="tbl blk" id="blkTbl"><colgroup><col><col style="width:112px"><col style="width:104px"><col style="width:96px"><col style="width:56px"></colgroup>
+          <thead><tr><th>${L('الـ Blocker', 'Blocker')}</th><th>${L('التأثير', 'Impact')}</th><th>${L('مستني مين', 'Waiting on')}</th><th>${L('مفتوح من', 'Open for')}</th><th></th></tr></thead>
+          <tbody>${B.map(b => `<tr data-row><td><div class="nm t-strong ell" data-f="name">${b[0]}</div><div class="cell-sub">${b[1]}</div></td><td>${ui.tag(b[2], b[3])}</td><td class="sec">${b[4]}</td><td class="sec">${b[5]}</td><td class="right">${ui.menuBtn('blk')}</td></tr>`).join('')}</tbody></table>
       </div>
       <div class="span-4 card">
         <div class="card-head"><div><h3 class="t-h3">${L('ضغط الفريق', 'Team load')}</h3><p class="sub">${L('الساعات المحجوزة الأسبوع ده', 'Booked hours this week')}</p></div><a class="link" href="ws-team.html">${L('الفريق', 'Team')}${fwd('xs')}</a></div>
