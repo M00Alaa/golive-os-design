@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .chart{display:grid;grid-template-columns:auto 1fr;gap:var(--gl-space-3);height:248px}
+  .y-axis{display:flex;flex-direction:column;justify-content:space-between;font:var(--gl-type-caption);color:var(--gl-text-muted);text-align:end;padding-bottom:26px;margin-top:-9px}
+  .plot{position:relative;display:flex;flex-direction:column}
+  .gridlines{position:absolute;inset:0 0 26px 0;display:flex;flex-direction:column;justify-content:space-between}
+  .gridlines i{height:1px;background:var(--gl-chart-grid)}
+  .gridlines i:last-child{background:var(--gl-border-default)}
+  .bars{position:relative;flex:1;display:flex;align-items:flex-end;gap:var(--gl-space-3);padding-inline:var(--gl-space-2)}
+  .bar-col{flex:1;height:100%;display:flex;align-items:flex-end;justify-content:center;position:relative}
+  .bar-col b{display:block;width:100%;max-width:32px;border-radius:6px 6px 2px 2px;background:color-mix(in srgb,var(--gl-brand-primary) 22%,transparent)}
+  .bar-col.cur b{background:var(--gl-brand-primary)}
+  .bar-col .tip{position:absolute;bottom:calc(var(--h) + 8px);background:var(--gl-neutral-900);color:#fff;font:var(--gl-type-label-sm);padding:4px 8px;border-radius:6px;white-space:nowrap;direction:ltr}
+  [data-theme="dark"] .bar-col .tip{background:var(--gl-neutral-50);color:var(--gl-neutral-900)}
+  .x-axis{display:flex;gap:var(--gl-space-3);padding-inline:var(--gl-space-2);height:26px;align-items:flex-end}
+  .x-axis span{flex:1;text-align:center;font:var(--gl-type-caption);color:var(--gl-text-muted);white-space:nowrap}
+  .mrr-sum{display:flex;align-items:baseline;gap:var(--gl-space-3);margin-bottom:var(--gl-space-5)}
+  .mrr-sum .v{font:var(--gl-type-display);letter-spacing:-.5px;direction:ltr}
+  .donut-wrap{position:relative;width:176px;height:176px;margin:var(--gl-space-2) auto var(--gl-space-6)}
+  .donut-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .donut-c .v{font:var(--gl-type-kpi)}
+  .plan-row{display:grid;grid-template-columns:1fr auto 64px;align-items:center;gap:var(--gl-space-3);padding-block:var(--gl-space-3);border-block-start:1px solid var(--gl-border-default)}
+  .plan-row .sw{width:10px;height:10px;border-radius:3px;display:inline-block;margin-inline-end:var(--gl-space-2)}
+  .plan-row .pct{text-align:end;color:var(--gl-text-muted)}
+  .act{display:flex;gap:var(--gl-space-3);padding-block:var(--gl-space-3)}
+  .act + .act{border-block-start:1px solid var(--gl-border-default)}
+  .act-ic{width:32px;height:32px;border-radius:var(--gl-radius-md);display:grid;place-items:center;flex:none}
+  .act-ic svg.i{width:16px;height:16px}
+  .act .tx{font:var(--gl-type-body-sm);color:var(--gl-text-primary)}
+  .act .tx b{font-weight:500}
+  .act .tm{font:var(--gl-type-caption);color:var(--gl-text-muted);margin-top:2px}
+  .act-list{padding:var(--gl-space-1) var(--gl-space-6) var(--gl-space-3)}
+  .ic-brand{background:var(--gl-brand-subtle);color:var(--gl-brand-text)}
+  .ic-info{background:var(--gl-info-bg);color:var(--gl-info-fg)}
+  .ic-warn{background:var(--gl-warning-bg);color:var(--gl-warning-fg)}
+  .ic-danger{background:var(--gl-danger-bg);color:var(--gl-danger-fg)}
+  .ic-neutral{background:var(--gl-neutral-bg);color:var(--gl-neutral-fg)}
+  .actv{display:flex;align-items:center;gap:var(--gl-space-3)}
+  .actv .bar{flex:1}
+  .actv span{width:36px;font:var(--gl-type-label-sm);color:var(--gl-text-secondary);text-align:end}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/app.js"></script>
+<script>
+const MONTHS = [['ديسمبر','Dec'],['يناير','Jan'],['فبراير','Feb'],['مارس','Mar'],['أبريل','Apr'],['مايو','May'],['يونيو','Jun'],['يوليو','Jul'],['أغسطس','Aug'],['سبتمبر','Sep'],['أكتوبر','Oct'],['نوفمبر','Nov']];
+const MRR = [9.8,10.4,11.1,11.9,12.6,13.2,14.1,14.9,15.6,16.4,17.3,18.4];
+GL.mount({
+  nav: 'overview',
+  title: L => L('نظرة عامة', 'Overview'),
+  render: (L, { icon, fwd }) => {
+    const kpi = (label, ic, val, delta, dcls, foot, spark, color) => `
+      <div class="card kpi">
+        <div class="kpi-top"><span class="kpi-label">${label}</span><span class="kpi-icon">${icon(ic)}</span></div>
+        <div class="kpi-row"><span class="kpi-val">${val}</span>${GLC.spark(spark, color)}</div>
+        <div class="kpi-foot">${delta ? `<span class="delta ${dcls}">${icon(dcls === 'down' ? 'trending-down' : (dcls === 'good-down' ? 'trending-down' : 'trending-up'))}${delta}</span>` : ''}<span>${foot}</span></div>
+      </div>`;
+    const trials = [
+      ['أفق الرقمية','Ofoq Digital','ofoq-digital.example','أ','OD','av-violet',5,82,2],
+      ['دلتا لأنظمة ERP','Delta ERP Systems','delta-erp.example','د','DE','av-blue',6,64,4],
+      ['صقر للحلول','Saqr Solutions','saqr.example','ص','SS','av-amber',3,28,6],
+      ['ركيزة للبرمجيات','Rakeeza Software','rakeeza.example','ر','RS','av-teal',8,91,9]
+    ];
+    const days = d => d <= 2 ? 'danger' : d <= 5 ? 'warning' : 'neutral';
+    const acts = [
+      ['zap','ic-brand', L('<b>نيل سوفت للحلول</b> رقّت خطتها إلى Growth','<b>NileSoft Solutions</b> upgraded to Growth'), L('منذ 12 دقيقة','12 min ago')],
+      ['building','ic-info', L('<b>أفق الرقمية</b> بدأت فترة تجريبية جديدة','<b>Ofoq Digital</b> started a new trial'), L('منذ ساعة','1 hour ago')],
+      ['alert-triangle','ic-warn', L('فشل تحصيل فاتورة <b>مدار للتقنية</b>','Payment failed for <b>Madar Tech</b>'), L('منذ 3 ساعات','3 hours ago')],
+      ['life-buoy','ic-danger', L('تذكرة عاجلة من <b>سحابة الأهرام</b>','Urgent ticket from <b>Ahram Cloud</b>'), L('منذ 5 ساعات','5 hours ago')],
+      ['x','ic-neutral', L('<b>ثقة لحلول الأعمال</b> ألغت الاشتراك','<b>Thiqa Business Solutions</b> cancelled'), L('أمس، 4:20 م','Yesterday, 4:20 PM')]
+    ];
+    const max = 20;
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('صباح الخير يا محمد 👋','Good morning, Mohamed 👋')}</h1>
+        <p class="sub">${L('ده ملخص أداء المنصة خلال آخر 30 يوم.','Here’s how the platform performed over the last 30 days.')}</p></div>
+      <div class="actions">
+        <button class="btn btn-outline">${icon('calendar','sm')}${L('آخر 30 يوم','Last 30 days')}${icon('chevron-down','sm')}</button>
+        <button class="btn btn-outline">${icon('download','sm')}${L('تصدير','Export')}</button>
+        <button class="btn btn-primary">${icon('plus','sm')}${L('إضافة شركة','Add company')}</button>
+      </div>
+    </div>
+
+    <section class="grid g-4">
+      ${kpi(L('الإيراد الشهري المتكرر','Monthly recurring revenue'),'credit-card','<span class="ltr">$18,420</span>','12.4%','up',L('مقارنة بالشهر الماضي','vs last month'),MRR,'var(--gl-brand-primary)')}
+      ${kpi(L('الشركات النشطة','Active companies'),'building','128','+8','up',L('شركات جديدة هذا الشهر','new this month'),[96,99,104,108,111,115,120,128],'var(--gl-brand-primary)')}
+      ${kpi(L('فترات تجريبية نشطة','Active trials'),'clock','23','',null,`<span class="tag warning"><span class="dot"></span>${L('6 تنتهي هذا الأسبوع','6 end this week')}</span>`,[14,18,16,21,19,24,22,23],'var(--gl-accent-default)')}
+      ${kpi(L('معدل الإلغاء','Churn rate'),'activity','1.8%','0.4%','good-down',L('أقل من الشهر الماضي','lower than last month'),[3.1,2.8,2.9,2.5,2.2,2.3,2.0,1.8],'var(--gl-success-solid)')}
+    </section>
+
+    <section class="grid g-12">
+      <div class="card span-8">
+        <div class="card-head">
+          <div><h3 class="t-h3">${L('نمو الإيراد الشهري (MRR)','MRR growth')}</h3><p class="sub">${L('آخر 12 شهر، بالدولار','Last 12 months, USD')}</p></div>
+          <div class="pills"><span class="pill">${L('6 شهور','6M')}</span><span class="pill active">${L('12 شهر','12M')}</span><span class="pill">${L('الكل','All')}</span></div>
+        </div>
+        <div class="card-body pt0">
+          <div class="mrr-sum"><span class="v">$18,420</span><span class="delta up">${icon('trending-up')}+$1,120</span><span class="muted t-sm">${L('عن أكتوبر','vs October')}</span></div>
+          <div class="chart">
+            <div class="y-axis ltr">${[20,15,10,5,0].map(v => `<span>${v ? '$' + v + 'k' : '0'}</span>`).join('')}</div>
+            <div class="plot">
+              <div class="gridlines">${'<i></i>'.repeat(5)}</div>
+              <div class="bars">${MRR.map((v, i) => `<div class="bar-col ${i === 11 ? 'cur' : ''}" style="--h:${v / max * 100}%"><b style="height:${v / max * 100}%"></b>${i === 11 ? `<span class="tip">$${v}k</span>` : ''}</div>`).join('')}</div>
+              <div class="x-axis">${MONTHS.map(m => `<span>${L(m[0], m[1])}</span>`).join('')}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card span-4">
+        <div class="card-head"><div><h3 class="t-h3">${L('توزيع الخطط','Plan distribution')}</h3><p class="sub">${L('128 شركة نشطة','128 active companies')}</p></div>
+          <button class="icon-btn sm">${icon('more')}</button></div>
+        <div class="card-body pt0">
+          <div class="donut-wrap">${GLC.donut([{v:64,color:'var(--gl-brand-300)'},{v:52,color:'var(--gl-brand-primary)'},{v:12,color:'var(--gl-accent-default)'}],176,20)}
+            <div class="donut-c"><span class="v">128</span><span class="t-cap muted">${L('شركة','companies')}</span></div></div>
+          ${[['Starter','var(--gl-brand-300)',64,'50%'],['Growth','var(--gl-brand-primary)',52,'41%'],['Enterprise','var(--gl-accent-default)',12,'9%']].map(p => `
+          <div class="plan-row"><span class="t-label"><span class="sw" style="background:${p[1]}"></span>${p[0]}</span><span class="t-strong num">${p[2]}</span><span class="pct t-sm num">${p[3]}</span></div>`).join('')}
+        </div>
+      </div>
+    </section>
+
+    <section class="grid g-12">
+      <div class="card span-7 table-wrap">
+        <div class="card-head bordered"><div><h3 class="t-h3">${L('فترات تجريبية تنتهي قريبًا','Trials ending soon')}</h3><p class="sub">${L('تابع معاهم قبل ما الفترة تخلص','Reach out before their trial ends')}</p></div>
+          <a class="link" href="companies.html">${L('عرض الكل','View all')}${icon('chevron-right','flip xs')}</a></div>
+        <table class="tbl">
+          <colgroup><col><col style="width:96px"><col style="width:128px"><col style="width:104px"><col style="width:72px"></colgroup>
+          <thead><tr><th>${L('الشركة','Company')}</th><th>${L('المستخدمين','Users')}</th><th>${L('مؤشر التفعيل','Activation')}</th><th>${L('تنتهي خلال','Ends in')}</th><th></th></tr></thead>
+          <tbody>${trials.map(t => `<tr>
+            <td><div class="cell-co"><span class="avatar ${t[5]}">${L(t[3], t[4])}</span><div><div class="nm">${L(t[0], t[1])}</div><div class="dm">${t[2]}</div></div></div></td>
+            <td class="num">${t[6]}</td>
+            <td><div class="actv"><div class="bar thin ${t[7] < 40 ? 'warn' : ''}"><i style="width:${t[7]}%"></i></div><span class="num">${t[7]}%</span></div></td>
+            <td><span class="tag ${days(t[8])}">${L(t[8] === 2 ? 'يومين' : t[8] + ' أيام', t[8] + ' days')}</span></td>
+            <td class="right"><button class="icon-btn sm">${icon('mail')}</button></td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+      <div class="card span-5">
+        <div class="card-head bordered"><div><h3 class="t-h3">${L('آخر النشاطات','Recent activity')}</h3><p class="sub">${L('أحداث المنصة لحظة بلحظة','Live platform events')}</p></div>
+          <a class="link" href="#">${L('سجل النشاط','Audit log')}${icon('chevron-right','flip xs')}</a></div>
+        <div class="act-list">${acts.map(a => `<div class="act"><span class="act-ic ${a[1]}">${icon(a[0])}</span><div class="grow"><div class="tx">${a[2]}</div><div class="tm">${a[3]}</div></div></div>`).join('')}</div>
+      </div>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

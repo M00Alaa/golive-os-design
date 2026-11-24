@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .hero{padding:var(--gl-space-6) var(--gl-space-6) 0}
+  .hero-top{display:flex;align-items:flex-start;gap:var(--gl-space-5)}
+  .hero-id{flex:1;min-width:0}
+  .hero-id .name{display:flex;align-items:center;gap:var(--gl-space-3);flex-wrap:wrap}
+  .meta{display:flex;flex-wrap:wrap;gap:var(--gl-space-2) var(--gl-space-6);margin-top:var(--gl-space-3);font:var(--gl-type-body-sm);color:var(--gl-text-secondary)}
+  .meta span{display:inline-flex;align-items:center;gap:6px}
+  .meta svg.i{width:16px;height:16px;color:var(--gl-text-muted)}
+  .hero .tabs{margin-top:var(--gl-space-6);border-block-end:0;margin-inline:calc(var(--gl-space-6) * -1);padding-inline:var(--gl-space-6);border-block-start:1px solid var(--gl-border-default)}
+  .hero .tab{height:48px}
+  .plan-box{display:flex;align-items:center;gap:var(--gl-space-4);padding:var(--gl-space-4);border-radius:var(--gl-radius-md);background:var(--gl-brand-subtle);border:1px solid color-mix(in srgb,var(--gl-brand-primary) 18%,transparent)}
+  .plan-box .p{font:600 18px/26px var(--gl-font-sans)}
+  .plan-box .price{margin-inline-start:auto;text-align:end}
+  .plan-box .price b{font:var(--gl-type-h2);direction:ltr;display:inline-block}
+  .usage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gl-space-5) var(--gl-space-8);margin-top:var(--gl-space-6)}
+  .usage .top{display:flex;justify-content:space-between;margin-bottom:var(--gl-space-2);font:var(--gl-type-label)}
+  .usage .top span:last-child{color:var(--gl-text-secondary);font-variant-numeric:tabular-nums}
+  .sub-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gl-space-4);margin-top:var(--gl-space-6);padding-top:var(--gl-space-5);border-block-start:1px solid var(--gl-border-default)}
+  .sub-meta .k{font:var(--gl-type-caption);color:var(--gl-text-muted)}
+  .sub-meta .v{font:var(--gl-type-body-strong);margin-top:2px;display:flex;align-items:center;gap:6px}
+  .kv{display:flex;justify-content:space-between;gap:var(--gl-space-4);padding-block:var(--gl-space-3);font:var(--gl-type-body-sm)}
+  .kv + .kv{border-block-start:1px solid var(--gl-border-default)}
+  .kv .k{color:var(--gl-text-secondary)}
+  .kv .v{font-weight:500;text-align:end;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tk{display:flex;flex-direction:column;gap:6px;padding-block:var(--gl-space-3)}
+  .tk + .tk{border-block-start:1px solid var(--gl-border-default)}
+  .tk .t{font:var(--gl-type-body-strong)}
+  .tk .m{display:flex;align-items:center;gap:var(--gl-space-2);font:var(--gl-type-caption);color:var(--gl-text-muted)}
+  .tl{position:relative;padding-inline-start:var(--gl-space-6)}
+  .tl::before{content:"";position:absolute;inset-inline-start:5px;inset-block:8px;width:2px;background:var(--gl-border-default);border-radius:2px}
+  .tl-i{position:relative;padding-block:0 var(--gl-space-4)}
+  .tl-i:last-child{padding-bottom:0}
+  .tl-i::before{content:"";position:absolute;inset-inline-start:calc(var(--gl-space-6) * -1);top:5px;width:12px;height:12px;border-radius:50%;background:var(--gl-bg-surface);border:2px solid var(--gl-brand-primary)}
+  .tl-i.muted-dot::before{border-color:var(--gl-border-strong)}
+  .tl-i .t{font:var(--gl-type-body-sm);color:var(--gl-text-primary)}
+  .tl-i .d{font:var(--gl-type-caption);color:var(--gl-text-muted);margin-top:2px}
+  .proj .nm{font:var(--gl-type-body-strong);overflow:hidden;text-overflow:ellipsis}
+  .proj .cl{font:var(--gl-type-caption);color:var(--gl-text-muted);overflow:hidden;text-overflow:ellipsis}
+  .ph{display:flex;flex-direction:column;gap:6px}
+  .ph .r{display:flex;justify-content:space-between;font:var(--gl-type-caption);color:var(--gl-text-secondary)}
+  .side{display:flex;flex-direction:column;gap:var(--gl-space-6)}
+  .mainc{display:flex;flex-direction:column;gap:var(--gl-space-6)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  nav: 'companies',
+  title: L => L('نيل سوفت للحلول', 'NileSoft Solutions'),
+  render: (L, { icon, fwd }) => {
+    const kpi = (label, ic, val, foot, style) => `
+      <div class="card kpi">
+        <div class="kpi-top"><span class="kpi-label">${label}</span><span class="kpi-icon" style="${style || ''}">${icon(ic)}</span></div>
+        <span class="kpi-val">${val}</span>
+        <div class="kpi-foot">${foot}</div>
+      </div>`;
+    const usage = (label, used, total, unit, cls) => `
+      <div><div class="top"><span>${label}</span><span class="ltr">${used}${unit || ''} / ${total}${unit || ''}</span></div>
+      <div class="bar ${cls || ''}"><i style="width:${used / total * 100}%"></i></div></div>`;
+    const projects = [
+      [L('تطبيق Odoo ERP', 'Odoo ERP rollout'), L('مصنع النور للبلاستيك', 'Al Nour Plastics'), L('اختبار القبول UAT', 'UAT'), 72, L('15 ديسمبر', 'Dec 15'), 'success', L('في المسار', 'On track')],
+      [L('ترحيل بيانات المخازن', 'Inventory migration'), L('دلتا للتوزيع', 'Delta Distribution'), L('ترحيل البيانات', 'Data migration'), 55, L('2 يناير', 'Jan 2'), 'danger', L('متوقف', 'Blocked')],
+      [L('Odoo CRM', 'Odoo CRM'), L('الريادة الطبية', 'Riyada Medical'), L('جمع المتطلبات', 'Requirements'), 30, L('20 يناير', 'Jan 20'), 'warning', L('معرّض للتأخير', 'At risk')],
+      [L('بوابة الموارد البشرية', 'HR portal'), L('الأمل للمقاولات', 'Al Amal Contracting'), L('الإطلاق', 'Go-live'), 95, L('28 نوفمبر', 'Nov 28'), 'success', L('في المسار', 'On track')],
+      [L('النظام المحاسبي', 'Accounting suite'), L('كيان القابضة', 'Kayan Holding'), L('التصميم', 'Design'), 12, L('18 فبراير', 'Feb 18'), 'info', L('بدأ حديثًا', 'Kick-off')]
+    ];
+    const tickets = [
+      [L('مشكلة في استيراد بيانات العملاء', 'Customer data import fails'), 'danger', L('عالية', 'High'), '#4821', L('منذ ساعتين', '2h ago')],
+      [L('طلب زيادة حد المشاريع', 'Request to raise project limit'), 'warning', L('متوسطة', 'Medium'), '#4807', L('أمس', 'Yesterday')],
+      [L('استفسار عن الفوترة السنوية', 'Question about annual billing'), 'neutral', L('منخفضة', 'Low'), '#4790', L('منذ 3 أيام', '3 days ago')]
+    ];
+    const tl = [
+      [L('رقّت الخطة من Starter إلى Growth', 'Upgraded from Starter to Growth'), L('اليوم، 10:42 ص', 'Today, 10:42 AM'), ''],
+      [L('أضافت 3 مستخدمين جدد', 'Added 3 new users'), L('أمس، 3:15 م', 'Yesterday, 3:15 PM'), ''],
+      [L('تم دفع فاتورة نوفمبر — $179', 'November invoice paid — $179'), L('1 نوفمبر 2026', 'Nov 1, 2026'), 'muted-dot'],
+      [L('بدأت مشروع «النظام المحاسبي»', 'Started “Accounting suite” project'), L('28 أكتوبر 2026', 'Oct 28, 2026'), 'muted-dot'],
+      [L('تم إنشاء الحساب', 'Account created'), L('12 مارس 2026', 'Mar 12, 2026'), 'muted-dot']
+    ];
+    return `
+    <section class="card hero">
+      <nav class="crumbs"><a href="companies.html">${L('الشركات', 'Companies')}</a>${fwd('xs')}<span class="cur">${L('نيل سوفت للحلول', 'NileSoft Solutions')}</span></nav>
+      <div class="hero-top">
+        <span class="avatar xl av-teal">${L('ن', 'NS')}</span>
+        <div class="hero-id">
+          <div class="name"><h1 class="t-h1">${L('نيل سوفت للحلول', 'NileSoft Solutions')}</h1><span class="tag brand">Growth</span><span class="tag success"><span class="dot"></span>${L('نشطة', 'Active')}</span></div>
+          <div class="meta">
+            <span>${icon('globe')}<span class="domain">nilesoft.example</span></span>
+            <span>${icon('map-pin')}${L('القاهرة، مصر', 'Cairo, Egypt')}</span>
+            <span>${icon('calendar')}${L('عميل منذ 12 مارس 2026', 'Customer since Mar 12, 2026')}</span>
+            <span>${icon('user')}${L('المالك: أحمد سامي', 'Owner: Ahmed Samy')}</span>
+          </div>
+        </div>
+        <div class="row gap-3">
+          <button class="btn btn-outline">${icon('log-in', 'sm flip')}${L('الدخول كمسؤول', 'Log in as admin')}</button>
+          <button class="btn btn-outline">${icon('pencil', 'sm')}${L('تعديل', 'Edit')}</button>
+          <button class="icon-btn outline">${icon('more')}</button>
+        </div>
+      </div>
+      <div class="tabs">
+        <span class="tab active">${L('نظرة عامة', 'Overview')}</span>
+        <span class="tab">${L('المستخدمين', 'Users')} <span class="badge">24</span></span>
+        <span class="tab">${L('المشاريع', 'Projects')} <span class="badge">7</span></span>
+        <span class="tab">${L('الاشتراك والفواتير', 'Billing')}</span>
+        <span class="tab">${L('الدعم', 'Support')} <span class="badge">3</span></span>
+        <span class="tab">${L('سجل النشاط', 'Activity log')}</span>
+      </div>
+    </section>
+
+    <section class="grid g-4">
+      ${kpi(L('المشاريع النشطة', 'Active projects'), 'briefcase', '7', `<span class="delta up">${icon('trending-up')}+2</span><span>${L('هذا الشهر', 'this month')}</span>`)}
+      ${kpi(L('المستخدمين', 'Users'), 'users', '24<span class="muted t-h3"> / 30</span>', `<span>${L('6 مقاعد متاحة', '6 seats available')}</span>`)}
+      ${kpi(L('صحة الحساب', 'Account health'), 'activity', '86<span class="muted t-h3"> / 100</span>', `<span class="tag success"><span class="dot"></span>${L('ممتازة', 'Healthy')}</span>`, 'background:var(--gl-success-bg);color:var(--gl-success-fg)')}
+      ${kpi(L('تذاكر مفتوحة', 'Open tickets'), 'life-buoy', '3', `<span class="tag danger">${L('1 عالية الأولوية', '1 high priority')}</span>`, 'background:var(--gl-warning-bg);color:var(--gl-warning-fg)')}
+    </section>
+
+    <section class="grid g-12">
+      <div class="span-8 mainc">
+        <div class="card">
+          <div class="card-head"><div><h3 class="t-h3">${L('الاشتراك والاستخدام', 'Subscription & usage')}</h3><p class="sub">${L('الاستهلاك الحالي مقابل حدود الخطة', 'Current usage against plan limits')}</p></div>
+            <button class="btn btn-outline btn-sm">${L('تغيير الخطة', 'Change plan')}</button></div>
+          <div class="card-body pt0">
+            <div class="plan-box">
+              <span class="kpi-icon" style="background:var(--gl-brand-primary);color:var(--gl-text-on-brand)">${icon('layers')}</span>
+              <div><div class="p">Growth</div><div class="t-sm sec">${L('فوترة شهرية · تتجدد تلقائيًا', 'Billed monthly · auto-renews')}</div></div>
+              <div class="price"><b>$179</b><div class="t-cap muted">${L('في الشهر', 'per month')}</div></div>
+            </div>
+            <div class="usage">
+              ${usage(L('المستخدمين', 'Users'), 24, 30)}
+              ${usage(L('المشاريع النشطة', 'Active projects'), 7, 10)}
+              ${usage(L('بوابات العملاء', 'Client portals'), 9, 10, '', 'warn')}
+              ${usage(L('مساحة التخزين', 'Storage'), 3.2, 10, ' GB')}
+            </div>
+            <div class="sub-meta">
+              <div><div class="k">${L('التجديد القادم', 'Next renewal')}</div><div class="v">${L('12 ديسمبر 2026', 'Dec 12, 2026')}</div></div>
+              <div><div class="k">${L('طريقة الدفع', 'Payment method')}</div><div class="v">${icon('credit-card', 'sm')}<span class="ltr">Visa •••• 4242</span></div></div>
+              <div><div class="k">${L('إجمالي المدفوع', 'Lifetime value')}</div><div class="v"><span class="ltr">$1,353</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card table-wrap">
+          <div class="card-head bordered"><div><h3 class="t-h3">${L('مشاريع التنفيذ', 'Implementation projects')}</h3><p class="sub">${L('7 مشاريع نشطة، 5 معروضة', '7 active projects, showing 5')}</p></div>
+            <a class="link" href="#">${L('كل المشاريع', 'All projects')}${fwd('xs')}</a></div>
+          <table class="tbl proj">
+            <colgroup><col><col style="width:184px"><col style="width:112px"><col style="width:152px"></colgroup>
+            <thead><tr><th>${L('المشروع', 'Project')}</th><th>${L('المرحلة', 'Phase')}</th><th>${L('موعد الإطلاق', 'Go-live')}</th><th>${L('الحالة', 'Status')}</th></tr></thead>
+            <tbody>${projects.map(p => `<tr>
+              <td><div class="nm">${p[0]}</div><div class="cl">${p[1]}</div></td>
+              <td><div class="ph"><div class="r"><span>${p[2]}</span><span class="num">${p[3]}%</span></div><div class="bar thin ${p[5] === 'danger' ? 'danger' : p[5] === 'warning' ? 'warn' : ''}"><i style="width:${p[3]}%"></i></div></div></td>
+              <td class="sec">${p[4]}</td>
+              <td><span class="tag ${p[5]}"><span class="dot"></span>${p[6]}</span></td></tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside class="span-4 side">
+        <div class="card">
+          <div class="card-head"><h3 class="t-h3">${L('بيانات الشركة', 'Company details')}</h3><button class="icon-btn sm">${icon('pencil')}</button></div>
+          <div class="card-body pt0">
+            <div class="kv"><span class="k">${L('الاسم القانوني', 'Legal name')}</span><span class="v">${L('نيل سوفت للحلول ش.ذ.م.م', 'NileSoft Solutions LLC')}</span></div>
+            <div class="kv"><span class="k">${L('التخصص', 'Focus')}</span><span class="v">${L('تنفيذ Odoo', 'Odoo implementation')}</span></div>
+            <div class="kv"><span class="k">${L('حجم الفريق', 'Team size')}</span><span class="v">${L('25–50 موظف', '25–50 staff')}</span></div>
+            <div class="kv"><span class="k">${L('البريد', 'Email')}</span><span class="v ltr">ahmed@nilesoft.example</span></div>
+            <div class="kv"><span class="k">${L('اللغة', 'Language')}</span><span class="v">${L('العربية', 'Arabic')}</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3 class="t-h3">${L('تذاكر الدعم', 'Support tickets')}</h3><a class="link" href="#">${L('الكل', 'All')}${fwd('xs')}</a></div>
+          <div class="card-body pt0">${tickets.map(t => `<div class="tk"><span class="t">${t[0]}</span><span class="m"><span class="tag ${t[1]}">${t[2]}</span><span class="ltr">${t[3]}</span><span>·</span><span>${t[4]}</span></span></div>`).join('')}</div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3 class="t-h3">${L('الخط الزمني', 'Timeline')}</h3></div>
+          <div class="card-body pt0"><div class="tl">${tl.map(e => `<div class="tl-i ${e[2]}"><div class="t">${e[0]}</div><div class="d">${e[1]}</div></div>`).join('')}</div></div>
+        </div>
+      </aside>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

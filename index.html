@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .g-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--gl-space-8)}
+  .g-hero h1{font:var(--gl-type-display);letter-spacing:-.5px;margin-top:var(--gl-space-2)}
+  .g-hero p{color:var(--gl-text-secondary);font:var(--gl-type-body-lg);margin-top:var(--gl-space-2);max-width:640px}
+  .shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gl-space-6)}
+  .shot{display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .2s,transform .2s}
+  .shot:hover{box-shadow:var(--gl-shadow-lg);transform:translateY(-2px)}
+  .thumb{aspect-ratio:16/9;background:var(--gl-bg-subtle);border-block-end:1px solid var(--gl-border-default);overflow:hidden;display:block}
+  .thumb img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+  .shot-body{padding:var(--gl-space-5) var(--gl-space-6) var(--gl-space-6);display:flex;flex-direction:column;gap:var(--gl-space-3)}
+  .shot-body .row.between{align-items:flex-start}
+  .variants{display:flex;flex-wrap:wrap;gap:var(--gl-space-2);margin-top:var(--gl-space-1)}
+  .soon{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gl-space-6)}
+  .soon .card{padding:var(--gl-space-6);display:flex;flex-direction:column;gap:var(--gl-space-3);border-style:dashed;box-shadow:none;background:transparent}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  doc: 'index',
+  title: L => L('معرض التصميم', 'Design gallery'),
+  render: (L, { icon, fwd }) => {
+    const v = (href, label) => `<a class="btn btn-outline btn-sm" href="${href}">${label}</a>`;
+    const shot = (file, thumb, ic, title, desc, extra) => `
+      <article class="card shot">
+        <a class="thumb" href="${file}"><img src="assets/thumbs/${thumb}.png" alt="${title}" loading="lazy"></a>
+        <div class="shot-body">
+          <div class="row between gap-4"><div class="row gap-3"><span class="kpi-icon">${icon(ic)}</span><div><h3 class="t-h3" style="font-weight:600">${title}</h3><p class="t-sm sec">${desc}</p></div></div>
+            <a class="icon-btn sm outline" href="${file}">${icon('arrow-up-right', 'flip')}</a></div>
+          <div class="variants">${v(file + '?lang=ar&theme=light', 'AR · Light')}${v(file + '?lang=ar&theme=dark', 'AR · Dark')}${v(file + '?lang=en&theme=light', 'EN · Light')}${v(file + '?lang=en&theme=dark', 'EN · Dark')}${extra || ''}</div>
+        </div>
+      </article>`;
+    return `
+    <section class="g-hero">
+      <div><span class="tag accent">${L('المرحلة الأولى', 'Phase 1')}</span><h1>${L('معرض تصميم GoLive OS', 'GoLive OS design gallery')}</h1>
+        <p>${L('نموذج HTML/CSS عالي الدقة لنظام التصميم وشاشات Super Admin. كل شاشة بتدعم العربي والإنجليزي والوضع الفاتح والغامق من الأزرار اللي فوق.', 'A high-fidelity HTML/CSS prototype of the design system and Super Admin screens. Every screen supports Arabic, English, light and dark from the toggles above.')}</p></div>
+      <a class="btn btn-primary" href="dashboard.html">${icon('rocket', 'sm')}${L('افتح لوحة الإدارة', 'Open admin console')}</a>
+    </section>
+    <section class="ds-sec">
+      <header><div class="t-over">Super Admin</div><h2>${L('شاشات لوحة إدارة المنصة', 'Platform admin screens')}</h2></header>
+      <div class="shots">
+        ${shot('dashboard.html', 'dashboard-ar-light', 'dashboard', L('نظرة عامة', 'Overview dashboard'), L('MRR، الشركات، الفترات التجريبية والنشاط', 'MRR, companies, trials and live activity'))}
+        ${shot('companies.html', 'companies-ar-light', 'building', L('قائمة الشركات', 'Companies list'), L('فلاتر، تبويبات حالة، جدول وترقيم', 'Filters, status tabs, table and pagination'))}
+        ${shot('company-360.html', 'company-360-ar-light', 'activity', L('ملف الشركة 360', 'Company 360'), L('الاشتراك، الاستخدام، المشاريع، الدعم والخط الزمني', 'Subscription, usage, projects, support and timeline'))}
+        ${shot('design-system.html', 'design-system-ar-light', 'palette', L('نظام التصميم', 'Design system'), L('المتغيرات، الخطوط، المسافات وكل المكونات', 'Tokens, type, spacing and every component'))}
+      </div>
+    </section>
+    <section class="ds-sec">
+      <header><div class="t-over">${L('قريبًا', 'Next')}</div><h2>${L('المراحل الجاية', 'Coming next')}</h2></header>
+      <div class="soon">
+        <div class="card"><span class="kpi-icon">${icon('briefcase')}</span><h3 class="t-h3">${L('مساحة عمل الشركة', 'Company workspace')}</h3><p class="t-sm sec">${L('المشاريع، المتطلبات، الموافقات والـ blockers', 'Projects, requirements, approvals and blockers')}</p></div>
+        <div class="card"><span class="kpi-icon">${icon('users')}</span><h3 class="t-h3">${L('بوابة العميل', 'Client portal')}</h3><p class="t-sm sec">${L('متابعة التقدم والموافقة على المتطلبات', 'Track progress and sign off requirements')}</p></div>
+        <div class="card"><span class="kpi-icon">${icon('user-plus')}</span><h3 class="t-h3">${L('التسجيل والإعداد', 'Sign-up & onboarding')}</h3><p class="t-sm sec">${L('إنشاء الحساب واختيار الخطة وأول مشروع', 'Account, plan selection and first project')}</p></div>
+      </div>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

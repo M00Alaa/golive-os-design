@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .toolbar{display:flex;align-items:center;gap:var(--gl-space-3);padding:var(--gl-space-4) var(--gl-space-6);border-block-end:1px solid var(--gl-border-default)}
+  .toolbar .search{width:320px}
+  .toolbar .sel{width:152px}
+  .toolbar .end{margin-inline-start:auto;display:flex;gap:var(--gl-space-2)}
+  .stat-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gl-space-6)}
+  .mini{display:flex;align-items:center;gap:var(--gl-space-4);padding:var(--gl-space-4) var(--gl-space-5)}
+  .mini .kpi-icon{width:40px;height:40px}
+  .mini .v{font:600 20px/28px var(--gl-font-sans);font-variant-numeric:tabular-nums}
+  .mini .l{font:var(--gl-type-body-sm);color:var(--gl-text-secondary)}
+  .tbl td.co a:hover .nm{color:var(--gl-brand-text)}
+  .mrr{font:var(--gl-type-body-strong);font-variant-numeric:tabular-nums}
+  .mrr small{font:var(--gl-type-caption);color:var(--gl-text-muted)}
+  .chip-row{display:flex;align-items:center;gap:var(--gl-space-2);padding:var(--gl-space-3) var(--gl-space-6);border-block-end:1px solid var(--gl-border-default);background:var(--gl-bg-surface)}
+  .chip{display:inline-flex;align-items:center;gap:6px;height:28px;padding-inline:var(--gl-space-3) var(--gl-space-2);border-radius:var(--gl-radius-full);border:1px dashed var(--gl-border-strong);font:var(--gl-type-label-sm);color:var(--gl-text-secondary)}
+  .chip.on{border-style:solid;border-color:color-mix(in srgb,var(--gl-brand-primary) 40%,transparent);background:var(--gl-brand-subtle);color:var(--gl-brand-text)}
+  .chip svg.i{width:14px;height:14px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  nav: 'companies',
+  title: L => L('الشركات', 'Companies'),
+  render: (L, { icon, fwd, back }) => {
+    const mini = (ic, cls, v, l) => `<div class="card mini"><span class="kpi-icon" style="${cls}">${icon(ic)}</span><div><div class="v">${v}</div><div class="l">${l}</div></div></div>`;
+    const rows = GL_COMPANIES.map((c, i) => {
+      const st = GL_STATUS[c[7]];
+      return `<tr>
+        <td><span class="box"></span></td>
+        <td class="co"><a class="cell-co" href="company-360.html"><span class="avatar ${c[5]}">${L(c[3], c[4])}</span><div><div class="nm">${L(c[0], c[1])}</div><div class="dm">${c[2]}</div></div></a></td>
+        <td><span class="tag ${GL_PLAN_TAG[c[6]]}">${c[6]}</span></td>
+        <td><span class="tag ${st[0]}"><span class="dot"></span>${L(st[1], st[2])}</span></td>
+        <td><span class="cell-ic num">${icon('users', 'sm muted')}${c[8]}</span></td>
+        <td><span class="cell-ic num">${icon('folder', 'sm muted')}${c[12]}</span></td>
+        <td><span class="mrr ltr">$${c[9]}</span> <small class="muted t-cap">${L('/ شهر', '/ mo')}</small></td>
+        <td class="sec">${L(c[10], c[11])}</td>
+        <td class="right"><button class="icon-btn sm">${icon('more')}</button></td>
+      </tr>`;
+    }).join('');
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('الشركات', 'Companies')}</h1>
+        <p class="sub">${L('كل الشركات المشتركة في المنصة واشتراكاتها وحالتها.', 'Every company on the platform, with its plan and status.')}</p></div>
+      <div class="actions">
+        <button class="btn btn-outline">${icon('download', 'sm')}${L('تصدير CSV', 'Export CSV')}</button>
+        <button class="btn btn-primary">${icon('plus', 'sm')}${L('إضافة شركة', 'Add company')}</button>
+      </div>
+    </div>
+
+    <section class="stat-strip">
+      ${mini('building', '', '128', L('إجمالي الشركات', 'Total companies'))}
+      ${mini('check-circle', 'background:var(--gl-success-bg);color:var(--gl-success-fg)', '96', L('اشتراك نشط', 'Active subscriptions'))}
+      ${mini('clock', 'background:var(--gl-info-bg);color:var(--gl-info-fg)', '23', L('في الفترة التجريبية', 'On trial'))}
+      ${mini('alert-triangle', 'background:var(--gl-warning-bg);color:var(--gl-warning-fg)', '6', L('متأخرة الدفع', 'Past due'))}
+    </section>
+
+    <section class="card table-wrap">
+      <div class="tabs" style="padding-inline:var(--gl-space-6)">
+        <span class="tab active">${L('الكل', 'All')} <span class="badge">128</span></span>
+        <span class="tab">${L('نشطة', 'Active')} <span class="badge">96</span></span>
+        <span class="tab">${L('تجريبية', 'Trial')} <span class="badge">23</span></span>
+        <span class="tab">${L('متأخرة الدفع', 'Past due')} <span class="badge">6</span></span>
+        <span class="tab">${L('ملغاة', 'Cancelled')} <span class="badge">3</span></span>
+      </div>
+      <div class="toolbar">
+        <label class="control search sm">${icon('search', 'sm')}<input placeholder="${L('ابحث بالاسم أو الدومين…', 'Search by name or domain…')}"></label>
+        <div class="control sel sm"><span class="val">${L('كل الخطط', 'All plans')}</span>${icon('chevron-down', 'sm')}</div>
+        <div class="control sel sm"><span class="val">${L('تاريخ الإنشاء', 'Created date')}</span>${icon('chevron-down', 'sm')}</div>
+        <button class="btn btn-ghost btn-sm">${icon('filter', 'sm')}${L('فلاتر أكثر', 'More filters')}</button>
+        <div class="end">
+          <button class="icon-btn sm outline" title="Columns">${icon('columns')}</button>
+          <button class="icon-btn sm outline" title="Refresh">${icon('refresh')}</button>
+        </div>
+      </div>
+      <table class="tbl">
+        <colgroup><col style="width:64px"><col><col style="width:112px"><col style="width:136px"><col style="width:88px"><col style="width:88px"><col style="width:112px"><col style="width:144px"><col style="width:72px"></colgroup>
+        <thead><tr>
+          <th><span class="box"></span></th>
+          <th><span class="th-sort">${L('الشركة', 'Company')}${icon('sort', 'xs')}</span></th>
+          <th>${L('الخطة', 'Plan')}</th>
+          <th>${L('الحالة', 'Status')}</th>
+          <th>${L('المستخدمين', 'Users')}</th>
+          <th>${L('المشاريع', 'Projects')}</th>
+          <th><span class="th-sort">MRR${icon('sort', 'xs')}</span></th>
+          <th><span class="th-sort">${L('تاريخ الإنشاء', 'Created')}${icon('sort', 'xs')}</span></th>
+          <th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="card-foot">
+        <span class="t-sm sec">${L('عرض <b class="num">1–8</b> من <b class="num">128</b> شركة', 'Showing <b class="num">1–8</b> of <b class="num">128</b> companies')}</span>
+        <div class="pager">
+          <span class="pg nav">${back('sm')}</span>
+          <span class="pg on">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">…</span><span class="pg">16</span>
+          <span class="pg nav">${fwd('sm')}</span>
+        </div>
+      </div>
+    </section>`;
+  }
+});
+</script>
+</body>
+</html>

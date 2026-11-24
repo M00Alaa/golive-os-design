@@ -1,0 +1,129 @@
+/* GoLive OS — Design tokens (Phase 1)
+   Naming: --gl-<group>-<name>. Map 1:1 to Tailwind theme.extend / PrimeNG preset.
+   Light is default; [data-theme="dark"] on <html> switches semantic tokens. */
+@font-face {
+  font-family: "Readex Pro Local";
+  src: url("fonts/ReadexPro.ttf") format("truetype");
+  font-weight: 160 700;
+  font-display: swap;
+}
+:root, [data-theme="light"] {
+  /* ---------- Primitives ---------- */
+  --gl-brand-50:#ECFDF8; --gl-brand-100:#D1FAEE; --gl-brand-200:#A6F2DD; --gl-brand-300:#6EE4C7; --gl-brand-400:#34CDAB;
+  --gl-brand-500:#12B293; --gl-brand-600:#0A8F78; --gl-brand-700:#0A7363; --gl-brand-800:#0D5B50; --gl-brand-900:#0E4B43; --gl-brand-950:#042E29;
+  --gl-accent-100:#FFF1D6; --gl-accent-300:#FFCB6B; --gl-accent-500:#F5A524; --gl-accent-600:#D98A0B; --gl-accent-950:#2E2108;
+  --gl-neutral-0:#FFFFFF; --gl-neutral-50:#F4F7F6; --gl-neutral-100:#ECF0EF; --gl-neutral-200:#DFE5E4; --gl-neutral-300:#C5CECD;
+  --gl-neutral-400:#93A09E; --gl-neutral-500:#677573; --gl-neutral-600:#4A5755; --gl-neutral-700:#353F3E; --gl-neutral-800:#232B2A;
+  --gl-neutral-850:#1A2120; --gl-neutral-900:#131918; --gl-neutral-950:#0B100F;
+  --gl-green-50:#ECFDF3; --gl-green-400:#4ADE80; --gl-green-600:#16A34A; --gl-green-700:#15803D; --gl-green-950:#0E2A1A;
+  --gl-red-50:#FEF2F2; --gl-red-400:#F87171; --gl-red-600:#DC2626; --gl-red-700:#B91C1C; --gl-red-950:#2F1315;
+  --gl-amber-50:#FFF8EB; --gl-amber-400:#FBBF24; --gl-amber-600:#D97706; --gl-amber-700:#B45309; --gl-amber-950:#2E2108;
+  --gl-blue-50:#EFF6FF; --gl-blue-400:#60A5FA; --gl-blue-600:#2563EB; --gl-blue-700:#1D4ED8; --gl-blue-950:#0F1D38;
+  --gl-violet-50:#F5F3FF; --gl-violet-400:#A78BFA; --gl-violet-600:#7C3AED; --gl-violet-950:#1E1538;
+
+  /* ---------- Semantic (light) ---------- */
+  --gl-bg-canvas:var(--gl-neutral-50);
+  --gl-bg-surface:var(--gl-neutral-0);
+  --gl-bg-surface-raised:var(--gl-neutral-0);
+  --gl-bg-subtle:var(--gl-neutral-100);
+  --gl-bg-hover:var(--gl-neutral-50);
+  --gl-bg-sidebar:var(--gl-brand-950);
+  --gl-bg-sidebar-active:var(--gl-brand-800);
+  --gl-border-default:var(--gl-neutral-200);
+  --gl-border-strong:var(--gl-neutral-300);
+  --gl-border-focus:var(--gl-brand-500);
+  --gl-border-sidebar:var(--gl-brand-900);
+  --gl-text-primary:var(--gl-neutral-900);
+  --gl-text-secondary:var(--gl-neutral-600);
+  --gl-text-muted:var(--gl-neutral-500);
+  --gl-text-on-brand:var(--gl-neutral-0);
+  --gl-text-sidebar:var(--gl-brand-200);
+  --gl-text-sidebar-active:var(--gl-neutral-0);
+  --gl-brand-primary:var(--gl-brand-600);
+  --gl-brand-primary-hover:var(--gl-brand-700);
+  --gl-brand-subtle:var(--gl-brand-50);
+  --gl-brand-text:var(--gl-brand-700);
+  --gl-accent-default:var(--gl-accent-500);
+  --gl-accent-subtle:var(--gl-accent-100);
+  --gl-accent-text:var(--gl-accent-600);
+  --gl-success-fg:var(--gl-green-700); --gl-success-bg:var(--gl-green-50); --gl-success-solid:var(--gl-green-600);
+  --gl-warning-fg:var(--gl-amber-700); --gl-warning-bg:var(--gl-amber-50); --gl-warning-solid:var(--gl-amber-600);
+  --gl-danger-fg:var(--gl-red-700);    --gl-danger-bg:var(--gl-red-50);    --gl-danger-solid:var(--gl-red-600);
+  --gl-info-fg:var(--gl-blue-700);     --gl-info-bg:var(--gl-blue-50);     --gl-info-solid:var(--gl-blue-600);
+  --gl-neutral-fg:var(--gl-neutral-600); --gl-neutral-bg:var(--gl-neutral-100);
+  --gl-violet-fg:var(--gl-violet-600); --gl-violet-bg:var(--gl-violet-50);
+  --gl-chart-grid:var(--gl-neutral-100);
+  --gl-focus-ring:0 0 0 3px color-mix(in srgb, var(--gl-brand-500) 28%, transparent);
+
+  /* ---------- Spacing (8pt grid, 4 for fine-tuning) ---------- */
+  --gl-space-1:4px; --gl-space-2:8px; --gl-space-3:12px; --gl-space-4:16px; --gl-space-5:20px;
+  --gl-space-6:24px; --gl-space-8:32px; --gl-space-10:40px; --gl-space-12:48px; --gl-space-16:64px;
+
+  /* ---------- Radius ---------- */
+  --gl-radius-sm:6px; --gl-radius-md:8px; --gl-radius-lg:12px; --gl-radius-xl:16px; --gl-radius-full:999px;
+
+  /* ---------- Elevation ---------- */
+  --gl-shadow-xs:0 1px 2px rgb(11 16 15 / .05);
+  --gl-shadow-sm:0 1px 3px rgb(11 16 15 / .06), 0 1px 2px rgb(11 16 15 / .04);
+  --gl-shadow-md:0 4px 12px -2px rgb(11 16 15 / .07), 0 2px 4px -1px rgb(11 16 15 / .04);
+  --gl-shadow-lg:0 16px 32px -6px rgb(11 16 15 / .10), 0 4px 8px -2px rgb(11 16 15 / .05);
+
+  /* ---------- Typography ---------- */
+  --gl-font-sans:"Readex Pro","Readex Pro Local","Cairo","Inter",system-ui,sans-serif;
+  /* size / line-height / weight */
+  --gl-type-display:700 32px/44px var(--gl-font-sans);
+  --gl-type-h1:600 24px/36px var(--gl-font-sans);
+  --gl-type-h2:600 20px/30px var(--gl-font-sans);
+  --gl-type-h3:500 16px/26px var(--gl-font-sans);
+  --gl-type-body-lg:400 16px/26px var(--gl-font-sans);
+  --gl-type-body:400 14px/22px var(--gl-font-sans);
+  --gl-type-body-strong:500 14px/22px var(--gl-font-sans);
+  --gl-type-body-sm:400 13px/20px var(--gl-font-sans);
+  --gl-type-label:500 13px/20px var(--gl-font-sans);
+  --gl-type-label-sm:500 12px/16px var(--gl-font-sans);
+  --gl-type-caption:400 12px/18px var(--gl-font-sans);
+  --gl-type-overline:600 11px/16px var(--gl-font-sans);
+  --gl-type-kpi:600 28px/36px var(--gl-font-sans);
+
+  /* ---------- Layout ---------- */
+  --gl-sidebar-w:264px;
+  --gl-topbar-h:64px;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --gl-bg-canvas:var(--gl-neutral-950);
+  --gl-bg-surface:var(--gl-neutral-900);
+  --gl-bg-surface-raised:var(--gl-neutral-850);
+  --gl-bg-subtle:var(--gl-neutral-800);
+  --gl-bg-hover:var(--gl-neutral-850);
+  --gl-bg-sidebar:#070B0A;
+  --gl-bg-sidebar-active:var(--gl-brand-950);
+  --gl-border-default:var(--gl-neutral-800);
+  --gl-border-strong:var(--gl-neutral-700);
+  --gl-border-focus:var(--gl-brand-400);
+  --gl-border-sidebar:var(--gl-neutral-800);
+  --gl-text-primary:var(--gl-neutral-50);
+  --gl-text-secondary:var(--gl-neutral-400);
+  --gl-text-muted:var(--gl-neutral-500);
+  --gl-text-on-brand:var(--gl-brand-950);
+  --gl-text-sidebar:var(--gl-neutral-400);
+  --gl-text-sidebar-active:var(--gl-brand-300);
+  --gl-brand-primary:var(--gl-brand-400);
+  --gl-brand-primary-hover:var(--gl-brand-300);
+  --gl-brand-subtle:var(--gl-brand-950);
+  --gl-brand-text:var(--gl-brand-300);
+  --gl-accent-subtle:var(--gl-accent-950);
+  --gl-accent-text:var(--gl-accent-300);
+  --gl-success-fg:var(--gl-green-400); --gl-success-bg:var(--gl-green-950); --gl-success-solid:var(--gl-green-400);
+  --gl-warning-fg:var(--gl-amber-400); --gl-warning-bg:var(--gl-amber-950); --gl-warning-solid:var(--gl-amber-400);
+  --gl-danger-fg:var(--gl-red-400);    --gl-danger-bg:var(--gl-red-950);    --gl-danger-solid:var(--gl-red-400);
+  --gl-info-fg:var(--gl-blue-400);     --gl-info-bg:var(--gl-blue-950);     --gl-info-solid:var(--gl-blue-400);
+  --gl-neutral-fg:var(--gl-neutral-300); --gl-neutral-bg:var(--gl-neutral-800);
+  --gl-violet-fg:var(--gl-violet-400); --gl-violet-bg:var(--gl-violet-950);
+  --gl-chart-grid:var(--gl-neutral-800);
+  --gl-shadow-xs:0 1px 2px rgb(0 0 0 / .4);
+  --gl-shadow-sm:0 1px 3px rgb(0 0 0 / .45), 0 1px 2px rgb(0 0 0 / .3);
+  --gl-shadow-md:0 4px 12px -2px rgb(0 0 0 / .5), 0 2px 4px -1px rgb(0 0 0 / .3);
+  --gl-shadow-lg:0 16px 32px -6px rgb(0 0 0 / .6), 0 4px 8px -2px rgb(0 0 0 / .35);
+}

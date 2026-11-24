@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<style>
+  .ds-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--gl-space-8);padding:var(--gl-space-10);border-radius:var(--gl-radius-xl);background:radial-gradient(120% 140% at 100% 0%,var(--gl-brand-700) 0%,var(--gl-brand-950) 60%);color:#fff;position:relative;overflow:hidden}
+  [dir="ltr"] .ds-hero{background:radial-gradient(120% 140% at 0% 0%,var(--gl-brand-700) 0%,var(--gl-brand-950) 60%)}
+  .ds-hero h1{font:var(--gl-type-display);letter-spacing:-.5px}
+  .ds-hero p{color:var(--gl-brand-200);margin-top:var(--gl-space-2);max-width:560px;font:var(--gl-type-body-lg)}
+  .ds-hero .stats{display:flex;gap:var(--gl-space-8)}
+  .ds-hero .stats b{display:block;font:var(--gl-type-h1)}
+  .ds-hero .stats span{font:var(--gl-type-caption);color:var(--gl-brand-200)}
+  .ramp{display:grid;grid-template-columns:120px repeat(11,minmax(0,1fr));gap:var(--gl-space-2);align-items:center}
+  .ramp + .ramp{margin-top:var(--gl-space-4)}
+  .ramp .nm{font:var(--gl-type-label)}
+  .sw{display:flex;flex-direction:column;gap:6px}
+  .sw i{height:48px;border-radius:var(--gl-radius-md);box-shadow:inset 0 0 0 1px rgb(0 0 0 / .06)}
+  .sw span{font:var(--gl-type-caption);color:var(--gl-text-muted);direction:ltr;align-self:flex-start}
+  .sw span b{display:block;font:var(--gl-type-label-sm);color:var(--gl-text-primary)}
+  .themes{display:grid;grid-template-columns:1fr 1fr;gap:var(--gl-space-6)}
+  .theme-panel{background:var(--gl-bg-canvas);color:var(--gl-text-primary);border:1px solid var(--gl-border-default);border-radius:var(--gl-radius-lg);padding:var(--gl-space-6)}
+  .sem{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gl-space-2) var(--gl-space-4)}
+  .sem-i{display:flex;align-items:center;gap:var(--gl-space-3);padding:var(--gl-space-2);border-radius:var(--gl-radius-md);background:var(--gl-bg-surface);border:1px solid var(--gl-border-default)}
+  .sem-i i{width:32px;height:32px;border-radius:var(--gl-radius-sm);flex:none;box-shadow:inset 0 0 0 1px rgb(127 127 127 / .2)}
+  .sem-i .code{color:var(--gl-text-primary);font-size:11.5px}
+  .type-row{display:grid;grid-template-columns:200px 1fr 1fr;gap:var(--gl-space-6);align-items:center;padding-block:var(--gl-space-4)}
+  .type-row + .type-row{border-block-start:1px solid var(--gl-border-default)}
+  .type-row .meta{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+  .type-row .meta b{font:var(--gl-type-label)}
+  .space-row{display:grid;grid-template-columns:120px 64px 1fr;align-items:center;gap:var(--gl-space-4);padding-block:6px}
+  .space-row i{display:block;height:16px;border-radius:4px;background:color-mix(in srgb,var(--gl-brand-primary) 70%,transparent)}
+  .rad{display:flex;flex-direction:column;align-items:center;gap:var(--gl-space-3)}
+  .rad i{width:96px;height:96px;background:var(--gl-brand-subtle);border:2px solid var(--gl-brand-primary)}
+  .shd{height:96px;border-radius:var(--gl-radius-lg);background:var(--gl-bg-surface);display:flex;flex-direction:column;justify-content:flex-end;padding:var(--gl-space-4);gap:2px}
+  .comp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gl-space-6)}
+  .comp-grid .full{grid-column:1 / -1}
+  .bidi{display:grid;grid-template-columns:1fr 1fr;gap:var(--gl-space-6)}
+  .bidi > div{display:flex;flex-direction:column;gap:var(--gl-space-4);padding:var(--gl-space-6);border-radius:var(--gl-radius-lg);background:var(--gl-bg-canvas);border:1px solid var(--gl-border-default)}
+  .mini-side{overflow:hidden;background:var(--gl-bg-sidebar);border-radius:var(--gl-radius-lg);padding:var(--gl-space-4);display:flex;flex-direction:column;gap:var(--gl-space-1);width:264px}
+  .mini-side .nav-item.active::before{inset-inline-start:calc(var(--gl-space-4) * -1)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/app.js"></script>
+<script>
+const RAMPS = {
+  brand: ['50','100','200','300','400','500','600','700','800','900','950'],
+  neutral: ['50','100','200','300','400','500','600','700','800','900','950'],
+};
+const HEX = {brand:['#ECFDF8','#D1FAEE','#A6F2DD','#6EE4C7','#34CDAB','#12B293','#0A8F78','#0A7363','#0D5B50','#0E4B43','#042E29'],
+  neutral:['#F4F7F6','#ECF0EF','#DFE5E4','#C5CECD','#93A09E','#677573','#4A5755','#353F3E','#232B2A','#131918','#0B100F']};
+const STATUS = [['accent',['100','300','500','600','950'],['#FFF1D6','#FFCB6B','#F5A524','#D98A0B','#2E2108']],['green',['50','400','600','700','950'],['#ECFDF3','#4ADE80','#16A34A','#15803D','#0E2A1A']],['red',['50','400','600','700','950'],['#FEF2F2','#F87171','#DC2626','#B91C1C','#2F1315']],['amber',['50','400','600','700','950'],['#FFF8EB','#FBBF24','#D97706','#B45309','#2E2108']],['blue',['50','400','600','700','950'],['#EFF6FF','#60A5FA','#2563EB','#1D4ED8','#0F1D38']],['violet',['50','400','600','950'],['#F5F3FF','#A78BFA','#7C3AED','#1E1538']]];
+const SEM = ['bg-canvas','bg-surface','bg-subtle','bg-sidebar','border-default','border-strong','text-primary','text-secondary','text-muted','brand-primary','brand-subtle','brand-text','accent-default','accent-subtle','success-solid','warning-solid','danger-solid','info-solid'];
+const TYPE = [['display','Display','700 · 32/44'],['h1','Heading 1','600 · 24/36'],['h2','Heading 2','600 · 20/30'],['h3','Heading 3','500 · 16/26'],['body-lg','Body large','400 · 16/26'],['body','Body','400 · 14/22'],['body-strong','Body strong','500 · 14/22'],['body-sm','Body small','400 · 13/20'],['label','Label','500 · 13/20'],['caption','Caption','400 · 12/18'],['overline','Overline','600 · 11/16'],['kpi','KPI value','600 · 28/36']];
+GL.mount({
+  doc: 'ds',
+  title: L => L('نظام التصميم', 'Design System'),
+  render: (L, { icon, fwd, back }) => {
+    const sec = (over, title, desc, body) => `<section class="ds-sec"><header><div class="t-over">${over}</div><h2>${title}</h2>${desc ? `<p>${desc}</p>` : ''}</header>${body}</section>`;
+    const card = (label, body, cls) => `<div class="ds-card ${cls || ''}"><div class="ds-label">${label}</div>${body}</div>`;
+    const ramp = (name, steps, hexes) => `<div class="ramp" style="grid-template-columns:120px repeat(${steps.length},minmax(0,1fr))"><span class="nm">${name}</span>${steps.map((s, i) => `<div class="sw"><i style="background:var(--gl-${name}-${s})"></i><span><b>${s}</b>${hexes[i]}</span></div>`).join('')}</div>`;
+    const semPanel = th => `<div class="theme-panel" data-theme="${th}"><div class="row between" style="margin-bottom:var(--gl-space-4)"><span class="t-h3">${th === 'light' ? L('الوضع الفاتح', 'Light') : L('الوضع الغامق', 'Dark')}</span>${icon(th === 'light' ? 'sun' : 'moon', 'sm')}</div>
+      <div class="sem">${SEM.map(s => `<div class="sem-i"><i style="background:var(--gl-${s})"></i><span class="code">--gl-${s}</span></div>`).join('')}</div></div>`;
+    const sample = L('منصة واحدة لإدارة تنفيذ المشاريع', 'One platform to run every go-live');
+    const comps = `
+      <div class="comp-grid">
+        ${card(L('الأزرار', 'Buttons'), `
+          <div class="ds-row"><button class="btn btn-primary">${icon('plus', 'sm')}${L('إضافة شركة', 'Add company')}</button><button class="btn btn-secondary">${L('ثانوي', 'Secondary')}</button><button class="btn btn-outline">${L('محدد', 'Outline')}</button><button class="btn btn-ghost">${L('شفاف', 'Ghost')}</button><button class="btn btn-danger">${L('حذف', 'Delete')}</button></div>
+          <div class="ds-row" style="margin-top:var(--gl-space-4)"><button class="btn btn-primary btn-sm">${L('صغير', 'Small')}</button><button class="btn btn-outline btn-sm">${icon('download', 'sm')}${L('تصدير', 'Export')}</button><button class="btn btn-primary is-hover">${L('تمرير', 'Hover')}</button><button class="btn btn-primary" disabled>${L('معطل', 'Disabled')}</button><button class="btn btn-accent">${icon('rocket', 'sm')}Go-live</button></div>
+          <div class="ds-row" style="margin-top:var(--gl-space-4)"><button class="icon-btn outline">${icon('filter')}</button><button class="icon-btn">${icon('more')}</button><button class="icon-btn outline sm">${icon('pencil')}</button><button class="icon-btn bell">${icon('bell')}</button></div>`)}
+        ${card(L('حقول الإدخال', 'Inputs'), `
+          <div class="grid g-2" style="gap:var(--gl-space-4)">
+            <div class="field"><label>${L('اسم الشركة', 'Company name')}</label><div class="control"><input placeholder="${L('مثال: نيل سوفت', 'e.g. NileSoft')}"></div><span class="hint">${L('هيظهر في بوابة العميل', 'Shown on the client portal')}</span></div>
+            <div class="field"><label>${L('البريد الإلكتروني', 'Email')}</label><div class="control is-focus">${icon('mail', 'sm')}<span class="val ltr" style="text-align:start">ahmed@nilesoft.example</span></div><span class="hint">${L('حالة التركيز', 'Focus state')}</span></div>
+            <div class="field"><label>${L('الدومين', 'Domain')}</label><div class="control is-error"><span class="val">nilesoft</span>${icon('alert-circle', 'sm')}</div><span class="err">${L('الدومين غير صالح', 'Enter a valid domain')}</span></div>
+            <div class="field"><label>${L('الخطة', 'Plan')}</label><div class="control"><span class="val">Growth — $179</span>${icon('chevron-down', 'sm')}</div><span class="hint">${L('قائمة اختيار', 'Select')}</span></div>
+            <div class="field"><label>${L('بحث', 'Search')}</label><div class="control">${icon('search', 'sm')}<span class="val ph">${L('ابحث…', 'Search…')}</span><span class="kbd">Ctrl K</span></div></div>
+            <div class="field"><label>${L('معطل', 'Disabled')}</label><div class="control is-disabled"><span class="val ph">${L('غير متاح', 'Not available')}</span></div></div>
+          </div>`)}
+        ${card(L('الاختيارات', 'Selection'), `
+          <div class="ds-row" style="gap:var(--gl-space-6)"><span class="check"><span class="box"></span>${L('غير محدد', 'Unchecked')}</span><span class="check"><span class="box on">${icon('check')}</span>${L('محدد', 'Checked')}</span><span class="check"><span class="box on ind"></span>${L('جزئي', 'Indeterminate')}</span></div>
+          <div class="ds-row" style="gap:var(--gl-space-6);margin-top:var(--gl-space-5)"><span class="check"><span class="switch"></span>${L('إيقاف', 'Off')}</span><span class="check"><span class="switch on"></span>${L('تشغيل', 'On')}</span></div>
+          <div style="margin-top:var(--gl-space-5)" class="pills"><span class="pill">${L('يومي', 'Daily')}</span><span class="pill active">${L('شهري', 'Monthly')}</span><span class="pill">${L('سنوي', 'Yearly')}</span></div>`)}
+        ${card(L('الوسوم والشارات', 'Tags, badges & avatars'), `
+          <div class="ds-row"><span class="tag success"><span class="dot"></span>${L('نشطة', 'Active')}</span><span class="tag warning"><span class="dot"></span>${L('متأخرة', 'Past due')}</span><span class="tag danger"><span class="dot"></span>${L('ملغاة', 'Cancelled')}</span><span class="tag info"><span class="dot"></span>${L('تجريبية', 'Trial')}</span><span class="tag neutral">Starter</span><span class="tag brand">Growth</span><span class="tag violet">Enterprise</span><span class="tag accent">${L('جديد', 'New')}</span></div>
+          <div class="ds-row" style="margin-top:var(--gl-space-5)"><span class="badge">12</span><span class="badge brand">3</span><span class="badge soft">128</span>
+            <span style="width:var(--gl-space-4)"></span><span class="avatar sm av-teal">ن</span><span class="avatar av-blue">${L('د', 'DE')}</span><span class="avatar av-violet">${L('س', 'AC')}</span><span class="avatar av-amber">${L('م', 'MT')}</span><span class="avatar lg av-teal">${L('ن', 'NS')}</span><span class="avatar round av-solid">${L('م', 'M')}</span></div>`)}
+        ${card(L('التبويبات', 'Tabs'), `
+          <div class="tabs"><span class="tab active">${L('نظرة عامة', 'Overview')}</span><span class="tab">${L('المستخدمين', 'Users')} <span class="badge">24</span></span><span class="tab">${L('المشاريع', 'Projects')} <span class="badge">7</span></span><span class="tab">${L('الفواتير', 'Billing')}</span></div>
+          <div class="ds-label" style="margin-top:var(--gl-space-6)">${L('شريط التقدم', 'Progress')}</div>
+          <div class="stack gap-3"><div class="bar"><i style="width:72%"></i></div><div class="bar warn"><i style="width:90%"></i></div><div class="bar danger thin"><i style="width:35%"></i></div></div>
+          <div class="ds-label" style="margin-top:var(--gl-space-6)">${L('ترقيم الصفحات', 'Pagination')}</div>
+          <div class="pager"><span class="pg nav">${back('sm')}</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">…</span><span class="pg">16</span><span class="pg nav">${fwd('sm')}</span></div>`)}
+        ${card(L('عناصر القائمة الجانبية', 'Navigation'), `
+          <div class="mini-side">
+            <a class="nav-item">${icon('dashboard')}<span>${L('نظرة عامة', 'Overview')}</span></a>
+            <a class="nav-item active">${icon('building')}<span>${L('الشركات', 'Companies')}</span></a>
+            <a class="nav-item" style="background:rgb(255 255 255 / .05);color:#fff">${icon('layers')}<span>${L('الخطط (تمرير)', 'Plans (hover)')}</span></a>
+            <a class="nav-item">${icon('life-buoy')}<span>${L('الدعم الفني', 'Support')}</span><span class="count">12</span></a>
+          </div>`)}
+        ${card(L('بطاقة مؤشر', 'KPI card'), `
+          <div class="card kpi" style="max-width:300px">
+            <div class="kpi-top"><span class="kpi-label">${L('الإيراد الشهري المتكرر', 'Monthly recurring revenue')}</span><span class="kpi-icon">${icon('credit-card')}</span></div>
+            <span class="kpi-val ltr" style="text-align:start">$18,420</span>
+            <div class="kpi-foot"><span class="delta up">${icon('trending-up')}12.4%</span><span>${L('مقارنة بالشهر الماضي', 'vs last month')}</span></div>
+          </div>`)}
+        ${card(L('الإشعارات', 'Toasts'), `
+          <div class="stack gap-3">
+            <div class="toast success"><span class="ic">${icon('check-circle', 'sm')}</span><div><div class="ttl">${L('تم حفظ التغييرات', 'Changes saved')}</div><div class="msg">${L('تم تحديث خطة نيل سوفت إلى Growth.', 'NileSoft was moved to Growth.')}</div></div><button class="icon-btn sm">${icon('x')}</button></div>
+            <div class="toast danger"><span class="ic">${icon('alert-circle', 'sm')}</span><div><div class="ttl">${L('فشل تحصيل الدفع', 'Payment failed')}</div><div class="msg">${L('البطاقة المنتهية بـ 4242 مرفوضة.', 'Card ending 4242 was declined.')}</div></div><button class="icon-btn sm">${icon('x')}</button></div>
+          </div>`)}
+        ${card(L('الحالة الفارغة', 'Empty state'), `
+          <div class="empty"><span class="empty-ic">${icon('inbox')}</span><h3 class="t-h3">${L('مفيش تذاكر مفتوحة', 'No open tickets')}</h3><p class="t-sm">${L('أول ما عميل يفتح تذكرة دعم هتظهر هنا.', 'When a customer opens a ticket it will show up here.')}</p><button class="btn btn-outline btn-sm">${icon('refresh', 'sm')}${L('تحديث', 'Refresh')}</button></div>`)}
+        ${card(L('الجدول', 'Table'), `
+          <div class="card table-wrap" style="box-shadow:none"><table class="tbl compact"><colgroup><col><col style="width:110px"><col style="width:120px"></colgroup>
+          <thead><tr><th>${L('الشركة', 'Company')}</th><th>${L('الخطة', 'Plan')}</th><th>${L('الحالة', 'Status')}</th></tr></thead>
+          <tbody><tr><td><div class="cell-co"><span class="avatar sm av-teal">${L('ن', 'NS')}</span><div class="nm">${L('نيل سوفت للحلول', 'NileSoft Solutions')}</div></div></td><td><span class="tag brand">Growth</span></td><td><span class="tag success"><span class="dot"></span>${L('نشطة', 'Active')}</span></td></tr>
+          <tr class="sel"><td><div class="cell-co"><span class="avatar sm av-blue">${L('د', 'DE')}</span><div class="nm">${L('دلتا لأنظمة ERP', 'Delta ERP Systems')}</div></div></td><td><span class="tag neutral">Starter</span></td><td><span class="tag info"><span class="dot"></span>${L('تجريبية', 'Trial')}</span></td></tr></tbody></table></div>`)}
+      </div>`;
+    const bidiPanel = (d, lang) => {
+      const l = (a, e) => lang === 'ar' ? a : e;
+      return `<div dir="${d}" lang="${lang}"><div class="row between"><span class="t-h3">${d.toUpperCase()} · ${l('عربي', 'English')}</span><span class="tag neutral code" style="font-size:11px">dir="${d}"</span></div>
+        <div class="control">${icon('search', 'sm')}<span class="val ph">${l('ابحث عن شركة…', 'Search companies…')}</span></div>
+        <div class="row gap-3"><button class="btn btn-primary">${icon('plus', 'sm')}${l('إضافة شركة', 'Add company')}</button><a class="link">${l('عرض الكل', 'View all')}${icon('chevron-right', 'flip xs')}</a></div>
+        <div class="toast info" style="width:auto;box-shadow:none"><span class="ic">${icon('info', 'sm')}</span><div><div class="ttl">${l('التجربة تنتهي خلال يومين', 'Trial ends in 2 days')}</div><div class="msg">${l('ذكّر أفق الرقمية بالترقية.', 'Remind Ofoq Digital to upgrade.')}</div></div></div></div>`;
+    };
+    return `
+    <section class="ds-hero">
+      <div><div class="t-over" style="color:var(--gl-accent-300)">GoLive OS · Design System v0.1</div><h1 style="margin-top:var(--gl-space-2)">${L('نظام التصميم', 'Design System')}</h1>
+        <p>${L('الألوان والخطوط والمسافات والمكونات اللي بتتبني عليها كل شاشات المنصة — عربي RTL وإنجليزي LTR، فاتح وغامق.', 'Colors, type, spacing and components behind every GoLive screen — Arabic RTL & English LTR, light & dark.')}</p></div>
+      <div class="stats"><div><b>62</b><span>${L('متغير لون', 'color tokens')}</span></div><div><b>12</b><span>${L('مستوى خط', 'type styles')}</span></div><div><b>20</b><span>${L('مكون', 'components')}</span></div></div>
+    </section>
+    ${sec('01', L('الألوان الأساسية', 'Primitive colors'), L('اللون الأساسي teal بيعبّر عن الثقة والاستقرار، والـ amber لون مميز لحظات الـ go-live والتنبيهات المهمة.', 'Teal conveys trust and stability; amber is reserved for go-live moments and highlights.'),
+      `<div class="ds-card">${ramp('brand', RAMPS.brand, HEX.brand)}${ramp('neutral', RAMPS.neutral, HEX.neutral)}</div>
+       <div class="ds-card">${STATUS.map(s => ramp(s[0], s[1], s[2])).join('')}</div>`)}
+    ${sec('02', L('الألوان الدلالية', 'Semantic tokens'), L('المكونات بتستخدم المتغيرات الدلالية بس، فالتبديل بين الفاتح والغامق بيحصل من مكان واحد.', 'Components only use semantic tokens, so light/dark switches in one place.'),
+      `<div class="themes">${semPanel('light')}${semPanel('dark')}</div>`)}
+    ${sec('03', L('الخطوط', 'Typography'), L('Readex Pro لأنه بيغطي العربي واللاتيني بنفس الروح، مع أرقام جدولية في الجداول.', 'Readex Pro covers Arabic and Latin with one voice; tabular numerals in tables.'),
+      `<div class="ds-card">${TYPE.map(t => `<div class="type-row"><div class="meta"><b>${t[1]}</b><span class="code">--gl-type-${t[0]}</span><span class="t-cap muted ltr" style="text-align:start">${t[2]}</span></div>
+        <div dir="rtl" style="font:var(--gl-type-${t[0]})">${t[0] === 'kpi' ? '$18,420' : (t[0] === 'display' ? 'كل مشروع في موعده' : 'منصة واحدة لإدارة التنفيذ')}</div><div dir="ltr" style="font:var(--gl-type-${t[0]})">${t[0] === 'kpi' ? '$18,420' : (t[0] === 'display' ? 'Every go-live, on time' : 'One platform for every go-live')}</div></div>`).join('')}</div>`)}
+    ${sec('04', L('المسافات والزوايا والظلال', 'Spacing, radius & elevation'), L('كل المسافات من مضاعفات 4 و8 (8pt grid).', 'All spacing follows a 4/8pt grid.'),
+      `<div class="grid g-2">
+        <div class="ds-card"><div class="ds-label">${L('المسافات', 'Spacing')}</div>${[1,2,3,4,5,6,8,10,12,16].map(n => `<div class="space-row"><span class="code">--gl-space-${n}</span><span class="t-sm sec ltr" style="text-align:start">${n * 4}px</span><i style="width:${n * 4 * 3}px"></i></div>`).join('')}</div>
+        <div class="stack gap-6">
+          <div class="ds-card"><div class="ds-label">${L('الزوايا', 'Radius')}</div><div class="row between">${[['sm',6],['md',8],['lg',12],['xl',16],['full',999]].map(r => `<div class="rad"><i style="border-radius:${r[1] > 100 ? '50%' : r[1] + 'px'}"></i><span class="code">${r[0]} · ${r[1]}px</span></div>`).join('')}</div></div>
+          <div class="ds-card" style="background:var(--gl-bg-canvas)"><div class="ds-label">${L('الظلال', 'Elevation')}</div><div class="grid g-2" style="gap:var(--gl-space-4)">${['xs','sm','md','lg'].map(s => `<div class="shd" style="box-shadow:var(--gl-shadow-${s})"><b class="t-label">Shadow ${s.toUpperCase()}</b><span class="code">--gl-shadow-${s}</span></div>`).join('')}</div></div>
+        </div></div>`)}
+    ${sec('05', L('المكونات', 'Components'), L('كل مكون بحالاته، ومبني بمتغيرات --gl-* عشان يتنقل مباشرة لـ PrimeNG وTailwind.', 'Every component with its states, built on --gl-* tokens for a direct port to PrimeNG + Tailwind.'), comps)}
+    ${sec('06', L('الاتجاهين', 'Bidirectional'), L('نفس المكونات بتنعكس تلقائيًا باستخدام خصائص CSS المنطقية (margin-inline، padding-inline، inset-inline).', 'The same components mirror automatically via CSS logical properties.'),
+      `<div class="bidi">${bidiPanel('rtl', 'ar')}${bidiPanel('ltr', 'en')}</div>`)}`;
+  }
+});
+</script>
+</body>
+</html>
