@@ -250,3 +250,4 @@
 .avatar.sm.round,.avatar.round{border-radius:50%}
 .av-stack .avatar + .avatar{margin-inline-start:-6px}
 .set-row .ctl:has(> .switch){width:auto}
+.gap-5{gap:var(--gl-space-5)}.gap-8{gap:var(--gl-space-8)}
