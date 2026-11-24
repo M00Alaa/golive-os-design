@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/tokens.css">
 <link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
 <style>
   .ds-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--gl-space-8);padding:var(--gl-space-10);border-radius:var(--gl-radius-xl);background:radial-gradient(120% 140% at 100% 0%,var(--gl-brand-700) 0%,var(--gl-brand-950) 60%);color:#fff;position:relative;overflow:hidden}
   [dir="ltr"] .ds-hero{background:radial-gradient(120% 140% at 0% 0%,var(--gl-brand-700) 0%,var(--gl-brand-950) 60%)}
@@ -44,12 +45,25 @@
   .bidi > div{display:flex;flex-direction:column;gap:var(--gl-space-4);padding:var(--gl-space-6);border-radius:var(--gl-radius-lg);background:var(--gl-bg-canvas);border:1px solid var(--gl-border-default)}
   .mini-side{overflow:hidden;background:var(--gl-bg-sidebar);border-radius:var(--gl-radius-lg);padding:var(--gl-space-4);display:flex;flex-direction:column;gap:var(--gl-space-1);width:264px}
   .mini-side .nav-item.active::before{inset-inline-start:calc(var(--gl-space-4) * -1)}
+  .ix-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gl-space-6)}
+  .ix-grid .full{grid-column:1/-1}
+  .ix-btns{display:flex;flex-wrap:wrap;gap:var(--gl-space-2)}
+  .ix-static{display:flex;flex-direction:column;gap:var(--gl-space-3);align-items:flex-start}
+  .ix-static .toast{position:static;animation:none;width:100%;max-width:420px}
+  .ix-modal{border:1px solid var(--gl-border-default);border-radius:var(--gl-radius-lg);background:var(--gl-bg-surface);box-shadow:var(--gl-shadow-lg);overflow:hidden}
+  .ix-modal .ov-head{display:flex;gap:var(--gl-space-3);padding:var(--gl-space-4) var(--gl-space-5);border-block-end:1px solid var(--gl-border-default)}
+  .ix-modal .ov-foot{display:flex;justify-content:flex-end;gap:var(--gl-space-2);padding:var(--gl-space-3) var(--gl-space-5);background:var(--gl-bg-subtle);border-block-start:1px solid var(--gl-border-default)}
+  .ix-modal .ov-body{padding:var(--gl-space-5);display:flex;flex-direction:column;gap:var(--gl-space-4)}
+  .ix-ref td:first-child{font-family:ui-monospace,Menlo,monospace;font-size:12px;direction:ltr;unicode-bidi:isolate;white-space:normal;overflow:visible;text-overflow:clip;word-break:break-word}
+  .ix-thread{display:flex;flex-direction:column;gap:var(--gl-space-3);max-height:240px;overflow:auto}
+  .ix-steps .stepper{justify-content:flex-start}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script src="assets/icons.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
 const RAMPS = {
   brand: ['50','100','200','300','400','500','600','700','800','900','950'],
@@ -63,6 +77,20 @@ const TYPE = [['display','Display','700 · 32/44'],['h1','Heading 1','600 · 24/
 GL.mount({
   doc: 'ds',
   title: L => L('نظام التصميم', 'Design System'),
+  modals: {
+    dm: { icon: 'building', title: L => L('إضافة شركة', 'Add company'), sub: L => L('مودال متوسط · Enter للحفظ · Esc للإغلاق', 'Medium modal · Enter saves · Esc closes'),
+      body: (L, { ui }) => `${ui.field(L('اسم الشركة', 'Company name'), ui.input('name', { req: 1, ph: L('مثلًا: نيل سوفت', 'e.g. NileSoft') }), { req: 1 })}<div class="form-grid">${ui.field(L('الإيميل', 'Email'), ui.input('email', { req: 1, type: 'email', ltr: 1, icon: 'mail' }), { req: 1 })}${ui.field(L('الخطة', 'Plan'), ui.select('plan', ['Starter', 'Growth', 'Enterprise'], { req: 1, ph: L('اختار', 'Choose') }), { req: 1 })}</div>`,
+      submit: L => L('إضافة', 'Add'), add: { table: 'dsTbl', prepend: true, row: (v, L) => `<tr data-row data-cat="trial"><td class="t-strong" data-f="name">${v.name.replace(/</g, '&lt;')}</td><td>${v.plan}</td><td>${GL.ui.tag('info', L('تجربة', 'Trial'))}</td><td class="right">${GL.ui.menuBtn('dsm')}</td></tr>` }, toast: (L, v) => [L('اتضافت الشركة', 'Company added'), v.name] },
+    dd: { kind: 'drawer', size: 'lg', icon: 'sliders-horizontal', title: L => L('درج جانبي', 'Drawer'), sub: L => L('للتفاصيل والنماذج الطويلة · بيفتح من ناحية النهاية', 'For details and long forms · opens from the inline end'),
+      body: (L, { ui }) => `${ui.field(L('الحالة', 'Status'), `<div class="row gap-2" data-pick><span class="opt on">${L('نشطة', 'Active')}</span><span class="opt">${L('تجربة', 'Trial')}</span><span class="opt">${L('موقوفة', 'Suspended')}</span></div>`)}${ui.field(L('ملاحظات', 'Notes'), ui.textarea('n', { rows: 5, req: 1 }), { req: 1 })}<label class="check t-sm"><span class="box on">${GL.icon('check')}</span>${L('بلّغ العميل', 'Notify the client')}</label>`,
+      footNote: L => L('آخر تعديل من دقيقتين', 'Last edited 2 min ago'), submit: L => L('حفظ', 'Save') },
+    edit: { icon: 'pencil', title: L => L('تعديل', 'Edit'), body: (L, { ui }) => ui.field(L('الاسم', 'Name'), ui.input('name', { req: 1 }), { req: 1 }), submit: L => L('حفظ', 'Save'), toast: (L, v) => [L('اتحفظ', 'Saved'), v.name] }
+  },
+  menus: { dsm: [{ icon: 'pencil', ar: 'تعديل', en: 'Edit', open: 'edit' }, { icon: 'copy', ar: 'نسخ', en: 'Duplicate', toast: (L, n) => `success|${L('اتعملت نسخة', 'Duplicated')}|${n}` }, { icon: 'pause', ar: 'إيقاف', en: 'Suspend', confirm: 'dc' }, '-', { icon: 'trash-2', ar: 'حذف', en: 'Delete', del: 1, danger: 1 }] },
+  confirms: {
+    dc: { icon: 'pause', title: L => L('إيقاف الحساب؟', 'Suspend this account?'), text: L => L('تأكيد بسيط بزرار أساسي. بيتقفل بـ Esc.', 'A simple confirm with a primary action. Esc closes it.'), btn: L => L('إيقاف', 'Suspend'), toast: L => [L('اتوقف الحساب', 'Account suspended'), '', 'warning'] },
+    dx: { danger: 1, title: L => L('حذف نهائي؟', 'Delete permanently?'), text: L => L('للأفعال اللي مينفعش تترجع: اكتب الاسم عشان الزرار يشتغل.', 'For irreversible actions: type the name to enable the button.'), type: () => 'nilesoft', btn: L => L('حذف', 'Delete'), toast: L => [L('اتحذف', 'Deleted'), 'nilesoft', 'danger'] }
+  },
   render: (L, { icon, fwd, back }) => {
     const sec = (over, title, desc, body) => `<section class="ds-sec"><header><div class="t-over">${over}</div><h2>${title}</h2>${desc ? `<p>${desc}</p>` : ''}</header>${body}</section>`;
     const card = (label, body, cls) => `<div class="ds-card ${cls || ''}"><div class="ds-label">${label}</div>${body}</div>`;
@@ -155,7 +183,47 @@ GL.mount({
         </div></div>`)}
     ${sec('05', L('المكونات', 'Components'), L('كل مكون بحالاته، ومبني بمتغيرات --gl-* عشان يتنقل مباشرة لـ PrimeNG وTailwind.', 'Every component with its states, built on --gl-* tokens for a direct port to PrimeNG + Tailwind.'), comps)}
     ${sec('06', L('الاتجاهين', 'Bidirectional'), L('نفس المكونات بتنعكس تلقائيًا باستخدام خصائص CSS المنطقية (margin-inline، padding-inline، inset-inline).', 'The same components mirror automatically via CSS logical properties.'),
-      `<div class="bidi">${bidiPanel('rtl', 'ar')}${bidiPanel('ltr', 'en')}</div>`)}`;
+      `<div class="bidi">${bidiPanel('rtl', 'ar')}${bidiPanel('ltr', 'en')}</div>`)}
+    ${sec('07', L('التفاعل', 'Interactions'), L('كل الأنماط دي شغالة فعلًا هنا وفي كل الشاشات، ومبنية بـ attributes بسيطة في assets/interact.js من غير framework.', 'Every pattern here is live — the same engine (assets/interact.js) drives every screen via simple data-attributes, no framework.'), `
+      <div class="ix-grid">
+        ${card(L('التابات والفلاتر والبحث', 'Tabs, filters & search'), `<div class="stack gap-4">
+          <div class="row between gap-4 wrap"><div class="pills" data-tabs="dsf" data-filter-table="dsTbl"><span class="pill active" data-tab="all">${L('الكل', 'All')}</span><span class="pill" data-tab="active">${L('نشطة', 'Active')}</span><span class="pill" data-tab="trial">${L('تجربة', 'Trial')}</span><span class="pill" data-tab="sus">${L('موقوفة', 'Suspended')}</span></div>
+            <label class="control search" style="width:220px">${icon('search', 'sm')}<input data-search="dsTbl" placeholder="${L('دوّر…', 'Search…')}"></label></div>
+          <div class="card table-wrap"><table class="tbl" id="dsTbl"><colgroup><col><col style="width:112px"><col style="width:136px"><col style="width:56px"></colgroup><thead><tr><th>${L('الشركة', 'Company')}</th><th>${L('الخطة', 'Plan')}</th><th>${L('الحالة', 'Status')}</th><th></th></tr></thead><tbody>
+            ${[[L('نيل سوفت', 'NileSoft'), 'Growth', 'active', 'success', L('نشطة', 'Active')], [L('دلتا للحلول', 'Delta Solutions'), 'Starter', 'trial', 'info', L('تجربة', 'Trial')], [L('أفق للأنظمة', 'Ofok Systems'), 'Enterprise', 'active', 'success', L('نشطة', 'Active')], [L('سحابة الشرق', 'Sharq Cloud'), 'Starter', 'sus', 'danger', L('موقوفة', 'Suspended')]].map(r => `<tr data-row data-cat="${r[2]}"><td class="t-strong" data-f="name">${r[0]}</td><td>${r[1]}</td><td>${GL.ui.tag(r[3], r[4])}</td><td class="right">${GL.ui.menuBtn('dsm')}</td></tr>`).join('')}</tbody></table></div>
+          <span class="t-cap muted"><span data-count="dsTbl">4</span> ${L('نتيجة · جرّب "xyz" عشان تشوف حالة مفيش نتايج', 'results · try “xyz” to see the no-results state')}</span></div>`)}
+        ${card(L('المودال، الدرج، التأكيد، القايمة', 'Modal, drawer, confirm, menu'), `<div class="stack gap-5">
+          <div class="ix-btns"><button type="button" class="btn btn-primary" data-open="dm">${icon('plus', 'sm')}${L('مودال', 'Modal')}</button><button type="button" class="btn btn-outline" data-open="dd">${icon('panel-right', 'sm')}${L('درج', 'Drawer')}</button><button type="button" class="btn btn-outline" data-confirm="dc">${L('تأكيد', 'Confirm')}</button><button type="button" class="btn btn-danger" data-confirm="dx">${icon('trash-2', 'sm')}${L('تأكيد بالكتابة', 'Type-to-confirm')}</button>${GL.ui.menuBtn('dsm')}</div>
+          <div class="ix-modal"><div class="ov-head"><span class="ic-tile">${icon('building', 'sm')}</span><div class="grow"><div class="t-h3">${L('عنوان المودال', 'Modal title')}</div><div class="t-cap muted">${L('وصف قصير', 'Short description')}</div></div><button type="button" class="icon-btn sm">${icon('x')}</button></div><div class="ov-body">${GL.ui.field(L('حقل', 'Field'), GL.ui.input('x', { ph: L('قيمة', 'Value') }), { req: 1 })}</div><div class="ov-foot"><button type="button" class="btn btn-ghost">${L('إلغاء', 'Cancel')}</button><button type="button" class="btn btn-primary">${L('حفظ', 'Save')}</button></div></div>
+          <div class="t-cap muted">${L('الأحجام: sm 400 · md 560 · lg 720 · xl 960 · الدرج 480/640. التركيز بيروح لأول حقل، Esc بيقفل، والتحقق قبل الحفظ.', 'Sizes: sm 400 · md 560 · lg 720 · xl 960 · drawer 480/640. Focus moves to the first field, Esc closes, validation runs before save.')}</div></div>`)}
+        ${card(L('الإشعارات (Toasts)', 'Toasts'), `<div class="stack gap-5"><div class="ix-btns">${[['success', L('نجاح', 'Success'), L('اتحفظت التغييرات', 'Changes saved')], ['info', L('معلومة', 'Info'), L('بنجهز التصدير', 'Preparing export')], ['warning', L('تحذير', 'Warning'), L('الاشتراك هينتهي', 'Subscription ending')], ['danger', L('خطأ', 'Error'), L('فشل الدفع', 'Payment failed')]].map(t => `<button type="button" class="btn btn-outline btn-sm" data-toast="${t[0]}|${t[2]}|${L('بيختفي بعد 4.5 ثانية', 'Auto-dismisses after 4.5s')}">${t[1]}</button>`).join('')}</div>
+          <div class="ix-static">${[['success', 'check-circle', L('اتضافت الشركة', 'Company added'), L('نيل سوفت · خطة Growth', 'NileSoft · Growth plan')], ['danger', 'alert-circle', L('في بيانات ناقصة', 'Please fix the highlighted fields'), L('2 حقل محتاج مراجعة', '2 field(s) need attention')]].map(t => `<div class="toast ${t[0]}"><span class="ic">${icon(t[1], 'sm')}</span><div class="grow"><div class="ttl">${t[2]}</div><div class="msg">${t[3]}</div></div><button type="button" class="icon-btn sm">${icon('x', 'sm')}</button></div>`).join('')}</div></div>`)}
+        ${card(L('التحقق من النماذج', 'Form validation'), `<div class="stack gap-4" data-form>
+          ${GL.ui.field(L('الاسم', 'Name'), GL.ui.input('n', { req: 1, min: 3 }), { req: 1 })}
+          ${GL.ui.field(L('الإيميل', 'Email'), GL.ui.input('e', { req: 1, type: 'email', ltr: 1, icon: 'mail', val: 'ahmed@' }), { req: 1 })}
+          <div class="field"><label>${L('كلمة السر', 'Password')} <span class="req">*</span></label><span class="control">${icon('lock', 'sm')}<input name="pw" type="password" data-pw data-req data-min="8" placeholder="••••••••"><button type="button" class="icon-btn sm" data-eye style="margin-inline-end:-8px">${icon('eye')}</button></span><div class="pw-meter"><i></i><i></i><i></i><i></i></div><span class="hint pw-hint">${L('12 حرف أو أكتر مع رقم ورمز', '12+ characters with a number and symbol')}</span></div>
+          <div class="row gap-2"><button type="button" class="btn btn-primary" data-save>${L('حفظ', 'Save')}</button><span class="t-cap muted">${L('اضغط حفظ عشان تشوف الأخطاء — بتختفي وانت بتكتب', 'Press save to see errors — they clear as you type')}</span></div></div>`)}
+        ${card(L('عناصر الاختيار', 'Selection controls'), `<div class="stack gap-5">
+          <div class="row gap-6 wrap"><span class="row gap-2"><span class="switch on" data-label="${L('الإشعارات', 'Notifications')}"></span><span class="t-sm">${L('مفتاح', 'Switch')}</span></span><label class="check t-sm"><span class="box on">${icon('check')}</span>${L('اختيار', 'Checkbox')}</label><label class="check t-sm"><span class="box"></span>${L('غير مختار', 'Unchecked')}</label></div>
+          ${GL.ui.field(L('اختيار واحد', 'Single choice'), `<div class="row gap-2"><span class="opt on"><span class="radio on"></span>${L('شهري', 'Monthly')}</span><span class="opt"><span class="radio"></span>${L('سنوي', 'Annual')}</span></div>`)}
+          ${GL.ui.field(L('اختيار متعدد', 'Multiple choice'), `<div class="row gap-2 wrap" data-multi>${['Sales', 'CRM', 'Inventory', 'Accounting'].map((m, i) => `<span class="opt ${i < 2 ? 'on' : ''}"><span class="box ${i < 2 ? 'on' : ''}">${i < 2 ? icon('check') : ''}</span>${m}</span>`).join('')}</div>`)}
+          ${GL.ui.field(L('قايمة منسدلة', 'Select'), GL.ui.select('s', [L('القاهرة (UTC+2)', 'Cairo (UTC+2)'), L('الرياض (UTC+3)', 'Riyadh (UTC+3)')], { icon: 'clock' }))}</div>`)}
+        ${card(L('المحادثة والمرفقات', 'Composer & attachments'), `<div class="stack gap-4">
+          <div class="ix-thread" id="dsThr"><div class="msg">${GL.ui.av(L('م', 'MA'), 'av-teal', 'round')}<div class="bubble"><div class="hd"><b>${L('منى عادل', 'Mona Adel')}</b><span>· 10:31 AM</span></div><div class="bd">${L('ممكن تبعت ملف الأرصدة؟', 'Could you send the balances file?')}</div></div></div></div>
+          <div class="composer" data-composer><div class="comp-tabs" data-tabs="dscmp"><span class="pill active" data-tab="reply">${icon('reply', 'sm')}${L('رد', 'Reply')}</span><span class="pill" data-tab="note">${icon('lock', 'sm')}${L('ملاحظة داخلية', 'Internal note')}</span></div><textarea class="ta" rows="2" placeholder="${L('اكتب… Ctrl+Enter للإرسال', 'Write… Ctrl+Enter to send')}"></textarea><div class="row gap-2 wrap" data-files hidden style="padding:0 var(--gl-space-4) var(--gl-space-2)"></div><div class="bar2"><button type="button" class="icon-btn sm" data-file="Opening_Balances.xlsx">${icon('paperclip')}</button><button type="button" class="icon-btn sm" data-insert="🙏">${icon('smile')}</button><div class="end"><button type="button" class="btn btn-primary btn-sm" data-send="dsThr">${icon('send', 'sm flip')}${L('إرسال', 'Send')}</button></div></div></div></div>`)}
+        ${card(L('خطوات المعالج', 'Wizard stepper'), `<div class="ix-steps"><ol class="stepper">${[L('بيانات الشركة', 'Workspace'), L('دعوة الفريق', 'Invite team'), L('الخطة', 'Plan'), L('جاهز', 'Ready')].map((t, i) => `<li class="${i < 1 ? 'done' : i === 1 ? 'cur' : ''}"><span class="st-n">${i < 1 ? icon('check') : i + 1}</span><span>${t}</span></li>`).join('<li class="st-line" aria-hidden="true"></li>')}</ol></div><p class="t-cap muted mt-3">${L('«متابعة» بيعمل تحقق للخطوة قبل ما ينقل (data-step).', '“Continue” validates the step before moving on (data-step).')}</p>`, 'full')}
+        ${card(L('مرجع الـ attributes للمطورين', 'Attribute reference for developers'), `<table class="tbl ix-ref"><colgroup><col style="width:280px"><col></colgroup><tbody>${[
+          ['data-tabs · data-tab · data-pane', L('تابات بتبدّل الأقسام وبتفتكر الحالة لما تغيّر اللغة', 'Tabs that swap panes and survive language/theme switches')],
+          ['data-filter-table · data-search · data-col-filter', L('فلترة أي جدول أو قايمة بالحالة والبحث والأعمدة، مع حالة «مفيش نتايج»', 'Filter any table/list by status, search and column, with a no-results state')],
+          ['data-open="id"', L('يفتح مودال أو درج من page.modals مع تعبئة تلقائية للتعديل وإضافة صف بعد الحفظ', 'Opens a modal/drawer from page.modals, pre-fills for edit, adds a row on save')],
+          ['data-menu · data-confirm · data-delete', L('قايمة صف، تأكيد (عادي أو بالكتابة)، حذف مع تراجع', 'Row menu, confirm (simple or type-to-confirm), delete with undo')],
+          ['data-form · data-save · data-step', L('تحقق: data-req، type=email، data-min، data-match، data-req-group', 'Validation: data-req, type=email, data-min, data-match, data-req-group')],
+          ['data-toast="kind|title|msg"', L('إشعار سريع من غير كود', 'Instant toast without code')],
+          ['data-composer · data-send · data-file', L('كتابة رسالة أو ملاحظة داخلية مع مرفقات', 'Compose a reply or internal note with attachments')],
+          ['data-pick · data-multi · data-clone · data-eye', L('اختيار واحد/متعدد، تكرار صف (دعوات)، إظهار كلمة السر', 'Single/multi pick, clone a row (invites), reveal password')],
+          ['?tab=g:k · ?open=id · ?validate=1', L('روابط مباشرة لأي حالة — بنستخدمها في السكرينشوتس', 'Deep links to any state — used for screenshots')]
+        ].map(r => `<tr><td>${r[0]}</td><td class="sec">${r[1]}</td></tr>`).join('')}</tbody></table>`, 'full')}
+      </div>`)}`;
   }
 });
 </script>
