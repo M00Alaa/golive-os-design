@@ -14,6 +14,12 @@
 .danger-card{border-color:color-mix(in srgb,var(--gl-danger-solid) 35%,var(--gl-border-default))}
 .key{display:flex;align-items:center;gap:var(--gl-space-3);padding:var(--gl-space-3) var(--gl-space-4);border:1px solid var(--gl-border-default);border-radius:var(--gl-radius-md);background:var(--gl-bg-subtle)}
 .key code{font:500 13px/20px ui-monospace,Menlo,Consolas,monospace;direction:ltr;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:start}
+.int{display:flex;flex-direction:column;gap:var(--gl-space-3);padding:var(--gl-space-5)}
+.int .lg{width:40px;height:40px;border-radius:var(--gl-radius-md);display:grid;place-items:center;font:700 15px/1 var(--gl-font-sans);color:#fff}
+.int .f{display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+.dns td{font:500 12px/18px ui-monospace,Menlo,Consolas,monospace}
+.tpl{display:flex;align-items:center;gap:var(--gl-space-4);padding:var(--gl-space-4) var(--gl-space-6)}
+.tpl + .tpl{border-block-start:1px solid var(--gl-border-default)}
 </style>
 </head>
 <body>
@@ -22,50 +28,95 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
+const keyRow = (L, k) => `<div class="key" data-row>${GL.icon('key-round', 'sm')}<div class="grow" style="min-width:0"><div class="t-strong t-sm" data-f="name">${k[0]}</div><code>${k[1]}</code></div><span class="t-cap muted">${k[2]}</span><button type="button" class="icon-btn sm" data-toast="success|${L('اتنسخ', 'Copied')}|">${GL.icon('copy')}</button><button type="button" class="icon-btn sm" data-confirm="revoke" title="Revoke">${GL.icon('trash-2')}</button></div>`;
+const hookRow = (L, h) => `<tr data-row><td class="ltr t-sm" data-f="name">${h[0]}</td><td>${h[1].map(e => `<span class="code-tag" style="margin-inline-end:4px">${e}</span>`).join('')}</td><td>${h[2] ? GL.ui.tag('success', L('شغال', 'Healthy')) : GL.ui.tag('danger', L('بيفشل', 'Failing'))}</td><td class="right">${GL.ui.menuBtn('hook')}</td></tr>`;
 GL.mount({
   nav: 'settings',
   title: L => L('الإعدادات', 'Settings'),
+  modals: {
+    key: { icon: 'key-round', title: L => L('مفتاح API جديد', 'New API key'), sub: L => L('المفتاح هيظهر مرة واحدة بس', 'The key is shown only once'),
+      body: (L, { ui }) => `${ui.field(L('اسم المفتاح', 'Key name'), ui.input('name', { req: 1, ph: L('مثال: تقارير Metabase', 'e.g. Metabase reporting') }), { req: 1 })}
+        <div class="field"><label>${L('الصلاحيات', 'Scopes')} <span class="req">*</span></label><div class="stack gap-2" data-multi data-req-group>${[['companies:read', L('قراءة الشركات', 'Read companies'), 1], ['billing:read', L('قراءة الفوترة', 'Read billing'), 1], ['billing:write', L('تعديل الفوترة', 'Write billing'), 0], ['support:write', L('إنشاء تذاكر', 'Create tickets'), 0]].map(x => `<div class="opt ${x[2] ? 'on' : ''}"><span class="box ${x[2] ? 'on' : ''}">${x[2] ? GL.icon('check') : ''}</span><div class="grow"><div class="t-strong">${x[1]}</div><div class="t-cap muted ltr" style="text-align:start">${x[0]}</div></div></div>`).join('')}</div></div>
+        ${ui.field(L('ينتهي بعد', 'Expires'), ui.select('exp', [L('30 يوم', '30 days'), L('90 يوم', '90 days'), L('سنة', '1 year'), L('من غير انتهاء', 'Never')], { val: L('90 يوم', '90 days') }))}`,
+      submit: L => L('إنشاء المفتاح', 'Create key'), add: { table: 'keyList', row: (v, L) => keyRow(L, [v.name, 'gl_live_••••••••••••••••' + Math.random().toString(16).slice(2, 6), L('لسه متستخدمش', 'Never used')]) },
+      toast: L => [L('اتعمل المفتاح واتنسخ', 'Key created and copied'), L('احفظه في مكان آمن', 'Store it somewhere safe')] },
+    hook: { icon: 'webhook', title: L => L('Webhook جديد', 'New webhook'),
+      body: (L, { ui }) => `${ui.field(L('رابط الاستقبال', 'Endpoint URL'), ui.input('url', { req: 1, ltr: 1, icon: 'link', ph: 'https://ops.golive.example/hooks' }), { req: 1 })}
+        <div class="field"><label>${L('الأحداث', 'Events')}</label><div class="row gap-2 wrap" data-multi data-req-group>${['company.created', 'invoice.paid', 'invoice.failed', 'subscription.cancelled', 'ticket.created'].map((e, i) => `<span class="opt ${i < 2 ? 'on' : ''}" style="padding:6px 12px"><span class="box ${i < 2 ? 'on' : ''}">${i < 2 ? GL.icon('check') : ''}</span><span class="ltr t-sm">${e}</span></span>`).join('')}</div></div>`,
+      submit: L => L('إضافة', 'Add endpoint'), onSubmit: (v, { form }) => { v.ev = [...form.querySelectorAll('.opt.on .ltr')].map(x => x.textContent); },
+      add: { table: 'hookTbl', row: (v, L) => hookRow(L, [v.url, v.ev || [], 1]) }, toast: L => [L('اتضاف الـ Webhook', 'Webhook added'), L('بعتنا حدث تجريبي', 'We sent a test event')] },
+    tpl: { kind: 'drawer', size: 'lg', icon: 'mail', title: (L, c) => c.name, sub: L => L('قالب البريد · عربي وإنجليزي', 'Email template · Arabic & English'),
+      body: (L, { ui, ctx }) => `<div class="pills" data-tabs="tl"><span class="pill active" data-tab="ar">العربية</span><span class="pill" data-tab="en">English</span></div>
+        ${ui.field(L('عنوان الرسالة', 'Subject'), ui.input('subj', { req: 1, val: L('فترتك التجريبية هتخلص بعد 3 أيام', 'Your trial ends in 3 days') }), { req: 1 })}
+        ${ui.field(L('النص', 'Body'), ui.textarea('body', { rows: 8, val: L('أهلًا {{owner.first_name}}،\n\nفترة GoLive OS التجريبية لـ {{company.name}} هتخلص يوم {{trial.ends_at}}. اختار خطة عشان مشاريعك وبوابات عملائك تفضل شغالة.\n\n{{button: اختار خطة}}', 'Hi {{owner.first_name}},\n\nThe GoLive OS trial for {{company.name}} ends on {{trial.ends_at}}. Pick a plan to keep your projects and client portals running.\n\n{{button: Choose a plan}}') }), { hint: L('المتغيرات المتاحة: {{owner.first_name}} {{company.name}} {{trial.ends_at}}', 'Variables: {{owner.first_name}} {{company.name}} {{trial.ends_at}}') })}`,
+      foot: L => `<button type="button" class="btn btn-ghost" data-toast="success|${L('اتبعتت رسالة تجريبية', 'Test email sent')}|mohamed@golive.example">${GL.icon('send', 'sm flip')}${L('ابعت تجربة', 'Send test')}</button><span class="grow"></span><button type="button" class="btn btn-outline" data-close>${L('إلغاء', 'Cancel')}</button><button type="submit" class="btn btn-primary">${L('حفظ القالب', 'Save template')}</button>`,
+      toast: L => [L('اتحفظ القالب', 'Template saved'), ''] }
+  },
+  menus: { hook: [{ icon: 'send', ar: 'ابعت حدث تجريبي', en: 'Send test event', toast: L => `success|${L('اتبعت الحدث', 'Test event delivered')}|200 OK · 182ms` }, { icon: 'history', ar: 'سجل الإرسال', en: 'Delivery log', toast: L => `info|${L('آخر 24 ساعة: 312 إرسال', 'Last 24h: 312 deliveries')}|` }, '-', { icon: 'trash-2', ar: 'حذف', en: 'Delete', del: 1, danger: 1 }] },
+  confirms: {
+    revoke: { danger: 1, icon: 'key-round', title: (L, c) => L(`إلغاء مفتاح «${c.name}»؟`, `Revoke “${c.name}”?`), text: L => L('أي تكامل بيستخدم المفتاح ده هيقف فورًا.', 'Any integration using this key stops working immediately.'), btn: L => L('إلغاء المفتاح', 'Revoke key'), run: (L, c, row) => GLI.deleteRow(row, c.name) },
+    maint: { danger: 1, icon: 'alert-triangle', title: L => L('تفعيل وضع الصيانة؟', 'Enable maintenance mode?'), text: L => L('128 شركة هتشوف صفحة صيانة لحد ما تقفله.', '128 companies will see a maintenance page until you turn it off.'), type: () => 'MAINTENANCE', btn: L => L('تفعيل', 'Enable'), toast: L => [L('وضع الصيانة شغال', 'Maintenance mode is on'), '', 'warning'] },
+    purge: { danger: 1, icon: 'trash-2', title: L => L('مسح بيانات التجارب المنتهية؟', 'Purge expired trial data?'), text: L => L('هيتمسح 14 مساحة عمل تجريبية خلصت من أكتر من 60 يوم.', 'Deletes 14 trial workspaces that expired over 60 days ago.'), type: () => 'PURGE', btn: L => L('مسح نهائي', 'Purge'), toast: L => [L('اتمسحت 14 مساحة', '14 workspaces purged'), ''] },
+    disc: { danger: 1, icon: 'plug', title: (L, c) => L(`فصل ${c.name}؟`, `Disconnect ${c.name}?`), text: L => L('المزامنة هتقف لحد ما توصله تاني.', 'Sync stops until you reconnect.'), btn: L => L('فصل', 'Disconnect'), run: (L, c, row) => { row.querySelector('[data-st]').innerHTML = `<button type="button" class="btn btn-outline btn-sm" data-toast="success|${L('اتوصل', 'Connected')}|">${L('توصيل', 'Connect')}</button>`; }, toast: (L, c) => [L('اتفصل', 'Disconnected'), c.name] }
+  },
   render: (L, { icon, ui }) => {
-    const sub = [['settings', L('عام', 'General'), 1], ['palette', L('الهوية والدومين', 'Branding & domain')], ['receipt', L('الفوترة والضرائب', 'Billing & tax')], ['mail', L('البريد والإشعارات', 'Email & notifications')], ['shield-check', L('الأمان', 'Security')], ['plug', L('التكاملات', 'Integrations')], ['webhook', L('API وWebhooks', 'API & webhooks')]];
+    const sub = [['general', 'settings', L('عام', 'General')], ['brand', 'palette', L('الهوية والدومين', 'Branding & domain')], ['billing', 'receipt', L('الفوترة والضرائب', 'Billing & tax')], ['email', 'mail', L('البريد والإشعارات', 'Email & notifications')], ['security', 'shield-check', L('الأمان', 'Security')], ['int', 'plug', L('التكاملات', 'Integrations')], ['api', 'webhook', L('API وWebhooks', 'API & webhooks')]];
     const row = (t, d, ctl) => `<div class="set-row"><div><div class="t">${t}</div><div class="d">${d}</div></div><div class="ctl">${ctl}</div></div>`;
-    const sel = v => `<span class="control" style="width:100%"><span class="val">${v}</span>${icon('chevron-down', 'sm')}</span>`;
+    const sw = (on, lbl) => `<span class="switch ${on ? 'on' : ''}" data-label="${lbl || ''}"></span>`;
+    const card = (t, d, body, o) => { o = o || {}; return `<div class="card sec-card" ${o.form ? 'data-form' : ''}><div class="card-head"><div><h3 class="t-h3">${t}</h3><p class="sub">${d}</p></div>${o.act || ''}</div><div class="card-body" ${o.tight ? 'style="padding-block:var(--gl-space-2)"' : ''}>${body}</div>${o.form ? `<div class="sticky-save"><button type="button" class="btn btn-ghost" data-toast="info|${L('اترجعت التغييرات', 'Changes discarded')}|">${L('إلغاء', 'Cancel')}</button><button type="button" class="btn btn-primary" data-save>${L('حفظ التغييرات', 'Save changes')}</button></div>` : ''}</div>`; };
+    const pane = (k, html) => `<div class="stack gap-6" data-pane-group="set" data-pane="${k}" ${k === 'general' ? '' : 'hidden'}>${html}</div>`;
     return `
     <div class="page-head"><div><h1 class="t-h1">${L('إعدادات المنصة', 'Platform settings')}</h1><p class="sub">${L('إعدادات عامة بتأثر على كل الشركات المشتركة', 'Global settings that affect every subscribed company')}</p></div></div>
     <section class="settings">
-      <nav class="subnav">${sub.map(s => `<a class="${s[2] ? 'on' : ''}" href="#">${icon(s[0])}<span>${s[1]}</span></a>`).join('')}<a href="#" style="color:var(--gl-danger-fg)">${icon('alert-triangle')}<span>${L('منطقة الخطر', 'Danger zone')}</span></a></nav>
-      <div class="stack gap-6">
-        <div class="card sec-card">
-          <div class="card-head"><div><h3 class="t-h3">${L('بيانات المنصة', 'Platform profile')}</h3><p class="sub">${L('بتظهر في الإيميلات والفواتير وصفحات التسجيل', 'Shown on emails, invoices and sign-up pages')}</p></div></div>
-          <div class="card-body"><div class="form-grid">
-            <div class="field"><label>${L('اسم المنصة', 'Platform name')}</label><span class="control"><input value="GoLive OS"></span></div>
-            <div class="field"><label>${L('بريد الدعم', 'Support email')}</label><span class="control">${icon('mail', 'sm')}<input class="ltr" value="support@golive.example"></span></div>
-            <div class="field"><label>${L('اللغة الافتراضية للشركات الجديدة', 'Default language for new companies')}</label>${sel(L('العربية (RTL)', 'Arabic (RTL)'))}</div>
-            <div class="field"><label>${L('المنطقة الزمنية', 'Time zone')}</label>${sel(L('القاهرة (UTC+2)', 'Cairo (UTC+2)'))}</div>
-            <div class="field"><label>${L('العملة', 'Currency')}</label>${sel('USD — $')}</div>
-            <div class="field"><label>${L('صيغة التاريخ', 'Date format')}</label>${sel('DD/MM/YYYY')}</div>
-          </div></div>
-          <div class="sticky-save"><button class="btn btn-ghost">${L('إلغاء', 'Cancel')}</button><button class="btn btn-primary">${L('حفظ التغييرات', 'Save changes')}</button></div>
-        </div>
-        <div class="card sec-card">
-          <div class="card-head"><div><h3 class="t-h3">${L('الأمان', 'Security')}</h3><p class="sub">${L('سياسات بتتطبق على فريق المنصة وعلى مسؤولي الشركات', 'Policies for platform staff and company admins')}</p></div>${ui.tag('success', L('قوي', 'Strong'))}</div>
-          <div class="card-body" style="padding-block:var(--gl-space-2)">
-            ${row(L('إلزام التحقق بخطوتين لفريق المنصة', 'Require 2FA for platform staff'), L('أي عضو من غير 2FA مش هيقدر يدخل بعد 7 أيام', 'Members without 2FA are locked out after 7 days'), '<span class="switch on"></span>')}
-            ${row(L('الدخول كمسؤول للشركة يحتاج سبب', 'Impersonation requires a reason'), L('السبب بيتسجل في سجل النشاط وبيتبعت إشعار للشركة', 'Logged to audit trail and the company is notified'), '<span class="switch on"></span>')}
-            ${row(L('مدة الجلسة', 'Session timeout'), L('تسجيل خروج تلقائي بعد عدم النشاط', 'Auto sign-out after inactivity'), sel(L('8 ساعات', '8 hours')))}
-            ${row(L('عناوين IP المسموحة للوحة الإدارة', 'Admin console IP allow-list'), L('اتركها فاضية للسماح من أي مكان', 'Leave empty to allow from anywhere'), `<span class="control" style="width:100%"><input class="ltr" placeholder="41.33.12.0/24"></span>`)}
-          </div>
-        </div>
-        <div class="card sec-card">
-          <div class="card-head"><div><h3 class="t-h3">${L('مفاتيح API', 'API keys')}</h3><p class="sub">${L('للتكامل مع أنظمة الفوترة والتقارير الداخلية', 'For internal billing and reporting integrations')}</p></div><button class="btn btn-outline btn-sm">${icon('plus')}${L('مفتاح جديد', 'New key')}</button></div>
-          <div class="card-body stack gap-3">
-            <div class="key">${icon('key-round', 'sm')}<code>gl_live_••••••••••••••••7f3a</code><span class="t-cap muted">${L('استخدام: منذ 4 د', 'Used 4m ago')}</span><button class="icon-btn sm">${icon('copy')}</button></div>
-            <div class="key">${icon('key-round', 'sm')}<code>gl_live_••••••••••••••••c21e</code><span class="t-cap muted">${L('استخدام: منذ 12 يوم', 'Used 12d ago')}</span><button class="icon-btn sm">${icon('copy')}</button></div>
-          </div>
-        </div>
-        <div class="card danger-card">
-          <div class="card-body row between gap-6"><div><div class="t-strong" style="color:var(--gl-danger-fg)">${L('وضع الصيانة', 'Maintenance mode')}</div><div class="t-sm sec">${L('كل الشركات هتشوف صفحة صيانة، ولوحة الإدارة بس هتفضل شغالة', 'All companies see a maintenance page; only this console stays available')}</div></div><button class="btn btn-outline" style="color:var(--gl-danger-fg)">${L('تفعيل الصيانة', 'Enable maintenance')}</button></div>
-        </div>
+      <nav class="subnav" data-tabs="set" data-act="on">${sub.map((s, i) => `<a class="${i ? '' : 'on'}" href="#" data-tab="${s[0]}">${icon(s[1])}<span>${s[2]}</span></a>`).join('')}<a href="#" data-tab="danger" style="color:var(--gl-danger-fg)">${icon('alert-triangle')}<span>${L('منطقة الخطر', 'Danger zone')}</span></a></nav>
+      <div>
+      ${pane('general', card(L('بيانات المنصة', 'Platform profile'), L('بتظهر في الإيميلات والفواتير وصفحات التسجيل', 'Shown on emails, invoices and sign-up pages'), `<div class="form-grid">
+            ${ui.field(L('اسم المنصة', 'Platform name'), ui.input('pn', { req: 1, val: 'GoLive OS' }), { req: 1 })}
+            ${ui.field(L('بريد الدعم', 'Support email'), ui.input('se', { req: 1, type: 'email', ltr: 1, icon: 'mail', val: 'support@golive.example' }), { req: 1 })}
+            ${ui.field(L('اللغة الافتراضية للشركات الجديدة', 'Default language for new companies'), ui.select('lang', [L('العربية (RTL)', 'Arabic (RTL)'), 'English (LTR)'], { icon: 'languages' }))}
+            ${ui.field(L('المنطقة الزمنية', 'Time zone'), ui.select('tz', [L('القاهرة (UTC+2)', 'Cairo (UTC+2)'), L('الرياض (UTC+3)', 'Riyadh (UTC+3)'), L('دبي (UTC+4)', 'Dubai (UTC+4)')], { icon: 'clock' }))}
+            ${ui.field(L('العملة', 'Currency'), ui.select('cur', ['USD — $', 'EGP — ج.م', 'SAR — ر.س', 'AED — د.إ'], { icon: 'banknote' }))}
+            ${ui.field(L('صيغة التاريخ', 'Date format'), ui.select('df', ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'], { icon: 'calendar' }))}
+          </div>`, { form: 1 }) +
+        card(L('التسجيل', 'Sign-up'), L('إزاي الشركات الجديدة بتدخل المنصة', 'How new companies join the platform'), `
+          ${row(L('السماح بالتسجيل الذاتي', 'Allow self sign-up'), L('لو مقفول، التسجيل بدعوة بس', 'When off, sign-up is invite-only'), sw(1, L('التسجيل الذاتي', 'Self sign-up')))}
+          ${row(L('تأكيد البريد قبل الدخول', 'Verify email before access'), L('بيتبعت كود من 6 أرقام', 'Sends a 6-digit code'), sw(1))}
+          ${row(L('منع دومينات البريد المجانية', 'Block free email domains'), L('gmail.com وyahoo.com وغيرهم', 'gmail.com, yahoo.com and similar'), sw(0))}`, { tight: 1 }))}
+      ${pane('brand', card(L('الشعار والألوان', 'Logo & colours'), L('بيظهروا في صفحات الدخول والإيميلات', 'Used on sign-in pages and emails'), `<div class="grid g-2" style="gap:var(--gl-space-6)"><div class="field"><label>${L('الشعار', 'Logo')}</label><div class="dropzone" data-toast="success|${L('اترفع الشعار', 'Logo uploaded')}|logo.svg">${icon('cloud-upload')}<span>${L('اسحب SVG أو PNG', 'Drop an SVG or PNG')}</span><span class="t-cap muted">512×512 · 1MB</span></div></div>
+          <div class="stack gap-4"><div class="field"><label>${L('اللون الأساسي', 'Primary colour')}</label><div class="swatch-pick" data-pick>${['#0A8F78', '#2563EB', '#7C3AED', '#DB2777', '#EA580C', '#0F172A'].map((c, i) => `<i class="${i ? '' : 'on'}" style="background:${c}"></i>`).join('')}</div></div>
+          <div class="field"><label>${L('لون التمييز', 'Accent colour')}</label><div class="swatch-pick" data-pick>${['#F5A524', '#22C55E', '#06B6D4', '#F43F5E'].map((c, i) => `<i class="${i ? '' : 'on'}" style="background:${c}"></i>`).join('')}</div></div></div></div>`, { form: 1 }) +
+        card(L('دومين الإرسال', 'Sending domain'), L('عشان الإيميلات توصل من golive.example ومتروحش سبام', 'So emails come from golive.example and avoid spam'), `<table class="tbl dns"><colgroup><col style="width:88px"><col style="width:200px"><col><col style="width:120px"></colgroup><thead><tr><th>${L('النوع', 'Type')}</th><th>${L('الاسم', 'Name')}</th><th>${L('القيمة', 'Value')}</th><th>${L('الحالة', 'Status')}</th></tr></thead><tbody>
+          <tr><td>TXT</td><td class="ltr">golive.example</td><td class="ltr">v=spf1 include:mail.example ~all</td><td>${ui.tag('success', L('متحقق', 'Verified'))}</td></tr>
+          <tr><td>CNAME</td><td class="ltr">gl._domainkey</td><td class="ltr">gl.dkim.mail.example</td><td>${ui.tag('success', L('متحقق', 'Verified'))}</td></tr>
+          <tr><td>TXT</td><td class="ltr">_dmarc</td><td class="ltr">v=DMARC1; p=quarantine</td><td>${ui.tag('warning', L('مستني', 'Pending'))}</td></tr></tbody></table>`, { act: `<button type="button" class="btn btn-outline btn-sm" data-toast="success|${L('اتعمل تحقق', 'Re-checked DNS')}|${L('2 من 3 متحققين', '2 of 3 verified')}">${icon('refresh', 'sm')}${L('تحقق تاني', 'Re-check')}</button>` }))}
+      ${pane('billing', card(L('مزود الدفع', 'Payment provider'), L('كل الاشتراكات بتتحصل من خلاله', 'All subscriptions are collected through it'), `<div class="row gap-4"><span class="ic-tile" style="background:#635BFF;color:#fff">${icon('credit-card')}</span><div class="grow"><div class="t-strong">Stripe</div><div class="t-sm sec ltr" style="text-align:start">acct_1Q…GoLive · ${L('وضع حي', 'Live mode')}</div></div>${ui.tag('success', L('متصل', 'Connected'))}<button type="button" class="btn btn-outline btn-sm" data-toast="info|${L('بيفتح لوحة Stripe', 'Opening Stripe dashboard')}|">${icon('external-link', 'sm')}${L('فتح Stripe', 'Open Stripe')}</button></div>`) +
+        card(L('الضرائب والفواتير', 'Tax & invoices'), L('بتتطبق على كل الفواتير الجديدة', 'Applied to all new invoices'), `<div class="form-grid">
+          ${ui.field(L('الرقم الضريبي', 'Tax ID'), ui.input('tax', { ltr: 1, val: 'EG-552-118-903' }))}
+          ${ui.field(L('ضريبة القيمة المضافة %', 'VAT %'), ui.input('vat', { req: 1, ltr: 1, val: '14' }), { req: 1 })}
+          ${ui.field(L('بادئة رقم الفاتورة', 'Invoice prefix'), ui.input('pre', { req: 1, ltr: 1, val: 'INV-2026-' }), { req: 1 })}
+          ${ui.field(L('فترة السماح بعد فشل الدفع', 'Grace period after failed payment'), ui.select('gr', [L('3 أيام', '3 days'), L('7 أيام', '7 days'), L('14 يوم', '14 days')], { val: L('7 أيام', '7 days') }))}
+          ${ui.field(L('تذييل الفاتورة', 'Invoice footer'), ui.textarea('ft', { rows: 3, val: L('شكرًا لاختيارك GoLive OS.', 'Thank you for choosing GoLive OS.') }), { full: 1 })}</div>`, { form: 1 }))}
+      ${pane('email', card(L('المرسل', 'Sender'), L('الاسم والبريد اللي بتوصل منه الرسائل', 'Name and address emails are sent from'), `<div class="form-grid">${ui.field(L('اسم المرسل', 'From name'), ui.input('fn', { req: 1, val: 'GoLive OS' }), { req: 1 })}${ui.field(L('بريد المرسل', 'From email'), ui.input('fe', { req: 1, type: 'email', ltr: 1, val: 'hello@golive.example' }), { req: 1 })}</div>`, { form: 1 }) +
+        `<div class="card sec-card"><div class="card-head"><div><h3 class="t-h3">${L('قوالب الإيميلات', 'Email templates')}</h3><p class="sub">${L('الرسائل التلقائية للشركات', 'Automated messages to companies')}</p></div></div>
+          ${[['party-popper', L('ترحيب بعد التسجيل', 'Welcome after sign-up'), L('فورًا', 'Immediately'), 1], ['hourglass', L('الفترة التجريبية قربت تخلص', 'Trial ending soon'), L('قبلها بـ 3 أيام', '3 days before'), 1], ['alert-triangle', L('فشل الدفع', 'Payment failed'), L('مع كل محاولة', 'Each attempt'), 1], ['receipt', L('فاتورة جديدة', 'New invoice'), L('عند الإصدار', 'On issue'), 1], ['message-square-text', L('رد على تذكرة', 'Ticket reply'), L('فورًا', 'Immediately'), 1], ['megaphone', L('ملخص المنتج الشهري', 'Monthly product digest'), L('أول كل شهر', '1st of month'), 0]].map(t => `<div class="tpl" data-row><span class="ic-tile">${icon(t[0])}</span><div class="grow"><div class="t-strong" data-f="name">${t[1]}</div><div class="t-sm sec">${t[2]}</div></div><button type="button" class="btn btn-ghost btn-sm" data-open="tpl">${icon('pencil', 'sm')}${L('تعديل', 'Edit')}</button>${sw(t[3], t[1])}</div>`).join('')}</div>`)}
+      ${pane('security', card(L('الأمان', 'Security'), L('سياسات بتتطبق على فريق المنصة وعلى مسؤولي الشركات', 'Policies for platform staff and company admins'), `
+            ${row(L('إلزام التحقق بخطوتين لفريق المنصة', 'Require 2FA for platform staff'), L('أي عضو من غير 2FA مش هيقدر يدخل بعد 7 أيام', 'Members without 2FA are locked out after 7 days'), sw(1, '2FA'))}
+            ${row(L('الدخول كمسؤول للشركة يحتاج سبب', 'Impersonation requires a reason'), L('السبب بيتسجل في سجل النشاط وبيتبعت إشعار للشركة', 'Logged to audit trail and the company is notified'), sw(1))}
+            ${row(L('مدة الجلسة', 'Session timeout'), L('تسجيل خروج تلقائي بعد عدم النشاط', 'Auto sign-out after inactivity'), ui.select('to', [L('ساعة', '1 hour'), L('8 ساعات', '8 hours'), L('24 ساعة', '24 hours')], { val: L('8 ساعات', '8 hours') }))}
+            ${row(L('الحد الأدنى لطول كلمة المرور', 'Minimum password length'), L('للمستخدمين الجدد وعند التغيير', 'For new users and on change'), ui.select('pl', ['8', '10', '12', '14'], { val: '12' }))}
+            ${row(L('عناوين IP المسموحة للوحة الإدارة', 'Admin console IP allow-list'), L('اتركها فاضية للسماح من أي مكان', 'Leave empty to allow from anywhere'), ui.input('ip', { ltr: 1, ph: '41.33.12.0/24' }))}`, { form: 1, tight: 1, act: ui.tag('success', L('قوي', 'Strong')) }) +
+        card(L('تسجيل دخول موحد لفريق المنصة', 'SSO for platform staff'), L('Google Workspace أو Microsoft Entra', 'Google Workspace or Microsoft Entra'), `<div class="row gap-4"><span class="ic-tile">${icon('fingerprint')}</span><div class="grow"><div class="t-strong">Google Workspace</div><div class="t-sm sec ltr" style="text-align:start">golive.example</div></div>${ui.tag('success', L('مفعّل', 'Enabled'))}<button type="button" class="btn btn-outline btn-sm" data-toast="info|${L('إعدادات SSO', 'SSO settings')}|">${L('إدارة', 'Manage')}</button></div>`))}
+      ${pane('int', `<div class="grid g-3">${[['Stripe', '#635BFF', 'S', L('تحصيل الاشتراكات والفواتير', 'Subscriptions and invoicing'), 1], ['Slack', '#4A154B', '#', L('تنبيهات التذاكر والمدفوعات الفاشلة', 'Ticket and failed-payment alerts'), 1], ['Google Workspace', '#1A73E8', 'G', L('دخول موحد لفريق المنصة', 'SSO for platform staff'), 1], ['Intercom', '#1F8DED', 'I', L('شات الدعم داخل المنتج', 'In-app support chat'), 0], ['Sentry', '#362D59', 'S', L('تتبع الأخطاء', 'Error tracking'), 0], ['Mailgun', '#F06B66', 'M', L('إرسال الإيميلات', 'Transactional email'), 1]].map(x => `<div class="card int" data-row><span class="lg" style="background:${x[1]}">${x[2]}</span><div><div class="t-strong" data-f="name">${x[0]}</div><div class="t-sm sec">${x[3]}</div></div><div class="f"><span data-st>${x[4] ? ui.tag('success', L('متصل', 'Connected')) : `<button type="button" class="btn btn-outline btn-sm" data-toast="success|${L('اتوصل', 'Connected')}|${x[0]}">${L('توصيل', 'Connect')}</button>`}</span>${x[4] ? `<button type="button" class="btn btn-ghost btn-sm" data-confirm="disc">${L('فصل', 'Disconnect')}</button>` : ''}</div></div>`).join('')}</div>`)}
+      ${pane('api', card(L('مفاتيح API', 'API keys'), L('للتكامل مع أنظمة الفوترة والتقارير الداخلية', 'For internal billing and reporting integrations'), `<div class="stack gap-3" id="keyList">${[[L('مزامنة الفوترة', 'Billing sync'), 'gl_live_••••••••••••••••7f3a', L('استخدام: منذ 4 د', 'Used 4m ago')], [L('تقارير Metabase', 'Metabase reports'), 'gl_live_••••••••••••••••c21e', L('استخدام: منذ 12 يوم', 'Used 12d ago')]].map(k => keyRow(L, k)).join('')}</div>`, { act: `<button type="button" class="btn btn-outline btn-sm" data-open="key">${icon('plus')}${L('مفتاح جديد', 'New key')}</button>` }) +
+        `<div class="card sec-card table-wrap"><div class="card-head"><div><h3 class="t-h3">Webhooks</h3><p class="sub">${L('بنبعت الأحداث دي لأنظمتك', 'We POST these events to your systems')}</p></div><button type="button" class="btn btn-outline btn-sm" data-open="hook">${icon('plus')}${L('إضافة', 'Add endpoint')}</button></div>
+          <table class="tbl" id="hookTbl"><colgroup><col style="width:280px"><col><col style="width:120px"><col style="width:56px"></colgroup><thead><tr><th>URL</th><th>${L('الأحداث', 'Events')}</th><th>${L('الحالة', 'Status')}</th><th></th></tr></thead><tbody>${[['https://ops.golive.example/stripe', ['invoice.paid', 'invoice.failed'], 1], ['https://crm.golive.example/new', ['company.created'], 0]].map(h => hookRow(L, h)).join('')}</tbody></table></div>`)}
+      ${pane('danger', `<div class="card danger-card"><div class="card-body stack gap-5">
+          <div class="row between gap-6"><div><div class="t-strong" style="color:var(--gl-danger-fg)">${L('وضع الصيانة', 'Maintenance mode')}</div><div class="t-sm sec">${L('كل الشركات هتشوف صفحة صيانة، ولوحة الإدارة بس هتفضل شغالة', 'All companies see a maintenance page; only this console stays available')}</div></div><button type="button" class="btn btn-outline" style="color:var(--gl-danger-fg)" data-confirm="maint">${L('تفعيل الصيانة', 'Enable maintenance')}</button></div>
+          <div class="divider"></div>
+          <div class="row between gap-6"><div><div class="t-strong" style="color:var(--gl-danger-fg)">${L('مسح بيانات التجارب المنتهية', 'Purge expired trial data')}</div><div class="t-sm sec">${L('مساحات عمل تجريبية خلصت من أكتر من 60 يوم (14 مساحة)', 'Trial workspaces expired over 60 days ago (14 workspaces)')}</div></div><button type="button" class="btn btn-danger" data-confirm="purge">${icon('trash-2', 'sm')}${L('مسح', 'Purge')}</button></div>
+        </div></div>`)}
       </div>
     </section>`;
   }

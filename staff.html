@@ -23,12 +23,36 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
 GL.mount({
   nav: 'staff',
   title: L => L('فريق المنصة', 'Platform Staff'),
+  modals: {
+    invite: { icon: 'user-plus', title: L => L('دعوة عضو للوحة الإدارة', 'Invite to admin console'), sub: L => L('الدعوة صالحة 7 أيام', 'Invite link is valid for 7 days'),
+      body: (L, { ui }) => `<div class="form-grid">${ui.field(L('الاسم', 'Name'), ui.input('name', { req: 1 }), { req: 1 })}${ui.field(L('البريد', 'Email'), ui.input('email', { req: 1, type: 'email', ltr: 1, ph: 'name@golive.example' }), { req: 1 })}</div>
+        <div class="field"><label>${L('الدور', 'Role')}</label><div class="stack gap-2" data-radio>${[['admin', L('مسؤول', 'Admin'), L('كل حاجة ما عدا الفوترة وإدارة الفريق', 'Everything except billing and staff')], ['support', L('دعم فني', 'Support'), L('التذاكر والدخول كمسؤول للشركات', 'Tickets and company impersonation')], ['billing', L('مالية', 'Billing'), L('الفواتير والاسترداد', 'Invoices and refunds')], ['ro', L('قراءة فقط', 'Read-only'), L('عرض بدون تعديل', 'View without changes')]].map((r, i) => `<div class="opt ${i === 1 ? 'on' : ''}" data-val="role" data-value="${r[0]}"><span class="radio ${i === 1 ? 'on' : ''}"></span><div class="grow"><div class="t-strong">${r[1]}</div><div class="t-sm sec">${r[2]}</div></div></div>`).join('')}</div></div>`,
+      submit: L => L('إرسال الدعوة', 'Send invite'), submitIcon: 'send',
+      onSubmit: (v, { form }) => { const o = form.querySelector('.opt.on'); v.role = o ? o.dataset.value : 'support'; },
+      add: { table: 'stfTbl', row: (v, L) => window.stRow(L, [v.name, v.email, (v.name.trim()[0] || 'U').toUpperCase(), 'av-teal', v.role, 0, '—', 'invited']) },
+      toast: (L, v) => [L('اتبعتت الدعوة', 'Invite sent'), v.email] },
+    role: { size: 'sm', icon: 'user-cog', title: L => L('تغيير الدور', 'Change role'), sub: (L, c) => c.name,
+      body: (L, { ui }) => ui.field(L('الدور', 'Role'), ui.select('role', [['admin', L('مسؤول', 'Admin')], ['support', L('دعم فني', 'Support')], ['billing', L('مالية', 'Billing')], ['ro', L('قراءة فقط', 'Read-only')]])),
+      onSubmit: (v, { row }) => { const R = window.stRoles(GL.L); if (row) { row.querySelector('[data-rl]').innerHTML = GL.ui.tag(R[v.role][0], R[v.role][1], false); row.dataset.role = v.role; GLI.flash(row); } }, toast: L => [L('اتغير الدور', 'Role updated'), ''] },
+    newrole: { kind: 'drawer', icon: 'shield', title: L => L('دور مخصص', 'Custom role'), sub: L => L('ابدأ من نسخة دور الدعم الفني', 'Starting from a copy of Support'),
+      body: (L, { ui }) => `${ui.field(L('اسم الدور', 'Role name'), ui.input('name', { req: 1, ph: L('مثال: دعم أول مستوى', 'e.g. Tier-1 support') }), { req: 1 })}${ui.field(L('الوصف', 'Description'), ui.input('d'), { opt: L('اختياري', 'optional') })}
+        <div class="sec-title">${L('الصلاحيات', 'Permissions')}</div><div class="stack gap-2" data-multi>${[[L('عرض الشركات وملف 360', 'View companies & 360'), 1], [L('الدخول كمسؤول للشركة', 'Log in as company admin'), 1], [L('تعليق أو حذف شركة', 'Suspend or delete company'), 0], [L('عرض الفواتير', 'View invoices'), 0], [L('استرداد وخصومات', 'Refunds & credits'), 0], [L('الرد على التذاكر', 'Reply to tickets'), 1]].map(x => `<div class="opt ${x[1] ? 'on' : ''}"><span class="box ${x[1] ? 'on' : ''}">${x[1] ? GL.icon('check') : ''}</span><span class="grow">${x[0]}</span></div>`).join('')}</div>`,
+      submit: L => L('إنشاء الدور', 'Create role'), toast: (L, v) => [L('اتعمل الدور', 'Role created'), v.name] },
+    policy: { icon: 'shield-check', title: L => L('سياسة الأمان', 'Security policy'), body: (L, { ui }) => `${[[L('إلزام التحقق بخطوتين', 'Require 2FA'), 1], [L('قفل الحساب بعد 5 محاولات فاشلة', 'Lock after 5 failed attempts'), 1], [L('تنبيه عند الدخول من جهاز جديد', 'Alert on new-device sign-in'), 1], [L('السماح بالدخول من خارج مصر', 'Allow sign-in outside Egypt'), 0]].map(x => `<div class="set-row" style="padding:var(--gl-space-2) 0"><span class="grow">${x[0]}</span><span class="switch ${x[1] ? 'on' : ''}" data-static></span></div>`).join('')}`, toast: L => [L('اتحفظت السياسة', 'Policy saved'), ''] }
+  },
+  menus: { st: [{ icon: 'user-cog', ar: 'تغيير الدور', en: 'Change role', open: 'role' }, { icon: 'mail', ar: 'إعادة إرسال الدعوة', en: 'Resend invite', toast: (L, n) => `success|${L('اتبعتت الدعوة تاني', 'Invite resent')}|${n}` }, { icon: 'shield', ar: 'إعادة ضبط 2FA', en: 'Reset 2FA', toast: (L, n) => `warning|${L('اتعمل reset للتحقق بخطوتين', '2FA reset')}|${n}` }, '-', { icon: 'user-x', ar: 'إزالة من الفريق', en: 'Remove from team', del: 1, danger: 1 }] },
   render: (L, { icon, ui }) => {
-    const roles = { owner: ['accent', L('مالك', 'Owner')], admin: ['brand', L('مسؤول', 'Admin')], support: ['info', L('دعم فني', 'Support')], billing: ['violet', L('مالية', 'Billing')], ro: ['neutral', L('قراءة فقط', 'Read-only')] };
+    const roles = window.stRoles = L => ({ owner: ['accent', L('مالك', 'Owner')], admin: ['brand', L('مسؤول', 'Admin')], support: ['info', L('دعم فني', 'Support')], billing: ['violet', L('مالية', 'Billing')], ro: ['neutral', L('قراءة فقط', 'Read-only')] }); const R0 = roles(L);
+    window.stRow = (L, s) => { const R = roles(L); return `<tr data-row data-role="${s[4]}"><td><div class="cell-co">${GL.ui.av(s[2], s[3], 'round')}<div><div class="nm" data-f="name">${s[0]}</div><div class="dm">${s[1]}</div></div></div></td>
+          <td data-rl>${GL.ui.tag(R[s[4]][0], R[s[4]][1], false)}</td>
+          <td>${s[5] ? `<span class="cell-ic yes t-sm">${icon('shield-check', 'sm')}${L('مفعّل', 'Enabled')}</span>` : `<span class="cell-ic t-sm" style="color:var(--gl-warning-fg)">${icon('alert-triangle', 'sm')}${L('غير مفعّل', 'Not set')}</span>`}</td>
+          <td class="sec">${s[6]}</td><td>${s[7] === 'active' ? GL.ui.tag('success', L('نشط', 'Active')) : GL.ui.tag('info', L('دعوة مرسلة', 'Invited'))}</td>
+          <td class="right">${s[4] === 'owner' ? '' : GL.ui.menuBtn('st')}</td></tr>`; };
     const S = [
       [L('محمد علاء', 'Mohamed Alaa'), 'mohamed@golive.example', L('م', 'MA'), 'av-solid', 'owner', 1, L('الآن', 'Now'), 'active'],
       [L('هند نبيل', 'Hend Nabil'), 'hend@golive.example', L('ه', 'HN'), 'av-violet', 'support', 1, L('منذ 5 د', '5m ago'), 'active'],
@@ -54,31 +78,27 @@ GL.mount({
     return `
     <div class="page-head">
       <div><h1 class="t-h1">${L('فريق المنصة والصلاحيات', 'Platform staff & roles')}</h1><p class="sub">${L('مين يقدر يدخل لوحة الإدارة وإيه اللي يقدر يعمله', 'Who can access the admin console and what they can do')}</p></div>
-      <div class="actions"><button class="btn btn-outline">${icon('shield-check', 'sm')}${L('سياسة الأمان', 'Security policy')}</button><button class="btn btn-primary">${icon('user-plus', 'sm')}${L('دعوة عضو', 'Invite member')}</button></div>
+      <div class="actions"><button class="btn btn-outline" data-open="policy">${icon('shield-check', 'sm')}${L('سياسة الأمان', 'Security policy')}</button><button class="btn btn-primary" data-open="invite">${icon('user-plus', 'sm')}${L('دعوة عضو', 'Invite member')}</button></div>
     </div>
     <section class="card table-wrap">
-      <div class="toolbar"><label class="control search">${icon('search', 'sm')}<input placeholder="${L('ابحث بالاسم أو البريد…', 'Search name or email…')}"></label><span class="chip">${icon('plus')}${L('الدور', 'Role')}</span>
+      <div class="toolbar"><label class="control search sm">${icon('search', 'sm')}<input data-search="stfTbl" placeholder="${L('ابحث بالاسم أو البريد…', 'Search name or email…')}"></label><span class="sel sm">${ui.select('r', Object.entries(R0).map(([k, r]) => [k, r[1]]), { ph: L('كل الأدوار', 'All roles'), filter: 'stfTbl', key: 'role', cls: 'sm', icon: 'shield' })}</span>
         <div class="end"><span class="callout info" style="padding:6px 12px;align-items:center">${icon('info', 'sm')}<span>${L('2 أعضاء من غير تحقق بخطوتين', '2 members without 2FA')}</span></span></div></div>
-      <table class="tbl">
+      <table class="tbl" id="stfTbl">
         <colgroup><col><col style="width:140px"><col style="width:152px"><col style="width:144px"><col style="width:128px"><col style="width:80px"></colgroup>
         <thead><tr><th>${L('العضو', 'Member')}</th><th>${L('الدور', 'Role')}</th><th>${L('التحقق بخطوتين', '2FA')}</th><th>${L('آخر نشاط', 'Last active')}</th><th>${L('الحالة', 'Status')}</th><th></th></tr></thead>
-        <tbody>${S.map(s => `<tr><td><div class="cell-co">${ui.av(s[2], s[3], 'round')}<div><div class="nm">${s[0]}</div><div class="dm">${s[1]}</div></div></div></td>
-          <td>${ui.tag(roles[s[4]][0], roles[s[4]][1], false)}</td>
-          <td>${s[5] ? `<span class="cell-ic yes t-sm">${icon('shield-check', 'sm')}${L('مفعّل', 'Enabled')}</span>` : `<span class="cell-ic t-sm" style="color:var(--gl-warning-fg)">${icon('alert-triangle', 'sm')}${L('غير مفعّل', 'Not set')}</span>`}</td>
-          <td class="sec">${s[6]}</td><td>${s[7] === 'active' ? ui.tag('success', L('نشط', 'Active')) : ui.tag('info', L('دعوة مرسلة', 'Invited'))}</td>
-          <td class="right"><button class="icon-btn sm">${icon('more')}</button></td></tr>`).join('')}</tbody>
+        <tbody>${S.map(x => window.stRow(L, x)).join('')}</tbody>
       </table>
     </section>
     <section class="grid g-12">
       <div class="span-4 card">
-        <div class="card-head"><div><h3 class="t-h3">${L('الأدوار', 'Roles')}</h3><p class="sub">${L('5 أدوار · 1 مخصص', '5 roles · 1 custom')}</p></div><button class="btn btn-outline btn-sm">${icon('plus')}${L('دور', 'Role')}</button></div>
-        <div class="card-body pt0 stack gap-2">${Object.entries(roles).map(([k, r], i) => `<div class="role-card ${k === 'support' ? 'on' : ''}"><span class="ic-tile" style="width:32px;height:32px">${icon(['crown', 'shield', 'headset', 'wallet', 'eye'][i], 'sm')}</span><span class="t-strong">${r[1]}</span><span class="n">${[1, 1, 2, 1, 1][i]} ${L('عضو', i === 2 ? 'members' : 'member')}</span></div>`).join('')}</div>
+        <div class="card-head"><div><h3 class="t-h3">${L('الأدوار', 'Roles')}</h3><p class="sub">${L('5 أدوار · 1 مخصص', '5 roles · 1 custom')}</p></div><button class="btn btn-outline btn-sm" data-open="newrole">${icon('plus')}${L('دور', 'Role')}</button></div>
+        <div class="card-body pt0 stack gap-2" data-pick>${Object.entries(R0).map(([k, r], i) => `<div class="role-card ${k === 'support' ? 'on' : ''}"><span class="ic-tile" style="width:32px;height:32px">${icon(['crown', 'shield', 'headset', 'wallet', 'eye'][i], 'sm')}</span><span class="t-strong">${r[1]}</span><span class="n">${[1, 1, 2, 1, 1][i]} ${L('عضو', i === 2 ? 'members' : 'member')}</span></div>`).join('')}</div>
       </div>
       <div class="span-8 card table-wrap">
-        <div class="card-head bordered"><div><h3 class="t-h3">${L('مصفوفة الصلاحيات', 'Permission matrix')}</h3><p class="sub">${L('الأدوار الأساسية مقفولة، تقدر تنسخها لدور مخصص', 'System roles are locked; duplicate one to customise')}</p></div><button class="btn btn-outline btn-sm">${icon('copy')}${L('نسخ دور', 'Duplicate role')}</button></div>
+        <div class="card-head bordered"><div><h3 class="t-h3">${L('مصفوفة الصلاحيات', 'Permission matrix')}</h3><p class="sub">${L('الأدوار الأساسية مقفولة، تقدر تنسخها لدور مخصص', 'System roles are locked; duplicate one to customise')}</p></div><button class="btn btn-outline btn-sm" data-open="newrole">${icon('copy')}${L('نسخ دور', 'Duplicate role')}</button></div>
         <table class="tbl perm">
           <colgroup><col><col style="width:84px"><col style="width:84px"><col style="width:84px"><col style="width:84px"><col style="width:96px"></colgroup>
-          <thead><tr><th>${L('الصلاحية', 'Permission')}</th>${Object.values(roles).map(r => `<th class="c">${r[1]}</th>`).join('')}</tr></thead>
+          <thead><tr><th>${L('الصلاحية', 'Permission')}</th>${Object.values(R0).map(r => `<th class="c">${r[1]}</th>`).join('')}</tr></thead>
           <tbody>${P.map(r => r[0] === 'g' ? `<tr class="grp"><td colspan="6">${r[1]}</td></tr>` : `<tr><td>${r[0]}</td>${r.slice(1).map(v => `<td class="c">${ck(v)}</td>`).join('')}</tr>`).join('')}</tbody>
         </table>
       </div>

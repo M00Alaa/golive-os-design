@@ -100,7 +100,7 @@
     const t = typeof m.title === 'function' ? m.title(L, ctx) : m.title;
     const sub = typeof m.sub === 'function' ? m.sub(L, ctx) : m.sub;
     const body = m.body(L, h);
-    const foot = m.foot ? m.foot(L, h) : `<button type="button" class="btn btn-ghost" data-close>${L('إلغاء', 'Cancel')}</button><button type="submit" class="btn ${m.danger ? 'btn-danger' : 'btn-primary'}">${m.submitIcon ? icon(m.submitIcon, 'sm') : ''}${typeof m.submit === 'function' ? m.submit(L, ctx) : (m.submit || L('حفظ', 'Save'))}</button>`;
+    const foot = m.foot ? m.foot(L, h) : `<button type="button" class="btn btn-ghost" data-close>${L('إلغاء', 'Cancel')}</button><button type="submit" class="btn ${m.danger ? 'btn-danger' : 'btn-primary'}">${m.submitIcon ? icon(m.submitIcon, m.submitIcon === 'send' ? 'sm flip' : 'sm') : ''}${typeof m.submit === 'function' ? m.submit(L, ctx) : (m.submit || L('حفظ', 'Save'))}</button>`;
     const ov = overlay(`<form class="ov-form" novalidate>
       <header class="ov-head">${m.icon ? `<span class="ic-tile" style="${m.tone ? GL.ui.tone[m.tone] : ''}">${icon(m.icon)}</span>` : ''}<div class="grow"><h2 class="t-h2">${t}</h2>${sub ? `<p class="t-sm sec mt-1">${sub}</p>` : ''}</div><button type="button" class="icon-btn sm" data-close>${icon('x')}</button></header>
       <div class="ov-body">${body}</div>
