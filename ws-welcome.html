@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.welcome{position:relative;overflow:hidden;padding:var(--gl-space-8);border-radius:var(--gl-radius-xl);background:linear-gradient(135deg,var(--gl-brand-900),var(--gl-brand-700));color:#fff;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:var(--gl-space-8);align-items:center}
+[data-theme="dark"] .welcome{background:linear-gradient(135deg,#06201C,var(--gl-brand-900));border:1px solid var(--gl-border-default)}
+.welcome::after{content:"";position:absolute;inset-inline-end:-60px;top:-100px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgb(245 165 36 / .3),transparent 65%)}
+.welcome h1{font:var(--gl-type-display);color:#fff}
+.welcome p{color:var(--gl-brand-100);font:var(--gl-type-body-lg);margin-top:var(--gl-space-2)}
+.welcome .gs{position:relative;z-index:1;background:rgb(255 255 255 / .08);border:1px solid rgb(255 255 255 / .14);border-radius:var(--gl-radius-lg);padding:var(--gl-space-5)}
+.welcome .gs .bar{background:rgb(255 255 255 / .15);margin-top:var(--gl-space-3)}
+.welcome .gs .bar > i{background:var(--gl-accent-default)}
+.steps{display:flex;flex-direction:column}
+.stp{display:flex;align-items:center;gap:var(--gl-space-4);padding:var(--gl-space-4) var(--gl-space-6)}
+.stp + .stp{border-block-start:1px solid var(--gl-border-default)}
+.stp .cb{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--gl-border-strong);display:grid;place-items:center;flex:none;font:var(--gl-type-label-sm);color:var(--gl-text-muted)}
+.stp.done .cb{background:var(--gl-success-solid);border-color:var(--gl-success-solid);color:#fff}
+.stp.done .cb svg{width:14px;height:14px;stroke-width:3}
+.stp.done .t{color:var(--gl-text-muted);text-decoration:line-through}
+.stp.next{background:color-mix(in srgb,var(--gl-brand-subtle) 60%,transparent)}
+.stp.next .cb{border-color:var(--gl-brand-primary);color:var(--gl-brand-text)}
+.stp .t{font:var(--gl-type-body-strong)}
+.stp .d{font:var(--gl-type-body-sm);color:var(--gl-text-secondary)}
+.stp .min{font:var(--gl-type-caption);color:var(--gl-text-muted);white-space:nowrap}
+.ghost-rows{display:flex;flex-direction:column;gap:var(--gl-space-3);width:100%;max-width:440px;margin-bottom:var(--gl-space-2)}
+.ghost-rows div{display:flex;align-items:center;gap:var(--gl-space-3);padding:var(--gl-space-3);border:1px dashed var(--gl-border-strong);border-radius:var(--gl-radius-md);opacity:.7}
+.ghost-rows i{display:block;height:8px;border-radius:4px;background:var(--gl-bg-subtle)}
+.ghost-rows .sq{width:28px;height:28px;border-radius:6px;background:var(--gl-bg-subtle);flex:none}
+.tpl-q{display:flex;align-items:center;gap:var(--gl-space-3);padding:var(--gl-space-3);border:1px solid var(--gl-border-default);border-radius:var(--gl-radius-md)}
+.tpl-q + .tpl-q{margin-top:var(--gl-space-2)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  shell: 'ws', nav: 'ws-home', fresh: true,
+  title: L => L('أهلًا بيك', 'Welcome'),
+  render: (L, { icon, fwd }) => `
+    <section class="welcome">
+      <div style="position:relative;z-index:1"><span class="tag accent">${icon('party-popper', 'xs')}${L('مساحة العمل جاهزة', 'Workspace ready')}</span><h1 class="mt-3">${L('أهلًا بيك في GoLive يا أحمد!', 'Welcome to GoLive, Ahmed!')}</h1><p>${L('مساحة نيل سوفت اتعملت، و3 دعوات اتبعتت لفريقك. يلا نطلق أول مشروع.', 'NileSoft’s workspace is live and 3 invites are on their way. Let’s launch your first project.')}</p>
+        <div class="row gap-3 mt-6"><a class="btn btn-accent" href="ws-projects.html">${icon('plus', 'sm')}${L('أنشئ أول مشروع', 'Create first project')}</a><button class="btn" style="background:rgb(255 255 255 / .1);color:#fff;border-color:rgb(255 255 255 / .2)">${icon('play', 'sm')}${L('شوف جولة في دقيقتين', 'Watch a 2-min tour')}</button></div></div>
+      <div class="gs"><div class="row between"><span class="t-strong" style="color:#fff">${L('خطوات البداية', 'Getting started')}</span><span class="t-label" style="color:var(--gl-accent-300)">2 / 6</span></div><div class="bar thin"><i style="width:33%"></i></div><div class="t-cap mt-3" style="color:var(--gl-brand-200)">${L('خلص الخطوات وخد شهر إضافي مجانًا 🎁', 'Finish all steps to earn a free extra month 🎁')}</div></div>
+    </section>
+    <section class="grid g-12" style="align-items:start">
+      <div class="span-7 card">
+        <div class="card-head bordered"><div><h3 class="t-h3">${L('جهّز مساحتك', 'Set up your workspace')}</h3><p class="sub">${L('حوالي 15 دقيقة إجمالًا', 'About 15 minutes in total')}</p></div></div>
+        <div class="steps">${[
+          ['done', L('أنشئ مساحة العمل', 'Create your workspace'), L('نيل سوفت للحلول · nilesoft.golive.example', 'NileSoft Solutions · nilesoft.golive.example'), ''],
+          ['done', L('ادعُ فريقك', 'Invite your team'), L('3 دعوات اتبعتت', '3 invites sent'), ''],
+          ['next', L('أنشئ أول مشروع من قالب', 'Create a project from a playbook'), L('المراحل والمهام والمتطلبات بتتعمل لوحدها', 'Phases, tasks and requirements are created for you'), L('3 دقايق', '3 min')],
+          ['', L('أضف عميلك وفعّل البوابة', 'Add your client & enable the portal'), L('العميل بيشوف التقدم ويرد على الطلبات', 'Clients see progress and answer requests'), L('2 دقيقة', '2 min')],
+          ['', L('خصّص هوية البوابة', 'Brand your client portal'), L('شعارك وألوانك ودومين خاص', 'Your logo, colours and domain'), L('5 دقايق', '5 min')],
+          ['', L('اربط Odoo أو Google Calendar', 'Connect Odoo or Google Calendar'), L('اختياري · مزامنة المهام والاجتماعات', 'Optional · sync tasks and meetings'), L('5 دقايق', '5 min')]
+        ].map((s, i) => `<div class="stp ${s[0]}"><span class="cb">${s[0] === 'done' ? icon('check') : i + 1}</span><div class="grow"><div class="t">${s[1]}</div><div class="d">${s[2]}</div></div>${s[0] === 'next' ? `<a class="btn btn-primary btn-sm" href="ws-templates.html">${L('ابدأ', 'Start')}${fwd('sm')}</a>` : s[3] ? `<span class="min">${s[3]}</span>` : ''}</div>`).join('')}</div>
+      </div>
+      <div class="span-5 side">
+        <div class="card"><div class="empty">
+          <div class="ghost-rows"><div><span class="sq"></span><span class="grow"><i style="width:60%"></i></span><i style="width:56px"></i></div><div><span class="sq"></span><span class="grow"><i style="width:45%"></i></span><i style="width:56px"></i></div></div>
+          <span class="empty-ic">${icon('briefcase')}</span><h3 class="t-h3">${L('لسه مفيش مشاريع', 'No projects yet')}</h3><p>${L('ابدأ من قالب جاهز وفي دقايق هيبقى عندك خطة كاملة تشاركها مع عميلك.', 'Start from a playbook and in minutes you’ll have a full plan to share with your client.')}</p>
+          <div class="row gap-2"><a class="btn btn-primary btn-sm" href="ws-projects.html">${icon('plus')}${L('مشروع جديد', 'New project')}</a><button class="btn btn-outline btn-sm">${icon('download')}${L('استيراد من Excel', 'Import from Excel')}</button></div></div></div>
+        <div class="card"><div class="card-head"><div><h3 class="t-h3">${L('قوالب مقترحة لكم', 'Suggested playbooks')}</h3><p class="sub">${L('بناءً على Odoo ERP وCRM', 'Based on Odoo ERP and CRM')}</p></div></div>
+          <div class="card-body pt0">${[['layers', '', L('Odoo ERP قياسي', 'Odoo ERP standard'), L('6 مراحل · 16 أسبوع', '6 phases · 16 weeks')], ['users', 'info', 'Odoo CRM ' + L('سريع', 'quick-start'), L('4 مراحل · 6 أسابيع', '4 phases · 6 weeks')]].map(t => `<a class="tpl-q" href="ws-templates.html"><span class="ic-tile" style="width:36px;height:36px">${icon(t[0], 'sm')}</span><div class="grow"><div class="t-strong">${t[2]}</div><div class="t-cap muted">${t[3]}</div></div>${fwd('sm')}</a>`).join('')}</div></div>
+      </div>
+    </section>`
+});
+</script>
+</body>
+</html>

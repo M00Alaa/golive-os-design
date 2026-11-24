@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoLive OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/app.css">
+<link rel="stylesheet" href="assets/screens.css">
+<style>
+.wcard{padding:0}
+.wbody{padding:var(--gl-space-8);display:flex;flex-direction:column;gap:var(--gl-space-6)}
+.prefix{display:flex;align-items:stretch;height:40px;border:1px solid var(--gl-border-focus);box-shadow:var(--gl-focus-ring);border-radius:var(--gl-radius-md);overflow:hidden;background:var(--gl-bg-surface);direction:ltr}
+.prefix span{display:flex;align-items:center;padding-inline:var(--gl-space-3);background:var(--gl-bg-subtle);color:var(--gl-text-muted);font:var(--gl-type-body-sm);border-inline-start:1px solid var(--gl-border-default)}
+.prefix input{flex:1;min-width:0;border:0;outline:0;padding-inline:var(--gl-space-3);background:transparent;font:var(--gl-type-body)}
+.focus-opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gl-space-3)}
+.focus-opts .opt{align-items:center}
+.size-pills{display:flex;gap:var(--gl-space-2);flex-wrap:wrap}
+.size-pills span{height:36px;display:inline-flex;align-items:center;padding-inline:var(--gl-space-4);border-radius:999px;border:1px solid var(--gl-border-default);font:var(--gl-type-label);color:var(--gl-text-secondary);background:var(--gl-bg-surface)}
+.size-pills span.on{border-color:var(--gl-brand-primary);background:var(--gl-brand-subtle);color:var(--gl-brand-text)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="assets/icons.js"></script>
+<script src="assets/charts.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script>
+GL.mount({
+  shell: 'wizard', step: 0,
+  title: L => L('بيانات الشركة', 'Workspace details'),
+  render: (L, { icon }) => `
+    <div class="wiz-head"><span class="t-over" style="color:var(--gl-brand-text)">${L('خطوة 1 من 4', 'Step 1 of 4')}</span><h1>${L('عرّفنا على شركتك', 'Tell us about your company')}</h1><p>${L('هنستخدم البيانات دي عشان نجهزلك قوالب تنفيذ مناسبة وبوابة عميل باسم شركتك.', 'We’ll use this to set up matching playbooks and a client portal in your company’s name.')}</p></div>
+    <div class="card wcard">
+      <div class="wbody">
+        <div class="row gap-4"><span class="avatar ws-logo" style="width:64px;height:64px;font-size:24px;border-radius:var(--gl-radius-lg)">${L('ن', 'NS')}</span><div><div class="t-strong">${L('شعار الشركة', 'Company logo')} <span class="t-cap muted">(${L('اختياري', 'optional')})</span></div><div class="row gap-2 mt-2"><button class="btn btn-outline btn-sm">${icon('upload')}${L('رفع', 'Upload')}</button></div></div></div>
+        <div class="form-grid">
+          <div class="field"><label>${L('اسم الشركة', 'Company name')}</label><span class="control"><input value="${L('نيل سوفت للحلول', 'NileSoft Solutions')}"></span></div>
+          <div class="field"><label>${L('رابط مساحة العمل', 'Workspace URL')}</label><div class="prefix"><input value="nilesoft"><span>.golive.example</span></div><span class="hint row gap-1" style="color:var(--gl-success-fg)">${icon('check-circle', 'xs')}${L('الرابط متاح', 'Available')}</span></div>
+        </div>
+        <div class="field"><label>${L('بتنفذوا إيه أساسًا؟', 'What do you mainly implement?')}</label>
+          <div class="focus-opts">${[['layers', 'Odoo ERP', 1], ['users', 'CRM · Odoo / Zoho', 1], ['database', 'Dynamics 365'], ['briefcase', 'SAP Business One'], ['user-check', L('موارد بشرية ورواتب', 'HR & payroll')], ['plus', L('حاجة تانية', 'Something else')]].map(o => `<label class="opt ${o[2] ? 'on' : ''}"><span class="box ${o[2] ? 'on' : ''}">${o[2] ? icon('check') : ''}</span><span class="ic-tile" style="width:32px;height:32px">${icon(o[0], 'sm')}</span><span class="t t-sm ell">${o[1]}</span></label>`).join('')}</div></div>
+        <div class="field"><label>${L('حجم فريقكم', 'Team size')}</label><div class="size-pills">${['1–4', '5–10', '11–25', '26–50', '50+'].map((s, i) => `<span class="${i === 3 ? 'on' : ''}">${s}</span>`).join('')}</div></div>
+        <div class="form-grid">
+          <div class="field"><label>${L('لغة البوابة لعملائك', 'Client portal language')}</label><span class="control"><span class="val">${L('العربية + English', 'Arabic + English')}</span>${icon('chevron-down', 'sm')}</span></div>
+          <div class="field"><label>${L('الدولة والمنطقة الزمنية', 'Country & time zone')}</label><span class="control"><span class="val">${L('مصر · القاهرة (UTC+2)', 'Egypt · Cairo (UTC+2)')}</span>${icon('chevron-down', 'sm')}</span></div>
+        </div>
+      </div>
+      <div class="wiz-foot"><a class="btn btn-ghost" href="signup.html">${icon('arrow-left', 'sm flip')}${L('رجوع', 'Back')}</a><a class="btn btn-primary" href="onboarding-invite.html">${L('متابعة', 'Continue')}${icon('arrow-right', 'sm flip')}</a></div>
+    </div>`
+});
+</script>
+</body>
+</html>

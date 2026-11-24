@@ -98,29 +98,29 @@
     </div></aside>`;
   }
 
-  function wsSidebar(active) {
-    const item = navItem(active);
+  function wsSidebar(active, fresh) {
+    const item = n => navItem(active)(fresh ? n.slice(0, 5) : n);
     return `
     <aside class="sidebar ws"><div class="sb-in">
       <a class="ws-switch" href="ws-dashboard.html">
         <span class="avatar ws-logo">${L('ن', 'NS')}</span>
-        <span class="grow"><div class="brand-name">${L('نيل سوفت للحلول', 'NileSoft Solutions')}</div><div class="brand-sub">${L('مساحة عمل · Growth', 'Workspace · Growth')}</div></span>
+        <span class="grow"><div class="brand-name">${L('نيل سوفت للحلول', 'NileSoft Solutions')}</div><div class="brand-sub">${fresh ? L('تجربة مجانية · باقي 14 يوم', 'Free trial · 14 days left') : L('مساحة عمل · Growth', 'Workspace · Growth')}</div></span>
         ${icon('chevrons-up-down', 'sm')}
       </a>
       <nav class="nav">
         <div class="nav-label">${L('العمل', 'Work')}</div>
         ${WS_NAV.slice(0, 4).map(item).join('')}
       </nav>
-      <nav class="nav">
+      ${fresh ? '' : `<nav class="nav">
         <div class="nav-label">${L('مشاريع مثبتة', 'Pinned projects')}</div>
         ${WS_PINNED.map(p => `<a class="nav-item pin" href="${p[3]}"><i style="background:${p[0]}"></i><span class="ell">${L(p[1], p[2])}</span></a>`).join('')}
-      </nav>
+      </nav>`}
       <nav class="nav">
         <div class="nav-label">${L('المساحة', 'Workspace')}</div>
         ${WS_NAV.slice(4).map(item).join('')}
       </nav>
       <div class="sidebar-foot">
-        <div class="sys-status usage-mini"><span class="grow"><b>${L('7 من 10 مشاريع نشطة', '7 of 10 active projects')}</b><span class="bar thin"><i style="width:70%"></i></span></span></div>
+        <div class="sys-status usage-mini"><span class="grow"><b>${fresh ? L('0 من 10 مشاريع نشطة', '0 of 10 active projects') : L('7 من 10 مشاريع نشطة', '7 of 10 active projects')}</b><span class="bar thin"><i style="width:${fresh ? 0 : 70}%"></i></span></span></div>
         <div class="me">
           <span class="avatar round av-solid">${L('أ', 'A')}</span>
           <span><div class="me-name">${L('أحمد سامي', 'Ahmed Samy')}</div><div class="me-role">${L('مالك المساحة', 'Workspace owner')}</div></span>
@@ -173,7 +173,7 @@
         <div class="art-grid"></div>
         <div class="art-in">
           <span class="tag accent">${icon('sparkles', 'xs')}${L('لشركات تنفيذ ERP وCRM', 'Built for ERP & CRM implementers')}</span>
-          <h2>${L('من توقيع العقد لحد الـ Go-live، في مكان واحد.', 'From signed contract to go-live, in one place.')}</h2>
+          <h2>${L('من توقيع العقد لحد الإطلاق، في مكان واحد.', 'From signed contract to go-live, in one place.')}</h2>
           <p>${L('المتطلبات والموافقات والـ blockers وبوابة العميل، كلها متابعة لحظة بلحظة.', 'Requirements, approvals, blockers and a client portal — tracked in real time.')}</p>
           <div class="art-card">
             <div class="row between"><div class="row gap-3"><span class="avatar sm av-teal">${L('ن', 'AN')}</span><div><div class="t-strong">${L('تطبيق Odoo ERP', 'Odoo ERP rollout')}</div><div class="t-cap">${L('مصنع النور للبلاستيك', 'Al Nour Plastics')}</div></div></div><span class="tag success"><span class="dot"></span>${L('في المسار', 'On track')}</span></div>
@@ -225,7 +225,7 @@
     if (page.doc) {
       root.innerHTML = `<div class="doc">${docbar()}<main class="doc-main">${body}</main></div>`;
     } else if (shell === 'ws') {
-      root.innerHTML = `<div class="app">${wsSidebar(page.nav)}<div class="main">${topbar(true)}<main class="content">${body}</main></div></div>`;
+      root.innerHTML = `<div class="app">${wsSidebar(page.nav, page.fresh)}<div class="main">${topbar(true)}<main class="content">${body}</main></div></div>`;
     } else if (shell === 'portal') {
       root.innerHTML = `<div class="portal">${portalbar(page.nav)}<main class="p-main">${body}</main></div>`;
     } else if (shell === 'auth') {
