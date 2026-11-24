@@ -201,6 +201,7 @@
     const inMenu = !!q('.menu');
     if (!inMenu) closeMenus();
     if ((el = q('[data-tab]')) && el.closest('[data-tabs]')) { e.preventDefault(); const c = el.closest('[data-tabs]'); UI[c.dataset.tabs] = el.dataset.tab; applyTabs(document); return; }
+    if ((el = q('[data-goto]'))) { e.preventDefault(); const [g, k] = el.dataset.goto.split(':'); UI[g] = k; applyTabs(document); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     if ((el = q('[data-open]'))) { e.preventDefault(); openModal(el.dataset.open, el); closeMenus(); return; }
     if ((el = q('[data-delete]'))) {
       e.preventDefault(); const row = el.closest('[data-row]') || (inMenu ? menuRow : null); closeMenus();
