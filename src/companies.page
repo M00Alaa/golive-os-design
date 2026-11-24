@@ -1,0 +1,105 @@
+.toolbar .search{width:320px}
+.toolbar .sel{width:184px}.toolbar .sel .control{width:100%}
+.tbl td.co a:hover .nm{color:var(--gl-brand-text)}
+.mrr{font:var(--gl-type-body-strong);font-variant-numeric:tabular-nums}
+.stat-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--gl-space-6)}
+//JS
+const coRow = (L, ui, icon, c) => {
+  const st = GL_STATUS[c.status];
+  return `<tr data-row data-cat="${c.status}" data-plan="${c.plan}" data-ctx='${JSON.stringify({ plan: c.plan, owner: c.owner || '', email: c.email || '' }).replace(/'/g, '&#39;')}'>
+    <td><span class="box"></span></td>
+    <td class="co"><a class="cell-co" href="company-360.html">${ui.av(c.ini, c.av)}<div><div class="nm" data-f="name">${c.name}</div><div class="dm" data-f="domain">${c.domain}</div></div></a></td>
+    <td data-plan-tag>${ui.tag(GL_PLAN_TAG[c.plan], c.plan, false)}</td>
+    <td data-st>${ui.tag(st[0], L(st[1], st[2]))}</td>
+    <td><span class="cell-ic num">${icon('users', 'sm muted')}${c.users}</span></td>
+    <td><span class="cell-ic num">${icon('folder', 'sm muted')}${c.projects}</span></td>
+    <td><span class="mrr ltr">$${c.mrr}</span> <small class="muted t-cap">${L('/ شهر', '/ mo')}</small></td>
+    <td class="sec">${c.created}</td>
+    <td class="right">${ui.menuBtn('co')}</td></tr>`;
+};
+const coForm = (L, { ui, ctx }) => `
+  <div class="form-grid">
+    ${ui.field(L('اسم الشركة', 'Company name'), ui.input('name', { req: 1, icon: 'building', ph: L('مثال: نيل سوفت للحلول', 'e.g. NileSoft Solutions') }), { req: 1, full: 1 })}
+    ${ui.field(L('الدومين', 'Domain'), ui.input('domain', { req: 1, ltr: 1, icon: 'globe', ph: 'company.example' }), { req: 1 })}
+    ${ui.field(L('الدولة', 'Country'), ui.select('country', [L('مصر', 'Egypt'), L('السعودية', 'Saudi Arabia'), L('الإمارات', 'UAE'), L('الكويت', 'Kuwait')]))}
+    ${ui.field(L('اسم المالك', 'Owner name'), ui.input('owner', { req: 1, icon: 'user' }), { req: 1 })}
+    ${ui.field(L('بريد المالك', 'Owner email'), ui.input('email', { req: 1, type: 'email', ltr: 1, icon: 'mail', ph: 'owner@company.example' }), { req: 1, hint: L('هيوصله دعوة لتفعيل الحساب', 'They’ll get an invite to activate the account') })}
+    ${ui.field(L('الخطة', 'Plan'), ui.select('plan', ['Starter', 'Growth', 'Enterprise'], { val: ctx.plan || 'Growth' }), { req: 1 })}
+    ${ui.field(L('دورة الفوترة', 'Billing cycle'), ui.select('cycle', [['m', L('شهري', 'Monthly')], ['y', L('سنوي (خصم 20%)', 'Annual (20% off)')]]))}
+  </div>
+  <div class="set-row" style="padding:0"><div class="grow"><div class="t-strong">${L('ابدأ بفترة تجريبية 14 يوم', 'Start with a 14-day trial')}</div><div class="t-sm sec">${L('مش هيتسحب أي مبلغ قبل نهاية الفترة', 'No charge until the trial ends')}</div></div><span class="switch on" data-static data-val="trial"></span></div>`;
+GL.mount({
+  nav: 'companies',
+  title: L => L('الشركات', 'Companies'),
+  modals: {
+    add: { kind: 'drawer', icon: 'building', title: L => L('إضافة شركة', 'Add company'), sub: L => L('أنشئ مساحة عمل جديدة وابعت دعوة للمالك', 'Create a workspace and invite its owner'), submit: L => L('إنشاء الشركة', 'Create company'), submitIcon: 'plus', body: coForm,
+      add: { table: 'coTbl', row: (v, L, h) => coRow(L, GL.ui, GL.icon, { name: v.name, domain: v.domain, ini: v.name.trim()[0].toUpperCase(), av: 'av-teal', plan: v.plan, status: v.trial ? 'trial' : 'active', users: 1, projects: 0, mrr: v.trial ? 0 : { Starter: 79, Growth: 179, Enterprise: 420 }[v.plan], created: L('النهارده', 'Today'), owner: v.owner, email: v.email }) },
+      toast: (L, v) => [L('اتضافت الشركة', 'Company created'), L(`اتبعتت دعوة لـ ${v.email}`, `Invite sent to ${v.email}`)] },
+    edit: { kind: 'drawer', icon: 'pencil', title: (L, c) => L('تعديل الشركة', 'Edit company'), sub: (L, c) => c.name, body: coForm, toast: L => [L('اتحفظت بيانات الشركة', 'Company updated'), ''],
+      onSubmit: (v, { row }) => { if (row) { row.querySelector('[data-plan-tag]').innerHTML = GL.ui.tag(GL_PLAN_TAG[v.plan], v.plan, false); row.dataset.plan = v.plan; } } },
+    plan: { icon: 'layers', size: 'sm', title: L => L('تغيير الخطة', 'Change plan'), sub: (L, c) => c.name,
+      body: (L, { ctx }) => `<div class="stack gap-2" data-radio>${[['Starter', '$79'], ['Growth', '$179'], ['Enterprise', '$420']].map(p => `<div class="opt ${p[0] === ctx.plan ? 'on' : ''}" data-val="plan" data-value="${p[0]}"><span class="radio ${p[0] === ctx.plan ? 'on' : ''}"></span><div class="grow"><div class="t-strong">${p[0]}</div><div class="t-sm sec">${p[1]} ${L('/ شهر', '/ mo')}</div></div></div>`).join('')}</div>
+        ${GL.ui.field(L('تطبيق التغيير', 'Apply change'), GL.ui.select('when', [['now', L('فورًا مع حساب الفرق', 'Now, prorated')], ['next', L('من الدورة الجاية', 'At next renewal')]]))}`,
+      submit: L => L('تأكيد التغيير', 'Confirm change'),
+      onSubmit: (v, { row, form }) => { const on = form.querySelector('.opt.on'); const p = on ? on.dataset.value : 'Growth'; if (row) { row.querySelector('[data-plan-tag]').innerHTML = GL.ui.tag(GL_PLAN_TAG[p], p, false); row.dataset.plan = p; GLI.flash(row); } },
+      toast: L => [L('اتغيرت الخطة', 'Plan changed'), L('هيظهر الفرق في الفاتورة الجاية', 'The difference shows on the next invoice')] },
+    'more-filters': { kind: 'drawer', icon: 'filter', title: L => L('فلاتر أكثر', 'More filters'),
+      body: (L, { ui }) => `${ui.field(L('عدد المستخدمين', 'Users'), ui.select('u', [L('أي عدد', 'Any'), '1–10', '11–50', '50+']))}${ui.field('MRR', ui.select('m', [L('أي قيمة', 'Any'), '$0', '$1–$200', '$200+']))}${ui.field(L('الدولة', 'Country'), ui.select('c', [L('الكل', 'All'), L('مصر', 'Egypt'), L('السعودية', 'Saudi Arabia')]))}<label class="check"><span class="box on">${GL.icon('check')}</span>${L('إخفاء الشركات المحذوفة', 'Hide deleted companies')}</label>`,
+      submit: L => L('تطبيق', 'Apply'), toast: L => [L('اتطبقت الفلاتر', 'Filters applied'), ''] }
+  },
+  menus: {
+    co: [{ icon: 'eye', ar: 'فتح ملف 360', en: 'Open 360 view', href: 'company-360.html' }, { icon: 'pencil', ar: 'تعديل', en: 'Edit', open: 'edit' }, { icon: 'layers', ar: 'تغيير الخطة', en: 'Change plan', open: 'plan' },
+      { icon: 'log-in', ar: 'الدخول كمسؤول', en: 'Log in as admin', confirm: 'imp' }, { icon: 'clock', ar: 'مد الفترة التجريبية 7 أيام', en: 'Extend trial 7 days', toast: (L, n) => `success|${L('اتمدت الفترة التجريبية', 'Trial extended')}|${n}` }, '-',
+      { icon: 'ban', ar: 'تعليق الحساب', en: 'Suspend', confirm: 'suspend' }, { icon: 'trash-2', ar: 'حذف الشركة', en: 'Delete company', confirm: 'del', danger: 1 }]
+  },
+  confirms: {
+    suspend: { icon: 'ban', title: (L, c) => L(`تعليق «${c.name}»؟`, `Suspend “${c.name}”?`), text: L => L('المستخدمين مش هيقدروا يدخلوا لحد ما تعيد التفعيل. البيانات هتفضل محفوظة.', 'Users lose access until you reactivate. Data is kept.'), btn: L => L('تعليق', 'Suspend'), danger: 1,
+      run: (L, c, row) => { row.querySelector('[data-st]').innerHTML = GL.ui.tag('neutral', L('معلّقة', 'Suspended')); GLI.flash(row); }, toast: (L, c) => [L('اتعلق الحساب', 'Company suspended'), c.name] },
+    imp: { icon: 'log-in', title: (L, c) => L(`الدخول كمسؤول في «${c.name}»`, `Log in as admin of “${c.name}”`), text: L => L('الجلسة هتتسجل في سجل التدقيق ومدتها 30 دقيقة.', 'The session is recorded in the audit log and lasts 30 minutes.'), btn: L => L('ابدأ الجلسة', 'Start session'), run: () => setTimeout(() => location.href = 'ws-dashboard.html', 900), toast: L => [L('جاري الدخول…', 'Opening workspace…'), '', 'info'] },
+    del: { danger: 1, title: (L, c) => L(`حذف «${c.name}» نهائيًا؟`, `Delete “${c.name}” permanently?`), text: L => L('هيتحذف كل المشاريع والملفات والمستخدمين. الإجراء ده مالوش رجوع.', 'All projects, files and users will be removed. This can’t be undone.'), type: (L, c) => c.domain, btn: L => L('حذف نهائي', 'Delete forever'), run: (L, c, row) => GLI.deleteRow(row, c.name) }
+  },
+  render: (L, { icon, fwd, back, ui }) => {
+    const rows = GL_COMPANIES.map(c => coRow(L, ui, icon, { name: L(c[0], c[1]), domain: c[2], ini: L(c[3], c[4]), av: c[5], plan: c[6], status: c[7], users: c[8], mrr: c[9], created: L(c[10], c[11]), projects: c[12], owner: '', email: 'owner@' + c[2] })).join('');
+    const cnt = k => GL_COMPANIES.filter(c => k === 'all' || c[7] === k).length;
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('الشركات', 'Companies')}</h1>
+        <p class="sub">${L('كل الشركات المشتركة في المنصة واشتراكاتها وحالتها.', 'Every company on the platform, with its plan and status.')}</p></div>
+      <div class="actions">
+        <button class="btn btn-outline" data-toast="success|${L('جاري التصدير', 'Export started')}|${L('هيوصلك ملف CSV على البريد خلال دقيقة', 'A CSV will be emailed to you in a minute')}">${icon('download', 'sm')}${L('تصدير CSV', 'Export CSV')}</button>
+        <button class="btn btn-primary" data-open="add">${icon('plus', 'sm')}${L('إضافة شركة', 'Add company')}</button>
+      </div>
+    </div>
+    <section class="stat-strip">
+      ${ui.mini('building', '', '128', L('إجمالي الشركات', 'Total companies'))}
+      ${ui.mini('check-circle', ui.tone.success, '96', L('اشتراك نشط', 'Active subscriptions'))}
+      ${ui.mini('clock', ui.tone.info, '23', L('في الفترة التجريبية', 'On trial'))}
+      ${ui.mini('alert-triangle', ui.tone.warning, '6', L('متأخرة الدفع', 'Past due'))}
+    </section>
+    <section class="card table-wrap">
+      <div class="tabs" style="padding-inline:var(--gl-space-6)" data-tabs="st" data-filter-table="coTbl">
+        ${[['all', 'الكل', 'All'], ['active', 'نشطة', 'Active'], ['trial', 'تجريبية', 'Trial'], ['pastdue', 'متأخرة الدفع', 'Past due'], ['cancelled', 'ملغاة', 'Cancelled']].map((t, i) => `<span class="tab ${i ? '' : 'active'}" data-tab="${t[0]}">${L(t[1], t[2])} <span class="badge">${cnt(t[0])}</span></span>`).join('')}
+      </div>
+      <div class="toolbar">
+        <label class="control search sm">${icon('search', 'sm')}<input data-search="coTbl" placeholder="${L('ابحث بالاسم أو الدومين…', 'Search by name or domain…')}"></label>
+        <span class="sel sm">${ui.select('fplan', ['Starter', 'Growth', 'Enterprise'], { ph: L('كل الخطط', 'All plans'), filter: 'coTbl', key: 'plan', icon: 'layers', cls: 'sm' })}</span>
+        <button class="btn btn-ghost btn-sm" data-open="more-filters">${icon('filter', 'sm')}${L('فلاتر أكثر', 'More filters')}</button>
+        <div class="end">
+          <span class="t-sm sec" style="align-self:center">${L('النتايج:', 'Results:')} <b class="num" data-count="coTbl">8</b></span>
+          <button class="icon-btn sm outline" title="Refresh" data-toast="info|${L('اتحدثت البيانات', 'Data refreshed')}|">${icon('refresh')}</button>
+        </div>
+      </div>
+      <div class="bulkbar" data-bulk="coTbl" hidden>${icon('check-circle', 'sm')}<span><b data-bulk-n>0</b> ${L('محدد', 'selected')}</span>
+        <div class="end"><button class="btn btn-outline btn-sm" data-toast="success|${L('اتبعتت رسالة', 'Email sent')}|">${icon('mail', 'sm')}${L('ابعت رسالة', 'Email')}</button><button class="btn btn-outline btn-sm" data-toast="success|${L('جاري التصدير', 'Export started')}|">${icon('download', 'sm')}${L('تصدير', 'Export')}</button></div></div>
+      <table class="tbl" id="coTbl">
+        <colgroup><col style="width:64px"><col><col style="width:112px"><col style="width:136px"><col style="width:88px"><col style="width:88px"><col style="width:120px"><col style="width:144px"><col style="width:72px"></colgroup>
+        <thead><tr><th><span class="box"></span></th><th><span class="th-sort">${L('الشركة', 'Company')}${icon('sort', 'xs')}</span></th><th>${L('الخطة', 'Plan')}</th><th>${L('الحالة', 'Status')}</th><th>${L('المستخدمين', 'Users')}</th><th>${L('المشاريع', 'Projects')}</th><th><span class="th-sort">MRR${icon('sort', 'xs')}</span></th><th><span class="th-sort">${L('تاريخ الإنشاء', 'Created')}${icon('sort', 'xs')}</span></th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="card-foot">
+        <span class="t-sm sec">${L('عرض <b class="num">1–8</b> من <b class="num">128</b> شركة', 'Showing <b class="num">1–8</b> of <b class="num">128</b> companies')}</span>
+        <div class="pager" data-pick><span class="pg nav">${back('sm')}</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">…</span><span class="pg">16</span><span class="pg nav">${fwd('sm')}</span></div>
+      </div>
+    </section>`;
+  }
+});

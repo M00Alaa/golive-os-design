@@ -1,0 +1,277 @@
+.hero{padding:var(--gl-space-6) var(--gl-space-6) 0}
+  .hero-top{display:flex;align-items:flex-start;gap:var(--gl-space-5)}
+  .hero-id{flex:1;min-width:0}
+  .hero-id .name{display:flex;align-items:center;gap:var(--gl-space-3);flex-wrap:wrap}
+  .meta{display:flex;flex-wrap:wrap;gap:var(--gl-space-2) var(--gl-space-6);margin-top:var(--gl-space-3);font:var(--gl-type-body-sm);color:var(--gl-text-secondary)}
+  .meta span{display:inline-flex;align-items:center;gap:6px}
+  .meta svg.i{width:16px;height:16px;color:var(--gl-text-muted)}
+  .hero .tabs{margin-top:var(--gl-space-6);border-block-end:0;margin-inline:calc(var(--gl-space-6) * -1);padding-inline:var(--gl-space-6);border-block-start:1px solid var(--gl-border-default)}
+  .hero .tab{height:48px}
+  .plan-box{display:flex;align-items:center;gap:var(--gl-space-4);padding:var(--gl-space-4);border-radius:var(--gl-radius-md);background:var(--gl-brand-subtle);border:1px solid color-mix(in srgb,var(--gl-brand-primary) 18%,transparent)}
+  .plan-box .p{font:600 18px/26px var(--gl-font-sans)}
+  .plan-box .price{margin-inline-start:auto;text-align:end}
+  .plan-box .price b{font:var(--gl-type-h2);direction:ltr;display:inline-block}
+  .usage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--gl-space-5) var(--gl-space-8);margin-top:var(--gl-space-6)}
+  .usage .top{display:flex;justify-content:space-between;margin-bottom:var(--gl-space-2);font:var(--gl-type-label)}
+  .usage .top span:last-child{color:var(--gl-text-secondary);font-variant-numeric:tabular-nums}
+  .sub-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gl-space-4);margin-top:var(--gl-space-6);padding-top:var(--gl-space-5);border-block-start:1px solid var(--gl-border-default)}
+  .sub-meta .k{font:var(--gl-type-caption);color:var(--gl-text-muted)}
+  .sub-meta .v{font:var(--gl-type-body-strong);margin-top:2px;display:flex;align-items:center;gap:6px}
+  .kv{display:flex;justify-content:space-between;gap:var(--gl-space-4);padding-block:var(--gl-space-3);font:var(--gl-type-body-sm)}
+  .kv + .kv{border-block-start:1px solid var(--gl-border-default)}
+  .kv .k{color:var(--gl-text-secondary)}
+  .kv .v{font-weight:500;text-align:end;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tk{display:flex;flex-direction:column;gap:6px;padding-block:var(--gl-space-3)}
+  .tk + .tk{border-block-start:1px solid var(--gl-border-default)}
+  .tk .t{font:var(--gl-type-body-strong)}
+  .tk .m{display:flex;align-items:center;gap:var(--gl-space-2);font:var(--gl-type-caption);color:var(--gl-text-muted)}
+  .tl{position:relative;padding-inline-start:var(--gl-space-6)}
+  .tl::before{content:"";position:absolute;inset-inline-start:5px;inset-block:8px;width:2px;background:var(--gl-border-default);border-radius:2px}
+  .tl-i{position:relative;padding-block:0 var(--gl-space-4)}
+  .tl-i:last-child{padding-bottom:0}
+  .tl-i::before{content:"";position:absolute;inset-inline-start:calc(var(--gl-space-6) * -1);top:5px;width:12px;height:12px;border-radius:50%;background:var(--gl-bg-surface);border:2px solid var(--gl-brand-primary)}
+  .tl-i.muted-dot::before{border-color:var(--gl-border-strong)}
+  .tl-i .t{font:var(--gl-type-body-sm);color:var(--gl-text-primary)}
+  .tl-i .d{font:var(--gl-type-caption);color:var(--gl-text-muted);margin-top:2px}
+  .proj .nm{font:var(--gl-type-body-strong);overflow:hidden;text-overflow:ellipsis}
+  .proj .cl{font:var(--gl-type-caption);color:var(--gl-text-muted);overflow:hidden;text-overflow:ellipsis}
+  .ph{display:flex;flex-direction:column;gap:6px}
+  .ph .r{display:flex;justify-content:space-between;font:var(--gl-type-caption);color:var(--gl-text-secondary)}
+  .side{display:flex;flex-direction:column;gap:var(--gl-space-6)}
+  .mainc{display:flex;flex-direction:column;gap:var(--gl-space-6)}
+
+.toolbar .sel{width:184px}.toolbar .sel .control{width:100%}
+.toolbar .search{width:320px}
+//JS
+const uRow = (L, u) => { const R = { owner: ['accent', L('مالك', 'Owner')], pm: ['brand', L('مدير مشروع', 'Project manager')], consultant: ['info', L('استشاري', 'Consultant')] }; const r = R[u[4]] || ['neutral', u[4]];
+  return `<tr data-row data-role="${u[4]}"><td><div class="cell-co">${GL.ui.av(u[2], u[3], 'round')}<div><div class="nm" data-f="name">${u[0]}</div><div class="dm ltr">${u[1]}</div></div></div></td><td data-role>${GL.ui.tag(r[0], r[1], false)}</td>
+  <td>${u[7] ? `<span class="cell-ic yes t-sm">${GL.icon('shield-check', 'sm')}${L('مفعّل', 'On')}</span>` : `<span class="cell-ic t-sm muted">${GL.icon('minus', 'sm')}${L('غير مفعّل', 'Off')}</span>`}</td><td class="sec">${u[5]}</td><td data-st>${u[6] === 'active' ? GL.ui.tag('success', L('نشط', 'Active')) : GL.ui.tag('info', L('دعوة مرسلة', 'Invited'))}</td><td class="right">${GL.ui.menuBtn('user')}</td></tr>`; };
+const tRow = (L, t) => { const P = { high: ['danger', L('عالية', 'High')], med: ['warning', L('متوسطة', 'Medium')], low: ['neutral', L('منخفضة', 'Low')] }, S = { open: ['info', L('مفتوحة', 'Open')], pending: ['warning', L('في انتظار العميل', 'Waiting on customer')], solved: ['success', L('محلولة', 'Solved')] };
+  return `<tr data-row data-cat="${t[3]}"><td class="ltr t-strong"><a class="link" href="support-ticket.html">${t[0]}</a></td><td><a href="support-ticket.html" class="t-strong" data-f="name">${t[1]}</a></td><td>${GL.ui.tag(P[t[2]][0], P[t[2]][1], false)}</td><td>${GL.ui.tag(S[t[3]][0], S[t[3]][1])}</td><td class="sec">${t[5]}</td><td class="sec">${t[4]}</td></tr>`; };
+GL.mount({
+  nav: 'companies',
+  title: L => L('نيل سوفت للحلول', 'NileSoft Solutions'),
+  modals: {
+    edit: { kind: 'drawer', icon: 'pencil', title: L => L('تعديل بيانات الشركة', 'Edit company details'), sub: L => L('نيل سوفت للحلول', 'NileSoft Solutions'),
+      body: (L, { ui }) => `<div class="form-grid">
+        ${ui.field(L('الاسم التجاري', 'Display name'), ui.input('name', { req: 1, val: L('نيل سوفت للحلول', 'NileSoft Solutions') }), { req: 1, full: 1 })}
+        ${ui.field(L('الاسم القانوني', 'Legal name'), ui.input('legal', { val: L('نيل سوفت للحلول ش.ذ.م.م', 'NileSoft Solutions LLC') }), { full: 1 })}
+        ${ui.field(L('الدومين', 'Domain'), ui.input('domain', { req: 1, ltr: 1, val: 'nilesoft.example', icon: 'globe' }), { req: 1 })}
+        ${ui.field(L('بريد الفوترة', 'Billing email'), ui.input('email', { req: 1, type: 'email', ltr: 1, val: 'billing@nilesoft.example', icon: 'mail' }), { req: 1 })}
+        ${ui.field(L('الدولة', 'Country'), ui.select('country', [L('مصر', 'Egypt'), L('السعودية', 'Saudi Arabia'), L('الإمارات', 'UAE')]))}
+        ${ui.field(L('حجم الفريق', 'Team size'), ui.select('size', ['1–10', '11–25', '25–50', '50+'], { val: '25–50' }))}
+        ${ui.field(L('ملاحظات داخلية', 'Internal notes'), ui.textarea('notes', { ph: L('تظهر لفريق المنصة بس', 'Only visible to platform staff') }), { full: 1 })}
+      </div>`, toast: L => [L('اتحفظت بيانات الشركة', 'Company details saved'), ''] },
+    plan: { icon: 'layers', size: 'sm', title: L => L('تغيير الخطة', 'Change plan'), sub: L => L('الخطة الحالية: Growth', 'Current plan: Growth'),
+      body: L => `<div class="stack gap-2" data-radio>${[['Starter', '$79', L('5 مستخدمين · 3 مشاريع', '5 users · 3 projects')], ['Growth', '$179', L('30 مستخدم · 10 مشاريع', '30 users · 10 projects')], ['Enterprise', '$420', L('غير محدود', 'Unlimited')]].map(p => `<div class="opt ${p[0] === 'Growth' ? 'on' : ''}"><span class="radio ${p[0] === 'Growth' ? 'on' : ''}"></span><div class="grow"><div class="t-strong">${p[0]}</div><div class="t-sm sec">${p[2]}</div></div><b class="ltr">${p[1]}</b></div>`).join('')}</div>
+        <div class="callout info">${GL.icon('info', 'sm')}<span>${L('الترقية بتتحسب بالتناسب مع باقي الدورة الحالية.', 'Upgrades are prorated for the rest of the current cycle.')}</span></div>`,
+      submit: L => L('تأكيد', 'Confirm'), toast: L => [L('اتغيرت الخطة', 'Plan updated'), ''] },
+    invite: { icon: 'user-plus', title: L => L('إضافة مستخدم', 'Add user'), sub: L => L('هيوصله إيميل دعوة للمساحة', 'They’ll get an email invite to the workspace'),
+      body: (L, { ui }) => `<div class="form-grid">${ui.field(L('الاسم', 'Name'), ui.input('name', { req: 1 }), { req: 1 })}${ui.field(L('البريد', 'Email'), ui.input('email', { req: 1, type: 'email', ltr: 1, ph: 'name@nilesoft.example' }), { req: 1 })}${ui.field(L('الدور', 'Role'), ui.select('role', [L('مدير مشروع', 'Project manager'), L('استشاري', 'Consultant'), L('مسؤول', 'Admin')]), { full: 1 })}</div>`,
+      submit: L => L('إرسال الدعوة', 'Send invite'), add: { table: 'uTbl', row: (v, L) => uRow(L, [v.name, v.email, (v.name.trim()[0] || 'U').toUpperCase(), 'av-teal', v.role, L('—', '—'), 'invited']) },
+      toast: (L, v) => [L('اتبعتت الدعوة', 'Invite sent'), v.email] },
+    role: { icon: 'user-cog', size: 'sm', title: L => L('تغيير الدور', 'Change role'), sub: (L, c) => c.name, body: (L, { ui }) => ui.field(L('الدور', 'Role'), ui.select('role', [L('مالك', 'Owner'), L('مسؤول', 'Admin'), L('مدير مشروع', 'Project manager'), L('استشاري', 'Consultant')])),
+      onSubmit: (v, { row }) => { if (row) row.querySelector('[data-role]').innerHTML = GL.ui.tag('neutral', v.role, false); }, toast: L => [L('اتغير الدور', 'Role changed'), ''] },
+    refund: { icon: 'rotate-ccw', tone: 'warning', title: L => L('استرداد مبلغ', 'Issue refund'), sub: (L, c) => c.name,
+      body: (L, { ui, ctx }) => `<div class="form-grid">${ui.field(L('المبلغ (USD)', 'Amount (USD)'), ui.input('amount', { req: 1, ltr: 1, val: ctx.amt || '179', icon: 'banknote' }), { req: 1 })}${ui.field(L('النوع', 'Type'), ui.select('type', [L('كامل', 'Full'), L('جزئي', 'Partial')]))}${ui.field(L('السبب', 'Reason'), ui.select('reason', [L('دفع مكرر', 'Duplicate charge'), L('طلب العميل', 'Customer request'), L('مشكلة في الخدمة', 'Service issue')], { ph: L('اختار السبب', 'Choose a reason'), req: 1 }), { req: 1, full: 1 })}${ui.field(L('ملاحظة', 'Note'), ui.textarea('note', { rows: 3 }), { full: 1, opt: L('اختياري', 'optional') })}</div>`,
+      submit: L => L('استرداد', 'Refund'), onSubmit: (v, { row }) => { if (row) row.querySelector('[data-st]').innerHTML = GL.ui.tag('violet', GL.L('مسترد', 'Refunded')); }, toast: (L, v) => [L('اتعمل الاسترداد', 'Refund issued'), '$' + v.amount] },
+    credit: { icon: 'wallet', size: 'sm', title: L => L('إضافة رصيد', 'Add credit'), body: (L, { ui }) => `${ui.field(L('المبلغ (USD)', 'Amount (USD)'), ui.input('amount', { req: 1, ltr: 1, icon: 'banknote', ph: '50' }), { req: 1 })}${ui.field(L('السبب', 'Reason'), ui.input('reason', { req: 1, ph: L('تعويض عن انقطاع الخدمة', 'Compensation for downtime') }), { req: 1 })}`,
+      submit: L => L('إضافة', 'Add credit'), toast: (L, v) => [L('اتضاف الرصيد', 'Credit added'), '$' + v.amount + L(' هيتخصم من الفاتورة الجاية', ' off the next invoice')] },
+    ticket: { kind: 'drawer', icon: 'life-buoy', title: L => L('تذكرة جديدة', 'New ticket'), sub: L => L('نيل سوفت للحلول', 'NileSoft Solutions'),
+      body: (L, { ui }) => `${ui.field(L('الموضوع', 'Subject'), ui.input('subject', { req: 1 }), { req: 1 })}<div class="form-grid">${ui.field(L('الأولوية', 'Priority'), ui.select('pr', [['high', L('عالية', 'High')], ['med', L('متوسطة', 'Medium')], ['low', L('منخفضة', 'Low')]], { val: 'med' }))}${ui.field(L('المسؤول', 'Assignee'), ui.select('as', [L('هند نبيل', 'Hend Nabil'), L('يوسف فريد', 'Youssef Farid')]))}</div>${ui.field(L('الوصف', 'Description'), ui.textarea('d', { req: 1, rows: 6 }), { req: 1 })}<div class="dropzone">${GL.icon('cloud-upload')}<span>${L('اسحب ملفات أو', 'Drag files or')} <b class="brand-t">${L('اختار', 'browse')}</b></span></div>`,
+      submit: L => L('إنشاء التذكرة', 'Create ticket'), add: { table: 'tTbl', row: (v, L) => tRow(L, ['#48' + (30 + Math.floor(Math.random() * 60)), v.subject, v.pr, 'open', L('الآن', 'Just now'), v.as]) }, toast: L => [L('اتعملت التذكرة', 'Ticket created'), ''] }
+  },
+  menus: {
+    c360: [{ icon: 'clock', ar: 'مد الفترة التجريبية', en: 'Extend trial', toast: L => `success|${L('اتمدت الفترة', 'Trial extended')}|` }, { icon: 'wallet', ar: 'إضافة رصيد', en: 'Add credit', open: 'credit' }, { icon: 'download', ar: 'تصدير البيانات', en: 'Export data', toast: L => `info|${L('جاري التجهيز', 'Preparing export')}|${L('هيوصلك لينك التحميل', 'You’ll get a download link')}` }, '-', { icon: 'ban', ar: 'تعليق الحساب', en: 'Suspend account', confirm: 'suspend' }],
+    user: [{ icon: 'user-cog', ar: 'تغيير الدور', en: 'Change role', open: 'role' }, { icon: 'key-round', ar: 'إعادة ضبط كلمة المرور', en: 'Send password reset', toast: (L, n) => `success|${L('اتبعت لينك إعادة الضبط', 'Reset link sent')}|${n}` }, { icon: 'shield', ar: 'إلغاء التحقق بخطوتين', en: 'Reset 2FA', toast: (L, n) => `warning|${L('اتلغى التحقق بخطوتين', '2FA reset')}|${n}` }, '-', { icon: 'user-x', ar: 'إيقاف المستخدم', en: 'Deactivate', confirm: 'deact', danger: 1 }],
+    inv: [{ icon: 'download', ar: 'تحميل PDF', en: 'Download PDF', toast: (L, n) => `success|${L('جاري التحميل', 'Downloading')}|${n}` }, { icon: 'mail', ar: 'إعادة إرسال', en: 'Resend', toast: (L, n) => `success|${L('اتبعتت الفاتورة', 'Invoice resent')}|${n}` }, '-', { icon: 'rotate-ccw', ar: 'استرداد', en: 'Refund', open: 'refund' }]
+  },
+  confirms: {
+    imp: { icon: 'log-in', title: L => L('الدخول كمسؤول في نيل سوفت؟', 'Log in as NileSoft admin?'), text: L => L('الجلسة هتتسجل في سجل التدقيق ومدتها 30 دقيقة.', 'The session is recorded in the audit log and lasts 30 minutes.'), btn: L => L('ابدأ الجلسة', 'Start session'), run: () => setTimeout(() => location.href = 'ws-dashboard.html', 900), toast: L => [L('جاري الدخول…', 'Opening workspace…'), '', 'info'] },
+    suspend: { icon: 'ban', danger: 1, title: L => L('تعليق حساب نيل سوفت؟', 'Suspend NileSoft?'), text: L => L('24 مستخدم هيفقدوا الدخول لحد ما تعيد التفعيل.', '24 users lose access until you reactivate.'), btn: L => L('تعليق', 'Suspend'), type: () => 'nilesoft.example', toast: L => [L('اتعلق الحساب', 'Account suspended'), ''] },
+    deact: { icon: 'user-x', danger: 1, title: (L, c) => L(`إيقاف ${c.name}؟`, `Deactivate ${c.name}?`), text: L => L('مش هيقدر يدخل، والمهام بتاعته هتفضل زي ما هي.', 'They can’t sign in; their tasks stay as they are.'), btn: L => L('إيقاف', 'Deactivate'), run: (L, c, row) => { row.querySelector('[data-st]').innerHTML = GL.ui.tag('neutral', L('موقوف', 'Deactivated')); GLI.flash(row); }, toast: (L, c) => [L('اتوقف المستخدم', 'User deactivated'), c.name] }
+  },
+  render: (L, { icon, fwd, ui }) => {
+    const users = Object.values(GL_TEAM).map((m, i) => [L(m[0], m[1]), m[1].split(' ')[0].toLowerCase() + '@nilesoft.example', L(m[2], m[3]), m[4], m[5], [L('الآن', 'Now'), L('منذ 10 د', '10m ago'), L('منذ ساعة', '1h ago'), L('أمس', 'Yesterday'), L('منذ يومين', '2 days ago'), L('منذ 3 أيام', '3 days ago'), L('منذ أسبوع', '1 week ago'), '—'][i], i === 7 ? 'invited' : 'active', i % 3 !== 2]);
+    const invoices = [['INV-2026-011', L('1 نوفمبر 2026', 'Nov 1, 2026'), '179', 'paid'], ['INV-2026-010', L('1 أكتوبر 2026', 'Oct 1, 2026'), '179', 'paid'], ['INV-2026-009', L('1 سبتمبر 2026', 'Sep 1, 2026'), '179', 'failed'], ['INV-2026-008', L('1 أغسطس 2026', 'Aug 1, 2026'), '79', 'paid'], ['INV-2026-007', L('1 يوليو 2026', 'Jul 1, 2026'), '79', 'paid'], ['INV-2026-006', L('1 يونيو 2026', 'Jun 1, 2026'), '79', 'paid']];
+    const tks = [['#4821', L('مشكلة في استيراد بيانات العملاء', 'Customer data import fails'), 'high', 'open', L('منذ ساعتين', '2h ago'), L('هند نبيل', 'Hend Nabil')], ['#4807', L('طلب زيادة حد المشاريع', 'Request to raise project limit'), 'med', 'pending', L('أمس', 'Yesterday'), L('يوسف فريد', 'Youssef Farid')], ['#4790', L('استفسار عن الفوترة السنوية', 'Question about annual billing'), 'low', 'open', L('منذ 3 أيام', '3 days ago'), L('نورهان رشاد', 'Nourhan Rashad')], ['#4712', L('رابط بوابة العميل مش شغال', 'Client portal link not working'), 'high', 'solved', L('منذ أسبوعين', '2 weeks ago'), L('هند نبيل', 'Hend Nabil')], ['#4655', L('تغيير بريد المالك', 'Change owner email'), 'low', 'solved', L('منذ شهر', '1 month ago'), L('يوسف فريد', 'Youssef Farid')]];
+    const acts = [['billing', L('رقّت الخطة من Starter إلى Growth', 'Upgraded from Starter to Growth'), L('أحمد سامي', 'Ahmed Samy'), L('اليوم، 10:42 ص', 'Today, 10:42 AM')], ['users', L('أضاف 3 مستخدمين جدد', 'Added 3 new users'), L('منى عادل', 'Mona Adel'), L('أمس، 3:15 م', 'Yesterday, 3:15 PM')], ['admin', L('دخول كمسؤول لمدة 12 دقيقة', 'Admin login for 12 minutes'), L('هند نبيل (فريق المنصة)', 'Hend Nabil (platform staff)'), L('أمس، 11:02 ص', 'Yesterday, 11:02 AM')], ['projects', L('أنشأ مشروع «تخطيط التصنيع MRP»', 'Created project “Manufacturing MRP”'), L('محمود عز', 'Mahmoud Ezz'), L('18 نوفمبر', 'Nov 18')], ['billing', L('تم دفع فاتورة نوفمبر — $179', 'November invoice paid — $179'), 'Stripe', L('1 نوفمبر', 'Nov 1')], ['users', L('فعّل التحقق بخطوتين إجباري', 'Enforced 2FA for all users'), L('أحمد سامي', 'Ahmed Samy'), L('29 أكتوبر', 'Oct 29')], ['projects', L('بدأ مشروع «النظام المحاسبي»', 'Started “Accounting suite” project'), L('عمر خالد', 'Omar Khaled'), L('28 أكتوبر', 'Oct 28')], ['billing', L('فشل دفع فاتورة سبتمبر', 'September payment failed'), 'Stripe', L('1 سبتمبر', 'Sep 1')]];
+    const kpi = (label, ic, val, foot, style) => `
+      <div class="card kpi">
+        <div class="kpi-top"><span class="kpi-label">${label}</span><span class="kpi-icon" style="${style || ''}">${icon(ic)}</span></div>
+        <span class="kpi-val">${val}</span>
+        <div class="kpi-foot">${foot}</div>
+      </div>`;
+    const usage = (label, used, total, unit, cls) => `
+      <div><div class="top"><span>${label}</span><span class="ltr">${used}${unit || ''} / ${total}${unit || ''}</span></div>
+      <div class="bar ${cls || ''}"><i style="width:${used / total * 100}%"></i></div></div>`;
+    const projects = [
+      [L('تطبيق Odoo ERP', 'Odoo ERP rollout'), L('مصنع النور للبلاستيك', 'Al Nour Plastics'), L('اختبار القبول UAT', 'UAT'), 72, L('15 ديسمبر', 'Dec 15'), 'success', L('في المسار', 'On track')],
+      [L('ترحيل بيانات المخازن', 'Inventory migration'), L('دلتا للتوزيع', 'Delta Distribution'), L('ترحيل البيانات', 'Data migration'), 55, L('2 يناير', 'Jan 2'), 'danger', L('متوقف', 'Blocked')],
+      [L('Odoo CRM', 'Odoo CRM'), L('الريادة الطبية', 'Riyada Medical'), L('جمع المتطلبات', 'Requirements'), 30, L('20 يناير', 'Jan 20'), 'warning', L('معرّض للتأخير', 'At risk')],
+      [L('بوابة الموارد البشرية', 'HR portal'), L('الأمل للمقاولات', 'Al Amal Contracting'), L('الإطلاق', 'Go-live'), 95, L('28 نوفمبر', 'Nov 28'), 'success', L('في المسار', 'On track')],
+      [L('النظام المحاسبي', 'Accounting suite'), L('كيان القابضة', 'Kayan Holding'), L('التصميم', 'Design'), 12, L('18 فبراير', 'Feb 18'), 'info', L('بدأ حديثًا', 'Kick-off')]
+    ];
+    const tickets = [
+      [L('مشكلة في استيراد بيانات العملاء', 'Customer data import fails'), 'danger', L('عالية', 'High'), '#4821', L('منذ ساعتين', '2h ago')],
+      [L('طلب زيادة حد المشاريع', 'Request to raise project limit'), 'warning', L('متوسطة', 'Medium'), '#4807', L('أمس', 'Yesterday')],
+      [L('استفسار عن الفوترة السنوية', 'Question about annual billing'), 'neutral', L('منخفضة', 'Low'), '#4790', L('منذ 3 أيام', '3 days ago')]
+    ];
+    const tl = [
+      [L('رقّت الخطة من Starter إلى Growth', 'Upgraded from Starter to Growth'), L('اليوم، 10:42 ص', 'Today, 10:42 AM'), ''],
+      [L('أضافت 3 مستخدمين جدد', 'Added 3 new users'), L('أمس، 3:15 م', 'Yesterday, 3:15 PM'), ''],
+      [L('تم دفع فاتورة نوفمبر — $179', 'November invoice paid — $179'), L('1 نوفمبر 2026', 'Nov 1, 2026'), 'muted-dot'],
+      [L('بدأت مشروع «النظام المحاسبي»', 'Started “Accounting suite” project'), L('28 أكتوبر 2026', 'Oct 28, 2026'), 'muted-dot'],
+      [L('تم إنشاء الحساب', 'Account created'), L('12 مارس 2026', 'Mar 12, 2026'), 'muted-dot']
+    ];
+    return `
+    <section class="card hero">
+      <nav class="crumbs"><a href="companies.html">${L('الشركات', 'Companies')}</a>${fwd('xs')}<span class="cur">${L('نيل سوفت للحلول', 'NileSoft Solutions')}</span></nav>
+      <div class="hero-top">
+        <span class="avatar xl av-teal">${L('ن', 'NS')}</span>
+        <div class="hero-id">
+          <div class="name"><h1 class="t-h1">${L('نيل سوفت للحلول', 'NileSoft Solutions')}</h1><span class="tag brand">Growth</span><span class="tag success"><span class="dot"></span>${L('نشطة', 'Active')}</span></div>
+          <div class="meta">
+            <span>${icon('globe')}<span class="domain">nilesoft.example</span></span>
+            <span>${icon('map-pin')}${L('القاهرة، مصر', 'Cairo, Egypt')}</span>
+            <span>${icon('calendar')}${L('عميل منذ 12 مارس 2026', 'Customer since Mar 12, 2026')}</span>
+            <span>${icon('user')}${L('المالك: أحمد سامي', 'Owner: Ahmed Samy')}</span>
+          </div>
+        </div>
+        <div class="row gap-3">
+          <button class="btn btn-outline" data-confirm="imp">${icon('log-in', 'sm flip')}${L('الدخول كمسؤول', 'Log in as admin')}</button>
+          <button class="btn btn-outline" data-open="edit">${icon('pencil', 'sm')}${L('تعديل', 'Edit')}</button>
+          <button class="icon-btn outline" data-menu="c360">${icon('more')}</button>
+        </div>
+      </div>
+      <div class="tabs" data-tabs="c360">
+        <span data-tab="overview" class="tab active">${L('نظرة عامة', 'Overview')}</span>
+        <span data-tab="users" class="tab">${L('المستخدمين', 'Users')} <span class="badge">24</span></span>
+        <span data-tab="projects" class="tab">${L('المشاريع', 'Projects')} <span class="badge">7</span></span>
+        <span data-tab="billing" class="tab">${L('الاشتراك والفواتير', 'Billing')}</span>
+        <span data-tab="support" class="tab">${L('الدعم', 'Support')} <span class="badge">3</span></span>
+        <span data-tab="activity" class="tab">${L('سجل النشاط', 'Activity log')}</span>
+      </div>
+    </section>
+    <div data-pane-group="c360" data-pane="overview" class="mainc">
+    <section class="grid g-4">
+      ${kpi(L('المشاريع النشطة', 'Active projects'), 'briefcase', '7', `<span class="delta up">${icon('trending-up')}+2</span><span>${L('هذا الشهر', 'this month')}</span>`)}
+      ${kpi(L('المستخدمين', 'Users'), 'users', '24<span class="muted t-h3"> / 30</span>', `<span>${L('6 مقاعد متاحة', '6 seats available')}</span>`)}
+      ${kpi(L('صحة الحساب', 'Account health'), 'activity', '86<span class="muted t-h3"> / 100</span>', `<span class="tag success"><span class="dot"></span>${L('ممتازة', 'Healthy')}</span>`, 'background:var(--gl-success-bg);color:var(--gl-success-fg)')}
+      ${kpi(L('تذاكر مفتوحة', 'Open tickets'), 'life-buoy', '3', `<span class="tag danger">${L('1 عالية الأولوية', '1 high priority')}</span>`, 'background:var(--gl-warning-bg);color:var(--gl-warning-fg)')}
+    </section>
+
+    <section class="grid g-12">
+      <div class="span-8 mainc">
+        <div class="card">
+          <div class="card-head"><div><h3 class="t-h3">${L('الاشتراك والاستخدام', 'Subscription & usage')}</h3><p class="sub">${L('الاستهلاك الحالي مقابل حدود الخطة', 'Current usage against plan limits')}</p></div>
+            <button class="btn btn-outline btn-sm" data-open="plan">${L('تغيير الخطة', 'Change plan')}</button></div>
+          <div class="card-body pt0">
+            <div class="plan-box">
+              <span class="kpi-icon" style="background:var(--gl-brand-primary);color:var(--gl-text-on-brand)">${icon('layers')}</span>
+              <div><div class="p">Growth</div><div class="t-sm sec">${L('فوترة شهرية · تتجدد تلقائيًا', 'Billed monthly · auto-renews')}</div></div>
+              <div class="price"><b>$179</b><div class="t-cap muted">${L('في الشهر', 'per month')}</div></div>
+            </div>
+            <div class="usage">
+              ${usage(L('المستخدمين', 'Users'), 24, 30)}
+              ${usage(L('المشاريع النشطة', 'Active projects'), 7, 10)}
+              ${usage(L('بوابات العملاء', 'Client portals'), 9, 10, '', 'warn')}
+              ${usage(L('مساحة التخزين', 'Storage'), 3.2, 10, ' GB')}
+            </div>
+            <div class="sub-meta">
+              <div><div class="k">${L('التجديد القادم', 'Next renewal')}</div><div class="v">${L('12 ديسمبر 2026', 'Dec 12, 2026')}</div></div>
+              <div><div class="k">${L('طريقة الدفع', 'Payment method')}</div><div class="v">${icon('credit-card', 'sm')}<span class="ltr">Visa •••• 4242</span></div></div>
+              <div><div class="k">${L('إجمالي المدفوع', 'Lifetime value')}</div><div class="v"><span class="ltr">$1,353</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card table-wrap">
+          <div class="card-head bordered"><div><h3 class="t-h3">${L('مشاريع التنفيذ', 'Implementation projects')}</h3><p class="sub">${L('7 مشاريع نشطة، 5 معروضة', '7 active projects, showing 5')}</p></div>
+            <a class="link" href="#" data-goto="c360:projects">${L('كل المشاريع', 'All projects')}${fwd('xs')}</a></div>
+          <table class="tbl proj">
+            <colgroup><col><col style="width:184px"><col style="width:112px"><col style="width:152px"></colgroup>
+            <thead><tr><th>${L('المشروع', 'Project')}</th><th>${L('المرحلة', 'Phase')}</th><th>${L('موعد الإطلاق', 'Go-live')}</th><th>${L('الحالة', 'Status')}</th></tr></thead>
+            <tbody>${projects.map(p => `<tr>
+              <td><div class="nm">${p[0]}</div><div class="cl">${p[1]}</div></td>
+              <td><div class="ph"><div class="r"><span>${p[2]}</span><span class="num">${p[3]}%</span></div><div class="bar thin ${p[5] === 'danger' ? 'danger' : p[5] === 'warning' ? 'warn' : ''}"><i style="width:${p[3]}%"></i></div></div></td>
+              <td class="sec">${p[4]}</td>
+              <td><span class="tag ${p[5]}"><span class="dot"></span>${p[6]}</span></td></tr>`).join('')}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside class="span-4 side">
+        <div class="card">
+          <div class="card-head"><h3 class="t-h3">${L('بيانات الشركة', 'Company details')}</h3><button class="icon-btn sm" data-open="edit">${icon('pencil')}</button></div>
+          <div class="card-body pt0">
+            <div class="kv"><span class="k">${L('الاسم القانوني', 'Legal name')}</span><span class="v">${L('نيل سوفت للحلول ش.ذ.م.م', 'NileSoft Solutions LLC')}</span></div>
+            <div class="kv"><span class="k">${L('التخصص', 'Focus')}</span><span class="v">${L('تنفيذ Odoo', 'Odoo implementation')}</span></div>
+            <div class="kv"><span class="k">${L('حجم الفريق', 'Team size')}</span><span class="v">${L('25–50 موظف', '25–50 staff')}</span></div>
+            <div class="kv"><span class="k">${L('البريد', 'Email')}</span><span class="v ltr">ahmed@nilesoft.example</span></div>
+            <div class="kv"><span class="k">${L('اللغة', 'Language')}</span><span class="v">${L('العربية', 'Arabic')}</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3 class="t-h3">${L('تذاكر الدعم', 'Support tickets')}</h3><a class="link" href="#" data-goto="c360:support">${L('الكل', 'All')}${fwd('xs')}</a></div>
+          <div class="card-body pt0">${tickets.map(t => `<div class="tk"><span class="t">${t[0]}</span><span class="m"><span class="tag ${t[1]}">${t[2]}</span><span class="ltr">${t[3]}</span><span>·</span><span>${t[4]}</span></span></div>`).join('')}</div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3 class="t-h3">${L('الخط الزمني', 'Timeline')}</h3></div>
+          <div class="card-body pt0"><div class="tl">${tl.map(e => `<div class="tl-i ${e[2]}"><div class="t">${e[0]}</div><div class="d">${e[1]}</div></div>`).join('')}</div></div>
+        </div>
+      </aside>
+    </section>
+    </div>
+    <div data-pane-group="c360" data-pane="users" hidden>
+      <section class="card table-wrap">
+        <div class="toolbar"><label class="control search sm">${icon('search', 'sm')}<input data-search="uTbl" placeholder="${L('ابحث بالاسم أو البريد…', 'Search name or email…')}"></label>
+          <span class="sel sm">${ui.select('r', [['owner', L('مالك', 'Owner')], ['pm', L('مدير مشروع', 'Project manager')], ['consultant', L('استشاري', 'Consultant')]], { ph: L('كل الأدوار', 'All roles'), filter: 'uTbl', key: 'role', cls: 'sm' })}</span>
+          <div class="end"><span class="t-sm sec" style="align-self:center">${L('24 من 30 مقعد', '24 of 30 seats')}</span><button class="btn btn-primary btn-sm" data-open="invite">${icon('user-plus', 'sm')}${L('إضافة مستخدم', 'Add user')}</button></div></div>
+        <table class="tbl" id="uTbl"><colgroup><col><col style="width:168px"><col style="width:128px"><col style="width:144px"><col style="width:128px"><col style="width:72px"></colgroup>
+          <thead><tr><th>${L('المستخدم', 'User')}</th><th>${L('الدور', 'Role')}</th><th>${L('التحقق بخطوتين', '2FA')}</th><th>${L('آخر نشاط', 'Last active')}</th><th>${L('الحالة', 'Status')}</th><th></th></tr></thead>
+          <tbody>${users.map(u => uRow(L, u)).join('')}</tbody></table>
+      </section>
+    </div>
+    <div data-pane-group="c360" data-pane="projects" hidden>
+      <section class="card table-wrap">
+        <div class="tabs" style="padding-inline:var(--gl-space-6)" data-tabs="pst" data-filter-table="pTbl">${[['all', 'الكل', 'All'], ['ok', 'في المسار', 'On track'], ['risk', 'معرّض للتأخير', 'At risk'], ['blocked', 'متوقف', 'Blocked'], ['kick', 'بدأ حديثًا', 'Kick-off']].map((t, i) => `<span class="tab ${i ? '' : 'active'}" data-tab="${t[0]}">${L(t[1], t[2])} <span class="badge">${t[0] === 'all' ? GL_PROJECTS.length : GL_PROJECTS.filter(p => p[11] === t[0]).length}</span></span>`).join('')}</div>
+        <div class="toolbar"><label class="control search sm">${icon('search', 'sm')}<input data-search="pTbl" placeholder="${L('ابحث بالمشروع أو العميل…', 'Search project or client…')}"></label></div>
+        <table class="tbl proj" id="pTbl"><colgroup><col><col style="width:200px"><col style="width:176px"><col style="width:104px"><col style="width:120px"><col style="width:152px"></colgroup>
+          <thead><tr><th>${L('المشروع', 'Project')}</th><th>${L('المرحلة', 'Phase')}</th><th>${L('مدير المشروع', 'PM')}</th><th>${L('الإطلاق', 'Go-live')}</th><th>${L('القيمة', 'Value')}</th><th>${L('الحالة', 'Status')}</th></tr></thead>
+          <tbody>${GL_PROJECTS.map(p => { const h = GL_HEALTH[p[11]], pm = GL_TEAM[p[12]]; return `<tr data-row data-cat="${p[11]}"><td><div class="nm" data-f="name">${L(p[0], p[1])}</div><div class="cl">${L(p[2], p[3])}</div></td>
+            <td><div class="ph"><div class="r"><span>${L(...GL_PHASES[p[7]])}</span><span class="num">${p[8]}%</span></div><div class="bar thin ${h[0] === 'danger' ? 'danger' : h[0] === 'warning' ? 'warn' : ''}"><i style="width:${p[8]}%"></i></div></div></td>
+            <td><span class="row gap-2">${ui.av(L(pm[2], pm[3]), pm[4] + ' sm', 'round')}<span class="t-sm">${L(pm[0], pm[1])}</span></span></td><td class="sec">${L(p[9], p[10])}</td><td class="num ltr">${p[15]}</td><td>${ui.tag(h[0], L(h[1], h[2]))}</td></tr>`; }).join('')}</tbody></table>
+      </section>
+    </div>
+    <div data-pane-group="c360" data-pane="billing" hidden class="grid g-12">
+      <div class="span-8 card table-wrap">
+        <div class="card-head bordered"><div><h3 class="t-h3">${L('الفواتير', 'Invoices')}</h3><p class="sub">${L('آخر 6 شهور', 'Last 6 months')}</p></div><button class="btn btn-outline btn-sm" data-open="credit">${icon('wallet', 'sm')}${L('إضافة رصيد', 'Add credit')}</button></div>
+        <table class="tbl"><colgroup><col style="width:176px"><col><col style="width:112px"><col style="width:136px"><col style="width:72px"></colgroup>
+          <thead><tr><th>${L('رقم الفاتورة', 'Invoice')}</th><th>${L('التاريخ', 'Date')}</th><th>${L('المبلغ', 'Amount')}</th><th>${L('الحالة', 'Status')}</th><th></th></tr></thead>
+          <tbody>${invoices.map(v => `<tr data-row data-ctx='{"amt":"${v[2]}"}'><td class="ltr t-strong" data-f="name">${v[0]}</td><td class="sec">${v[1]}</td><td class="num ltr">$${v[2]}</td><td data-st>${v[3] === 'paid' ? ui.tag('success', L('مدفوعة', 'Paid')) : ui.tag('danger', L('فشل الدفع', 'Failed'))}</td><td class="right">${ui.menuBtn('inv')}</td></tr>`).join('')}</tbody></table>
+      </div>
+      <div class="span-4 stack gap-6">
+        <div class="card"><div class="card-head"><h3 class="t-h3">${L('طريقة الدفع', 'Payment method')}</h3></div><div class="card-body pt0"><div class="row gap-3"><span class="ic-tile">${icon('credit-card')}</span><div class="grow"><div class="t-strong ltr">Visa •••• 4242</div><div class="t-cap muted">${L('تنتهي 08/2028', 'Expires 08/2028')}</div></div>${ui.tag('success', L('أساسية', 'Default'), false)}</div></div></div>
+        <div class="card"><div class="card-head"><h3 class="t-h3">${L('الرصيد', 'Credit balance')}</h3></div><div class="card-body pt0"><div class="t-h1 ltr">$25.00</div><p class="t-sm sec mt-1">${L('هيتخصم تلقائيًا من فاتورة ديسمبر', 'Applied automatically to the December invoice')}</p></div></div>
+      </div>
+    </div>
+    <div data-pane-group="c360" data-pane="support" hidden>
+      <section class="card table-wrap">
+        <div class="toolbar"><div class="pills" data-tabs="tst" data-filter-table="tTbl">${[['all', 'الكل', 'All'], ['open', 'مفتوحة', 'Open'], ['pending', 'في انتظار العميل', 'Waiting on customer'], ['solved', 'محلولة', 'Solved']].map((t, i) => `<span class="pill ${i ? '' : 'active'}" data-tab="${t[0]}">${L(t[1], t[2])}</span>`).join('')}</div>
+          <div class="end"><button class="btn btn-primary btn-sm" data-open="ticket">${icon('plus', 'sm')}${L('تذكرة جديدة', 'New ticket')}</button></div></div>
+        <table class="tbl" id="tTbl"><colgroup><col style="width:96px"><col><col style="width:112px"><col style="width:192px"><col style="width:152px"><col style="width:128px"></colgroup>
+          <thead><tr><th>#</th><th>${L('الموضوع', 'Subject')}</th><th>${L('الأولوية', 'Priority')}</th><th>${L('الحالة', 'Status')}</th><th>${L('المسؤول', 'Assignee')}</th><th>${L('آخر تحديث', 'Updated')}</th></tr></thead>
+          <tbody>${tks.map(t => tRow(L, t)).join('')}</tbody></table>
+      </section>
+    </div>
+    <div data-pane-group="c360" data-pane="activity" hidden>
+      <section class="card">
+        <div class="card-head bordered"><div class="pills" data-tabs="act" data-filter-table="actList">${[['all', 'الكل', 'All'], ['billing', 'الفوترة', 'Billing'], ['users', 'المستخدمين', 'Users'], ['projects', 'المشاريع', 'Projects'], ['admin', 'إجراءات الإدارة', 'Admin actions']].map((t, i) => `<span class="pill ${i ? '' : 'active'}" data-tab="${t[0]}">${L(t[1], t[2])}</span>`).join('')}</div>
+          <button class="btn btn-outline btn-sm" data-toast="success|${L('جاري التصدير', 'Export started')}|">${icon('download', 'sm')}${L('تصدير', 'Export')}</button></div>
+        <div class="card-body"><div class="tl" id="actList">${acts.map(a => `<div class="tl-i" data-row data-cat="${a[0]}"><div class="row gap-2"><span class="t">${a[1]}</span>${ui.tag({ billing: 'violet', users: 'info', projects: 'brand', admin: 'accent' }[a[0]], L(...{ billing: ['الفوترة', 'Billing'], users: ['المستخدمين', 'Users'], projects: ['المشاريع', 'Projects'], admin: ['إدارة', 'Admin'] }[a[0]]), false)}</div><div class="d">${a[2]} · ${a[3]}</div></div>`).join('')}</div></div>
+      </section>
+    </div>
+`;
+  }
+});

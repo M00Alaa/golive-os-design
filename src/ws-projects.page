@@ -1,0 +1,108 @@
+.seg6{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+.seg6 i{height:6px;border-radius:2px;background:var(--gl-bg-subtle)}
+.seg6 i.d{background:var(--gl-brand-primary)}
+.seg6 i.c{background:var(--gl-accent-default)}
+.seg6.blocked i.c{background:var(--gl-danger-solid)}
+.seg6.risk i.c{background:var(--gl-warning-solid)}
+.ph-l{display:flex;justify-content:space-between;font:var(--gl-type-caption);color:var(--gl-text-secondary);margin-bottom:6px}
+.cnt{display:inline-flex;align-items:center;gap:4px;height:24px;padding-inline:6px;border-radius:var(--gl-radius-sm);font:var(--gl-type-label-sm);color:var(--gl-text-secondary);background:var(--gl-bg-subtle)}
+.cnt svg.i{width:13px;height:13px}
+.cnt.z{opacity:.45}
+.cnt.hot{background:var(--gl-danger-bg);color:var(--gl-danger-fg)}
+.tbl td.co a:hover .nm{color:var(--gl-brand-text)}
+
+.toolbar .sel{width:184px}.toolbar .sel .control{width:100%}
+.board{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--gl-space-3);padding:var(--gl-space-5) var(--gl-space-6)}
+.bcol{display:flex;flex-direction:column;gap:var(--gl-space-3);background:var(--gl-bg-subtle);border-radius:var(--gl-radius-lg);padding:var(--gl-space-3);min-height:360px}
+.bcol h4{display:flex;align-items:center;justify-content:space-between;font:var(--gl-type-label);padding:var(--gl-space-1) var(--gl-space-1) var(--gl-space-2)}
+.bcard{background:var(--gl-bg-surface);border:1px solid var(--gl-border-default);border-radius:var(--gl-radius-md);padding:var(--gl-space-3);display:flex;flex-direction:column;gap:var(--gl-space-2);box-shadow:var(--gl-shadow-xs);cursor:grab}
+.bcard .t{font:var(--gl-type-label);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bcard .f{display:flex;align-items:center;justify-content:space-between;gap:var(--gl-space-2);flex-wrap:wrap;min-width:0}
+.bcard{min-width:0}.bcard .f .tag{max-width:100%;overflow:hidden}
+.bcard.add{border-style:dashed;box-shadow:none;background:transparent;color:var(--gl-text-muted);align-items:center;flex-direction:row;justify-content:center;cursor:pointer;font:var(--gl-type-label-sm)}
+.gantt{padding:var(--gl-space-5) var(--gl-space-6)}
+.g-head,.g-row{display:grid;grid-template-columns:260px minmax(0,1fr);align-items:center}
+.g-head .mo{display:grid;grid-template-columns:repeat(6,1fr);font:var(--gl-type-caption);color:var(--gl-text-muted)}
+.g-head .mo span{padding:0 var(--gl-space-2);border-inline-start:1px solid var(--gl-border-default)}
+.g-row{height:52px;border-block-start:1px solid var(--gl-border-default)}
+.g-track{position:relative;height:100%;background:repeating-linear-gradient(to right,transparent 0 calc(100%/6 - 1px),var(--gl-border-default) calc(100%/6 - 1px) calc(100%/6))}
+[dir="rtl"] .g-track{background:repeating-linear-gradient(to left,transparent 0 calc(100%/6 - 1px),var(--gl-border-default) calc(100%/6 - 1px) calc(100%/6))}
+.g-bar{position:absolute;top:14px;height:24px;border-radius:var(--gl-radius-full);display:flex;align-items:center;padding-inline:var(--gl-space-3);font:var(--gl-type-label-sm);color:#fff;white-space:nowrap;overflow:hidden}
+.g-bar i{position:absolute;inset-block:0;inset-inline-start:0;background:rgb(255 255 255 / .22);border-radius:inherit}
+.g-today{position:absolute;inset-block:0;width:2px;background:var(--gl-accent-default);z-index:1}
+//JS
+const prjRow = (L, ui, icon, p) => { const T = GL_TEAM, H = GL_HEALTH, PH = GL_PHASES; const cnt = (ic, n, title, hot) => `<span class="cnt ${n ? (hot ? 'hot' : '') : 'z'}" title="${title}">${icon(ic)}${n}</span>`;
+  const cat = p[11] === 'done' ? 'done' : 'active' + (p[11] === 'risk' || p[11] === 'blocked' ? ' attn' : '');
+  return `<tr data-row data-cat="${cat}" data-pm="${p[12]}" data-ph="${p[7]}">
+          <td class="co"><a class="cell-co" href="ws-project.html">${ui.av(L(p[4], p[5]), p[6], 'sm')}<div><div class="nm" data-f="name">${L(p[0], p[1])}</div><div class="cell-sub">${L(p[2], p[3])} · <span class="ltr">${p[14]}</span></div></div></a></td>
+          <td><div class="ph-l"><span>${p[7] > 5 ? L('مكتمل', 'Done') : L(PH[p[7]][0], PH[p[7]][1])}</span><span class="num">${p[8]}%</span></div><div class="seg6 ${p[11]}">${PH.map((x, i) => `<i class="${i < p[7] ? 'd' : i === p[7] ? 'c' : ''}"></i>`).join('')}</div></td>
+          <td class="sec">${L(p[9], p[10])}</td>
+          <td><span class="row gap-1">${cnt('file-pen-line', p[13][0], L('موافقات', 'Approvals'))}${cnt('clipboard-list', p[13][1], L('متطلبات', 'Requirements'))}${cnt('alert-triangle', p[13][2], 'Blockers', 1)}</span></td>
+          <td><span class="row gap-2">${ui.av(L(T[p[12]][2], T[p[12]][3]), T[p[12]][4])}<span class="t-sm ell">${L(T[p[12]][0], T[p[12]][1]).split(' ')[0]}</span></span></td>
+          <td data-st>${ui.tag(H[p[11]][0], L(H[p[11]][1], H[p[11]][2]))}</td>
+          <td class="right">${ui.menuBtn('prj')}</td></tr>`; };
+const prjForm = (L, { ui }) => `
+  ${ui.field(L('اسم المشروع', 'Project name'), ui.input('name', { req: 1, ph: L('مثال: تطبيق Odoo ERP', 'e.g. Odoo ERP rollout') }), { req: 1 })}
+  <div class="form-grid">
+    ${ui.field(L('العميل', 'Client'), ui.select('client', GL_PROJECTS.map(p => [p[2] + '|' + p[3] + '|' + p[4] + '|' + p[5], GL.L(p[2], p[3])]), { ph: L('اختار عميل', 'Choose a client'), req: 1, icon: 'building-2' }), { req: 1, hint: `<a class="link" href="ws-clients.html">${L('+ عميل جديد', '+ New client')}</a>` })}
+    ${ui.field(L('القالب', 'Playbook'), ui.select('tpl', [L('Odoo ERP — تصنيع', 'Odoo ERP — Manufacturing'), L('Odoo CRM', 'Odoo CRM'), L('ترحيل بيانات', 'Data migration'), L('من غير قالب', 'Blank')], { icon: 'layout-template' }))}
+    ${ui.field(L('مدير المشروع', 'Project manager'), ui.select('pm', Object.entries(GL_TEAM).filter(([k, m]) => m[5] !== 'consultant').map(([k, m]) => [k, GL.L(m[0], m[1])]), { val: 'ma', icon: 'user' }), { req: 1 })}
+    ${ui.field(L('قيمة العقد', 'Contract value'), ui.input('val', { ltr: 1, icon: 'banknote', ph: '$25,000' }))}
+    ${ui.field(L('تاريخ البدء', 'Start date'), ui.input('start', { type: 'date', req: 1, ltr: 1, val: '2026-12-01' }), { req: 1 })}
+    ${ui.field(L('موعد الإطلاق المستهدف', 'Target go-live'), ui.input('golive', { type: 'date', req: 1, ltr: 1 }), { req: 1 })}
+  </div>
+  <div class="field"><label>${L('الموديولات', 'Modules')}</label><div class="row gap-2 wrap" data-multi>${['Sales', 'CRM', 'Inventory', 'Accounting', 'Manufacturing', 'HR', 'POS'].map((m, i) => `<span class="opt ${i < 3 ? 'on' : ''}" style="padding:6px 12px"><span class="box ${i < 3 ? 'on' : ''}">${i < 3 ? GL.icon('check') : ''}</span>${m}</span>`).join('')}</div></div>
+  <div class="set-row" style="padding:0"><div class="grow"><div class="t-strong">${L('فعّل بوابة العميل', 'Enable client portal')}</div><div class="t-sm sec">${L('هنبعت دعوة لجهة الاتصال الأساسية', 'We’ll invite the primary contact')}</div></div><span class="switch on" data-static></span></div>`;
+GL.mount({
+  shell: 'ws', nav: 'ws-projects',
+  modals: {
+    new: { kind: 'drawer', size: 'lg', icon: 'briefcase', title: L => L('مشروع جديد', 'New project'), sub: L => L('7 من 10 مشاريع نشطة في خطتك', '7 of 10 active projects on your plan'), body: prjForm, submit: L => L('إنشاء المشروع', 'Create project'), submitIcon: 'plus',
+      add: { table: 'prjTbl', row: (v, L) => { const c = (v.client || '|||').split('|'); return prjRow(L, GL.ui, GL.icon, [v.name, v.name, c[0], c[1], c[2], c[3], 'av-teal', 0, 0, v.golive, v.golive, 'kick', v.pm || 'ma', [0, 0, 0], v.val || '—']); } },
+      toast: (L, v) => [L('اتعمل المشروع', 'Project created'), L('اتضافت مراحل القالب والمهام', 'Playbook phases and tasks were added')] },
+    edit: { kind: 'drawer', size: 'lg', icon: 'pencil', title: L => L('تعديل المشروع', 'Edit project'), sub: (L, c) => c.name, body: prjForm, toast: L => [L('اتحفظ المشروع', 'Project saved'), ''] }
+  },
+  menus: { prj: [{ icon: 'eye', ar: 'فتح المشروع', en: 'Open project', href: 'ws-project.html' }, { icon: 'pencil', ar: 'تعديل', en: 'Edit', open: 'edit' }, { icon: 'copy', ar: 'حفظ كقالب', en: 'Save as playbook', toast: (L, n) => `success|${L('اتحفظ كقالب', 'Saved as playbook')}|${n}` }, { icon: 'link', ar: 'نسخ رابط البوابة', en: 'Copy portal link', toast: L => `success|${L('اتنسخ الرابط', 'Link copied')}|portal.golive.example/…` }, '-', { icon: 'archive', ar: 'أرشفة', en: 'Archive', confirm: 'arch' }, { icon: 'trash-2', ar: 'حذف', en: 'Delete', del: 1, danger: 1 }] },
+  confirms: { arch: { icon: 'archive', title: (L, c) => L(`أرشفة «${c.name}»؟`, `Archive “${c.name}”?`), text: L => L('بوابة العميل هتتقفل وهيتحرر مكان في حد المشاريع.', 'The client portal closes and a project slot is freed.'), btn: L => L('أرشفة', 'Archive'), run: (L, c, row) => { row.dataset.cat = 'archived'; GLI.filterTable('prjTbl'); }, toast: (L, c) => [L('اتأرشف المشروع', 'Project archived'), c.name] } },
+  title: L => L('المشاريع', 'Projects'),
+  render: (L, { icon, ui }) => {
+    const T = GL_TEAM, H = GL_HEALTH, PH = GL_PHASES;
+    const P = GL_PROJECTS.concat([['تطبيق Odoo للمبيعات', 'Odoo Sales rollout', 'وادي للأغذية', 'Wadi Foods', 'و', 'WF', 'av-amber', 6, 100, '2 أكتوبر', 'Oct 2', 'done', 'rf', [0, 0, 0], '$19,800']]);
+    const months = [L('ديسمبر', 'Dec'), L('يناير', 'Jan'), L('فبراير', 'Feb'), L('مارس', 'Mar'), L('أبريل', 'Apr'), L('مايو', 'May')];
+    const span = [[0, 0.45], [-0.3, 0.95], [-0.6, 1.6], [-0.5, 0], [-0.2, 1.3], [0.1, 2.6], [0.4, 3.1], [-2, 0]];
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('المشاريع', 'Projects')}</h1><p class="sub">${L('كل مشاريع التنفيذ من توقيع العقد لحد الـ Go-live', 'Every implementation from signed contract to go-live')}</p></div>
+      <div class="actions"><div class="pills" data-tabs="view"><span class="pill active" data-tab="table">${icon('list', 'sm')}${L('جدول', 'Table')}</span><span class="pill" data-tab="board">${icon('kanban', 'sm')}${L('لوحة', 'Board')}</span><span class="pill" data-tab="timeline">${icon('calendar-clock', 'sm')}${L('زمني', 'Timeline')}</span></div>
+        <button class="btn btn-primary" data-open="new">${icon('plus', 'sm')}${L('مشروع جديد', 'New project')}</button></div>
+    </div>
+    <section class="stat-strip">
+      ${ui.mini('briefcase', '', '7', L('مشاريع نشطة من 10', 'Active of 10 allowed'))}
+      ${ui.mini('banknote', ui.tone.success, '$215K', L('قيمة العقود النشطة', 'Active contract value'))}
+      ${ui.mini('calendar-check', ui.tone.info, '86%', L('بتتسلم في ميعادها (12 شهر)', 'On-time go-lives (12 mo)'))}
+      ${ui.mini('alert-triangle', ui.tone.warning, '2', L('مشاريع محتاجة تدخل', 'Projects need attention'))}
+    </section>
+    <section class="card table-wrap" data-pane-group="view" data-pane="table">
+      <div class="tabs" style="padding-inline:var(--gl-space-6)" data-tabs="pst" data-filter-table="prjTbl"><span class="tab active" data-tab="active">${L('نشطة', 'Active')} <span class="badge">7</span></span><span class="tab" data-tab="attn">${L('محتاجة تدخل', 'Needs attention')} <span class="badge">2</span></span><span class="tab" data-tab="done">${L('مكتملة', 'Completed')} <span class="badge">1</span></span><span class="tab" data-tab="archived">${L('مؤرشفة', 'Archived')}</span></div>
+      <div class="toolbar"><label class="control search sm">${icon('search', 'sm')}<input data-search="prjTbl" placeholder="${L('ابحث بالمشروع أو العميل…', 'Search project or client…')}"></label>
+        <span class="sel sm">${ui.select('pm', Object.entries(T).filter(([k, m]) => m[5] === 'pm').map(([k, m]) => [k, L(m[0], m[1])]), { ph: L('كل المديرين', 'All managers'), filter: 'prjTbl', key: 'pm', cls: 'sm', icon: 'user' })}</span>
+        <span class="sel sm">${ui.select('ph', PH.map((x, i) => [String(i), L(x[0], x[1])]), { ph: L('كل المراحل', 'All phases'), filter: 'prjTbl', key: 'ph', cls: 'sm', icon: 'milestone' })}</span>
+        <div class="end"><button class="btn btn-ghost btn-sm" data-toast="info|${L('الترتيب: الأقرب إطلاقًا', 'Sorted by go-live')}|">${icon('sort')}${L('الأقرب إطلاقًا', 'Go-live soonest')}</button></div></div>
+      <table class="tbl" id="prjTbl">
+        <colgroup><col><col style="width:208px"><col style="width:112px"><col style="width:176px"><col style="width:136px"><col style="width:152px"><col style="width:56px"></colgroup>
+        <thead><tr><th>${L('المشروع', 'Project')}</th><th>${L('المرحلة', 'Phase')}</th><th>${L('الإطلاق', 'Go-live')}</th><th>${L('مفتوح', 'Open items')}</th><th>${L('المدير', 'PM')}</th><th>${L('الحالة', 'Health')}</th><th></th></tr></thead>
+        <tbody>${P.map(p => prjRow(L, ui, icon, p)).join('')}</tbody>
+      </table>
+      <div class="card-foot"><span class="t-sm muted">${L('7 نشطة · 1 مكتمل حديثًا', '7 active · 1 recently completed')}</span><span class="row gap-4 t-cap muted"><span class="row gap-1">${icon('file-pen-line', 'xs')}${L('موافقات', 'Approvals')}</span><span class="row gap-1">${icon('clipboard-list', 'xs')}${L('متطلبات من العميل', 'Client requirements')}</span><span class="row gap-1">${icon('alert-triangle', 'xs')}Blockers</span></span></div>
+    </section>
+    <section class="card" data-pane-group="view" data-pane="board" hidden>
+      <div class="card-head bordered"><div><h3 class="t-h3">${L('لوحة المراحل', 'Phase board')}</h3><p class="sub">${L('اسحب المشروع لمرحلة تانية (نموذج)', 'Drag a project to another phase (prototype)')}</p></div></div>
+      <div class="board">${PH.map((ph, i) => { const items = P.filter(p => Math.min(p[7], 5) === i && p[11] !== 'done'); return `<div class="bcol"><h4><span>${L(ph[0], ph[1])}</span><span class="t-cap muted num">${items.length}</span></h4>${items.map(p => `<a class="bcard" href="ws-project.html"><div class="t">${L(p[0], p[1])}</div><div class="t-cap muted ell">${L(p[2], p[3])}</div><div class="bar thin ${H[p[11]][0] === 'danger' ? 'danger' : H[p[11]][0] === 'warning' ? 'warn' : ''}"><i style="width:${p[8]}%"></i></div><div class="f">${ui.tag(H[p[11]][0], L(H[p[11]][1], H[p[11]][2]))}${ui.av(L(T[p[12]][2], T[p[12]][3]), T[p[12]][4] + ' sm', 'round')}</div></a>`).join('')}${i === 0 ? `<div class="bcard add" data-open="new">${icon('plus', 'sm')}${L('مشروع', 'Project')}</div>` : ''}</div>`; }).join('')}</div>
+    </section>
+    <section class="card" data-pane-group="view" data-pane="timeline" hidden>
+      <div class="card-head bordered"><div><h3 class="t-h3">${L('الخط الزمني', 'Timeline')}</h3><p class="sub">${L('من النهارده لحد مايو 2027', 'Today through May 2027')}</p></div><div class="row gap-4"><span class="legend"><i style="background:var(--gl-brand-600)"></i>${L('في المسار', 'On track')}</span><span class="legend"><i style="background:var(--gl-warning-solid)"></i>${L('معرّض للتأخير', 'At risk')}</span><span class="legend"><i style="background:var(--gl-danger-solid)"></i>${L('متوقف', 'Blocked')}</span></div></div>
+      <div class="gantt"><div class="g-head"><span></span><div class="mo">${months.map(m => `<span>${m}</span>`).join('')}</div></div>
+        ${GL_PROJECTS.map((p, k) => { const a = Math.max(0, span[k][0]), b = Math.min(6, span[k][1] + 0.6), col = { ok: 'var(--gl-brand-600)', risk: 'var(--gl-warning-solid)', blocked: 'var(--gl-danger-solid)', kick: 'var(--gl-info-solid)' }[p[11]]; return `<div class="g-row"><div class="row gap-2" style="min-width:0">${ui.av(L(p[4], p[5]), p[6], 'sm')}<div style="min-width:0"><div class="t-strong t-sm ell">${L(p[0], p[1])}</div><div class="t-cap muted">${L('الإطلاق', 'Go-live')} ${L(p[9], p[10])}</div></div></div><div class="g-track"><span class="g-today" style="inset-inline-start:7%"></span><span class="g-bar" style="inset-inline-start:${a / 6 * 100}%;width:${(b - a) / 6 * 100}%;background:${col}"><i style="width:${p[8]}%"></i><span style="position:relative">${p[8]}%</span></span></div></div>`; }).join('')}
+      </div>
+    </section>`;
+  }
+});

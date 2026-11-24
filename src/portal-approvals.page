@@ -1,0 +1,70 @@
+.al{display:flex;flex-direction:column}
+.ai{display:flex;gap:var(--gl-space-3);padding:var(--gl-space-4) var(--gl-space-5);border-inline-start:3px solid transparent}
+.ai + .ai{border-block-start:1px solid var(--gl-border-default)}
+.ai.on{background:var(--gl-brand-subtle);border-inline-start-color:var(--gl-brand-primary)}
+.ai .t{font:var(--gl-type-body-strong)}
+.ai .m{font:var(--gl-type-caption);color:var(--gl-text-muted);margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.doc-v{background:var(--gl-bg-subtle);padding:var(--gl-space-6);display:flex;justify-content:center;border-block:1px solid var(--gl-border-default)}
+.paper{width:100%;max-width:620px;background:var(--gl-bg-surface);border-radius:var(--gl-radius-sm);box-shadow:var(--gl-shadow-md);padding:var(--gl-space-8);display:flex;flex-direction:column;gap:var(--gl-space-4);font:var(--gl-type-body-sm)}
+.paper h3{font:var(--gl-type-h2)}
+.paper .ln{height:8px;border-radius:4px;background:var(--gl-bg-subtle)}
+.paper table{width:100%;border-collapse:collapse;font:var(--gl-type-caption)}
+.paper th,.paper td{border:1px solid var(--gl-border-default);padding:6px 8px;text-align:start}
+.paper th{background:var(--gl-bg-subtle);font-weight:600}
+.cmt{position:relative;background:var(--gl-accent-subtle);outline:2px solid color-mix(in srgb,var(--gl-accent-default) 50%,transparent);border-radius:4px}
+.signbox{padding:var(--gl-space-6);display:flex;flex-direction:column;gap:var(--gl-space-4)}
+.sig{font:italic 500 22px/32px "Readex Pro",cursive;color:var(--gl-brand-text);padding:var(--gl-space-2) var(--gl-space-4);border-block-end:1.5px dashed var(--gl-border-strong)}
+.vtag{font:500 12px/18px ui-monospace,Menlo,Consolas,monospace;color:var(--gl-text-muted);direction:ltr}
+//JS
+GL.mount({
+  shell: 'portal', nav: 'p-appr',
+  title: L => L('الموافقات', 'Approvals'),
+  render: (L, { icon, ui }) => {
+    const A = [
+      [L('سيناريوهات اختبار UAT', 'UAT test scenarios'), 'v3', L('اتبعتت من يومين · مستحق الخميس', 'Sent 2 days ago · due Thursday'), 'warning', L('مستني توقيعك', 'Awaiting you'), 1],
+      [L('تعديل نطاق: تكامل الميزان', 'Change request: weighbridge integration'), 'CR-04', L('+18 ساعة · +$1,440', '+18 hours · +$1,440'), 'warning', L('مستني توقيعك', 'Awaiting you')],
+      [L('وثيقة التصميم (Blueprint)', 'Solution blueprint'), 'v2', L('وقّعتها 4 أكتوبر', 'You signed Oct 4'), 'success', L('معتمدة', 'Signed')],
+      [L('خطة ترحيل البيانات', 'Data migration plan'), 'v1', L('وقّعتها هبة سليم 20 أكتوبر', 'Signed by Heba Selim Oct 20'), 'success', L('معتمدة', 'Signed')],
+      [L('خطة المشروع والجدول الزمني', 'Project plan & timeline'), 'v1', L('وقّعتها 2 سبتمبر', 'You signed Sep 2'), 'success', L('معتمدة', 'Signed')]
+    ];
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('الموافقات', 'Approvals')}</h1><p class="sub">${L('راجع المستندات ووقّع عليها إلكترونيًا. كل توقيع بيتسجل بالوقت والـ IP.', 'Review and e-sign documents. Every signature is recorded with time and IP.')}</p></div>
+    </div>
+    <section class="grid g-12" style="align-items:start">
+      <aside class="span-4 card al">
+        <div class="card-head bordered"><h3 class="t-h3">${L('كل المستندات', 'All documents')}</h3>${ui.tag('warning', L('2 مستنيين', '2 pending'), false)}</div>
+        ${A.map(a => `<div class="ai ${a[5] ? 'on' : ''}"><span class="ic-tile" style="width:36px;height:36px;${a[3] === 'success' ? ui.tone.success : ui.tone.accent}">${icon(a[3] === 'success' ? 'check-circle' : 'file-pen-line', 'sm')}</span><div class="grow" style="min-width:0"><div class="t">${a[0]} <span class="vtag">${a[1]}</span></div><div class="m">${ui.tag(a[3], a[4], false)}<span>${a[2]}</span></div></div></div>`).join('')}
+      </aside>
+      <div class="span-8 card">
+        <div class="card-head"><div><div class="row gap-2"><h3 class="t-h2">${L('سيناريوهات اختبار UAT', 'UAT test scenarios')}</h3><span class="vtag">v3 · 18 ${L('صفحة', 'pages')}</span></div><p class="sub">${L('من منى عادل · آخر تعديل: إضافة سيناريوهات المرتجعات بناءً على تعليقك', 'From Mona Adel · Changes: added returns scenarios based on your comment')}</p></div>
+          <div class="row gap-2"><button class="icon-btn sm outline">${icon('download')}</button><button class="icon-btn sm outline">${icon('external-link')}</button></div></div>
+        <div class="doc-v"><div class="paper">
+          <div class="row between"><span class="avatar ws-logo sm">${L('ن', 'NS')}</span><span class="t-cap muted ltr">UAT-AN-2026 · v3</span></div>
+          <h3>${L('سيناريوهات اختبار القبول — المبيعات والمشتريات', 'Acceptance test scenarios — Sales & Purchasing')}</h3>
+          <div class="ln" style="width:92%"></div><div class="ln" style="width:84%"></div><div class="ln" style="width:60%"></div>
+          <table><thead><tr><th>#</th><th>${L('السيناريو', 'Scenario')}</th><th>${L('النتيجة المتوقعة', 'Expected result')}</th><th>${L('القسم', 'Dept')}</th></tr></thead>
+            <tbody><tr><td>S-01</td><td>${L('أمر بيع بخصم 10%', 'Sales order with 10% discount')}</td><td>${L('فاتورة بالخصم والضريبة', 'Invoice with discount & VAT')}</td><td>${L('المبيعات', 'Sales')}</td></tr>
+              <tr><td>S-02</td><td>${L('بيع بالأجل لعميل فوق الحد', 'Credit sale over customer limit')}</td><td>${L('يتوقف لحين الاعتماد', 'Blocked pending approval')}</td><td>${L('المبيعات', 'Sales')}</td></tr>
+              <tr class="cmt"><td>S-07</td><td>${L('مرتجع مبيعات جزئي', 'Partial sales return')}</td><td>${L('إشعار دائن وتحديث المخزون', 'Credit note + stock update')}</td><td>${L('المخازن', 'Inventory')}</td></tr>
+              <tr><td>P-03</td><td>${L('أمر شراء فوق 50,000 ج.م', 'PO above EGP 50,000')}</td><td>${L('اعتماد على مرحلتين', 'Two-step approval')}</td><td>${L('المشتريات', 'Purchasing')}</td></tr></tbody></table>
+          <div class="ln" style="width:88%"></div><div class="ln" style="width:70%"></div>
+        </div></div>
+        <div class="grid g-2" style="gap:0">
+          <div class="signbox" style="border-inline-end:1px solid var(--gl-border-default)">
+            <div class="t-strong">${L('تعليقات', 'Comments')} <span class="badge soft">2</span></div>
+            <div class="msg">${ui.av(L('خ', 'KM'), 'av-amber', 'round')}<div class="grow"><div class="t-cap muted"><b style="color:var(--gl-text-primary)">${L('أنت', 'You')}</b> · v2 · 18 ${L('نوف', 'Nov')}</div><div class="t-sm">${L('محتاجين سيناريو للمرتجع الجزئي.', 'We need a partial-return scenario.')}</div></div></div>
+            <div class="msg">${ui.av(L('م', 'MA'), 'av-teal', 'round')}<div class="grow"><div class="t-cap muted"><b style="color:var(--gl-text-primary)">${L('منى عادل', 'Mona Adel')}</b> · v3 · 22 ${L('نوف', 'Nov')}</div><div class="t-sm">${L('اتضاف S-07 ✔', 'Added as S-07 ✔')}</div></div></div>
+            <span class="control">${icon('message', 'sm')}<input placeholder="${L('اكتب تعليق…', 'Add a comment…')}"></span>
+          </div>
+          <div class="signbox">
+            <div class="t-strong">${L('التوقيع', 'Sign-off')}</div>
+            <div class="sig">${L('خالد منصور', 'Khaled Mansour')}</div>
+            <label class="check t-sm"><span class="box on">${icon('check')}</span>${L('راجعت المستند وموافق على محتواه بالنيابة عن مصنع النور', 'I reviewed this document and approve it on behalf of Al Nour Plastics')}</label>
+            <div class="row gap-2"><button class="btn btn-outline grow">${icon('pencil', 'sm')}${L('طلب تعديل', 'Request changes')}</button><button class="btn btn-primary grow">${icon('file-pen-line', 'sm')}${L('اعتماد وتوقيع', 'Approve & sign')}</button></div>
+          </div>
+        </div>
+      </div>
+    </section>`;
+  }
+});

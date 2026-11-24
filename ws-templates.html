@@ -33,6 +33,11 @@
 .ti svg.i{width:15px;height:15px;color:var(--gl-text-muted)}
 .ti .tag{margin-inline-start:auto;height:20px}
 .sticky{position:sticky;top:calc(var(--gl-topbar-h) + var(--gl-space-6))}
+.ph-h{cursor:pointer;user-select:none}
+.ph-h > svg.i:last-child{transition:transform .15s}
+.ph-acc:not(.open) .ph-b{display:none}
+.ph-acc.open .ph-h > svg.i:last-child{transform:rotate(180deg)}
+.ph-b .add-i{display:flex;align-items:center;gap:var(--gl-space-2);padding-block:6px;font:var(--gl-type-label-sm);color:var(--gl-brand-text);background:none;border:0;cursor:pointer}
 </style>
 </head>
 <body>
@@ -41,49 +46,64 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
+const tpCard = (L, ui, icon, t) => `<article class="card tpl ${t[9] ? 'on' : ''}" data-row data-cat="${t[10] || 'ours'}" data-tp="${t[2]}">
+  <div class="row between start gap-3"><span class="ic-tile" style="${t[1] ? ui.tone[t[1]] : ''}">${icon(t[0])}</span><span class="row gap-2">${t[9] ? ui.tag('brand', L('افتراضي', 'Default'), false) : ''}${t[10] === 'lib' ? ui.tag('violet', 'GoLive', false) : ''}${ui.menuBtn('tp')}</span></div>
+  <div><div class="t" data-f="name">${t[2]}</div><div class="d">${t[3]}</div></div>
+  <div class="phs">${Array.from({ length: t[4] }, () => '<i></i>').join('')}</div>
+  <div class="st"><span>${icon('layers', 'xs')}${t[4]} ${L('مراحل', 'phases')}</span><span>${icon('list-checks', 'xs')}${t[5]} ${L('مهمة', 'tasks')}</span><span>${icon('clipboard-list', 'xs')}${t[6]} ${L('متطلب', 'reqs')}</span><span>${icon('clock', 'xs')}${t[8]}</span></div>
+  <div class="row between t-cap muted"><span>${L(`استُخدم في ${t[7]} مشاريع`, `Used in ${t[7]} projects`)}</span></div>
+</article>`;
+document.addEventListener('click', e => { const c = e.target.closest('.tpl'); if (!c || e.target.closest('[data-menu]')) return; document.querySelectorAll('.tpl').forEach(x => x.classList.toggle('on', x === c)); const h = document.querySelector('[data-tp-title]'); if (h) { h.textContent = c.dataset.tp; GLI.flash(h.closest('.card')); } });
 GL.mount({
   shell: 'ws', nav: 'ws-templates',
   title: L => L('قوالب التنفيذ', 'Playbooks'),
+  modals: {
+    new: { kind: 'drawer', size: 'lg', icon: 'layout-template', title: L => L('قالب جديد', 'New playbook'), sub: L => L('ابدأ من الصفر أو انسخ قالب موجود', 'Start blank or copy an existing playbook'),
+      body: (L, { ui }) => `${ui.field(L('اسم القالب', 'Playbook name'), ui.input('name', { req: 1, ph: L('مثال: Odoo للمستشفيات', 'e.g. Odoo for hospitals') }), { req: 1 })}${ui.field(L('الوصف', 'Description'), ui.textarea('desc', { rows: 3 }))}
+        <div class="form-grid">${ui.field(L('ابدأ من', 'Start from'), ui.select('base', [L('قالب فاضي', 'Blank'), L('Odoo ERP قياسي', 'Odoo ERP standard'), 'Odoo CRM', L('ترحيل البيانات', 'Data migration')], { icon: 'copy' }))}${ui.field(L('المدة المتوقعة', 'Typical duration'), ui.select('dur', [L('6 أسابيع', '6 weeks'), L('8 أسابيع', '8 weeks'), L('12 أسبوع', '12 weeks'), L('16 أسبوع', '16 weeks')], { icon: 'clock' }))}</div>
+        <div class="field"><label>${L('الموديولات', 'Modules')}</label><div class="row gap-2 wrap" data-multi data-req-group>${['Sales', 'CRM', 'Inventory', 'Accounting', 'Manufacturing', 'HR', 'POS'].map((m, i) => `<span class="opt ${i === 0 ? 'on' : ''}" style="padding:6px 12px"><span class="box ${i === 0 ? 'on' : ''}">${i === 0 ? GL.icon('check') : ''}</span>${m}</span>`).join('')}</div></div>`,
+      submit: L => L('إنشاء القالب', 'Create playbook'), add: { table: 'tpGrid', row: (v, L) => tpCard(L, GL.ui, GL.icon, ['layout-template', 'accent', v.name, v.desc || L('قالب جديد', 'New playbook'), 6, 0, 0, 0, v.dur, 0, 'ours']) }, toast: (L, v) => [L('اتعمل القالب', 'Playbook created'), L('ضيف المراحل والمهام من اللوحة', 'Add phases and tasks from the panel')] },
+    import: { icon: 'upload', title: L => L('استيراد قالب من Excel', 'Import playbook from Excel'), body: L => `<div class="dropzone">${GL.icon('cloud-upload')}<span>${L('اسحب ملف Excel فيه المراحل والمهام', 'Drop an Excel file with phases and tasks')}</span><a class="link t-cap" href="#" data-toast="success|${L('اتحمل القالب', 'Template downloaded')}|playbook_template.xlsx">${L('حمّل ملف المثال', 'Download sample file')}</a></div>`, submit: L => L('استيراد', 'Import'), toast: L => [L('اتستورد القالب', 'Playbook imported'), L('6 مراحل · 41 مهمة', '6 phases · 41 tasks')] },
+    item: { icon: 'plus', size: 'sm', title: L => L('إضافة عنصر للمرحلة', 'Add item to phase'), body: (L, { ui }) => `${ui.field(L('العنوان', 'Title'), ui.input('name', { req: 1 }), { req: 1 })}${ui.field(L('النوع', 'Type'), ui.select('k', [['task', L('مهمة', 'Task')], ['form', L('نموذج للعميل', 'Client form')], ['approval', L('موافقة', 'Sign-off')]]))}`,
+      submit: L => L('إضافة', 'Add'), onSubmit: (v, { row }) => { const b = document.querySelector('.ph-acc.open .ph-b') || document.querySelector('.ph-b'); const K = { task: ['neutral', GL.L('مهمة', 'Task'), 'square-check-big'], form: ['info', GL.L('نموذج للعميل', 'Client form'), 'clipboard-list'], approval: ['accent', GL.L('موافقة', 'Sign-off'), 'file-pen-line'] }[v.k]; const d = document.createElement('div'); d.className = 'ti'; d.innerHTML = `${GL.icon(K[2])}<span>${v.name}</span>${GL.ui.tag(K[0], K[1], false)}`; b.insertBefore(d, b.querySelector('.add-i')); GLI.flash(d); }, toast: L => [L('اتضاف', 'Added'), ''] }
+  },
+  menus: { tp: [{ icon: 'rocket', ar: 'استخدم في مشروع', en: 'Use for a project', href: 'ws-projects.html?open=new' }, { icon: 'pencil', ar: 'تعديل', en: 'Edit', toast: (L, n) => `info|${L('عدّل من اللوحة الجانبية', 'Edit from the side panel')}|${n}` }, { icon: 'copy', ar: 'نسخ', en: 'Duplicate', toast: (L, n) => `success|${L('اتعملت نسخة', 'Duplicated')}|${n}` }, { icon: 'star', ar: 'اجعله الافتراضي', en: 'Set as default', toast: (L, n) => `success|${L('بقى القالب الافتراضي', 'Now the default playbook')}|${n}` }, '-', { icon: 'trash-2', ar: 'حذف', en: 'Delete', del: 1, danger: 1 }] },
+  confirms: { use: { icon: 'rocket', title: L => L('إنشاء مشروع من القالب ده؟', 'Create a project from this playbook?'), text: L => L('هنفتح نموذج مشروع جديد ومعاه المراحل والمهام جاهزة.', 'We’ll open a new-project form with phases and tasks pre-filled.'), btn: L => L('يلا', 'Continue'), run: () => setTimeout(() => location.href = 'ws-projects.html?open=new', 400) } },
   render: (L, { icon, ui }) => {
     const TP = [
-      ['layers', '', L('Odoo ERP قياسي', 'Odoo ERP standard'), L('محاسبة، مشتريات، مخازن ومبيعات لشركات التصنيع والتوزيع', 'Accounting, purchasing, inventory and sales for manufacturers & distributors'), 6, 84, 32, 12, L('16 أسبوع', '16 weeks'), 1],
-      ['users', 'info', 'Odoo CRM ' + L('سريع', 'quick-start'), L('Pipeline، فرق المبيعات وتكامل الإيميل في 6 أسابيع', 'Pipeline, sales teams and email integration in 6 weeks'), 4, 38, 14, 9, L('6 أسابيع', '6 weeks')],
-      ['database', 'warning', L('ترحيل البيانات', 'Data migration'), L('تنظيف ومطابقة وترحيل من الأنظمة القديمة على دفعات', 'Cleanse, map and migrate from legacy systems in batches'), 5, 46, 18, 7, L('8 أسابيع', '8 weeks')],
-      ['credit-card', 'violet', L('نقاط البيع POS', 'Odoo POS rollout'), L('فروع متعددة، أجهزة، ودفع إلكتروني', 'Multi-branch, hardware and payment terminals'), 5, 52, 21, 4, L('10 أسابيع', '10 weeks')],
-      ['settings', 'accent', L('تخطيط التصنيع MRP', 'Manufacturing MRP'), L('قوائم المواد، أوامر الشغل والجودة', 'Bills of materials, work orders and quality'), 6, 97, 40, 3, L('20 أسبوع', '20 weeks')],
-      ['user-check', 'success', L('الموارد البشرية والرواتب', 'HR & payroll'), L('بيانات الموظفين، الحضور والرواتب حسب قانون العمل المصري', 'Employees, attendance and Egyptian-law payroll'), 4, 41, 16, 6, L('8 أسابيع', '8 weeks')]
+      ['layers', '', L('Odoo ERP قياسي', 'Odoo ERP standard'), L('محاسبة، مشتريات، مخازن ومبيعات لشركات التصنيع والتوزيع', 'Accounting, purchasing, inventory and sales for manufacturers & distributors'), 6, 84, 32, 12, L('16 أسبوع', '16 weeks'), 1, 'ours'],
+      ['users', 'info', 'Odoo CRM ' + L('سريع', 'quick-start'), L('Pipeline، فرق المبيعات وتكامل الإيميل في 6 أسابيع', 'Pipeline, sales teams and email integration in 6 weeks'), 4, 38, 14, 9, L('6 أسابيع', '6 weeks'), 0, 'ours'],
+      ['database', 'warning', L('ترحيل البيانات', 'Data migration'), L('تنظيف ومطابقة وترحيل من الأنظمة القديمة على دفعات', 'Cleanse, map and migrate from legacy systems in batches'), 5, 46, 18, 7, L('8 أسابيع', '8 weeks'), 0, 'ours'],
+      ['credit-card', 'violet', L('نقاط البيع POS', 'Odoo POS rollout'), L('فروع متعددة، أجهزة، ودفع إلكتروني', 'Multi-branch, hardware and payment terminals'), 5, 52, 21, 4, L('10 أسابيع', '10 weeks'), 0, 'ours'],
+      ['settings', 'accent', L('تخطيط التصنيع MRP', 'Manufacturing MRP'), L('قوائم المواد، أوامر الشغل والجودة', 'Bills of materials, work orders and quality'), 6, 97, 40, 3, L('20 أسبوع', '20 weeks'), 0, 'lib'],
+      ['user-check', 'success', L('الموارد البشرية والرواتب', 'HR & payroll'), L('بيانات الموظفين، الحضور والرواتب حسب قانون العمل المصري', 'Employees, attendance and Egyptian-law payroll'), 4, 41, 16, 6, L('8 أسابيع', '8 weeks'), 0, 'lib']
     ];
     const phases = [
       [L('الاكتشاف', 'Discovery'), 12, 6, [[L('اجتماع البداية Kick-off', 'Kick-off workshop'), 'task'], [L('استبيان العمليات الحالية', 'Current-process questionnaire'), 'form'], [L('تحديد أصحاب القرار', 'Identify decision makers'), 'task']]],
       [L('التصميم (Blueprint)', 'Design (Blueprint)'), 18, 8, [[L('ورش عمل لكل قسم', 'Workshops per department'), 'task'], [L('وثيقة التصميم', 'Solution blueprint'), 'approval']]],
-      [L('البناء والتهيئة', 'Build & configure'), 22, 5],
-      [L('ترحيل البيانات', 'Data migration'), 14, 7],
-      [L('اختبار القبول UAT', 'UAT'), 10, 4],
-      [L('الإطلاق والدعم', 'Go-live & hypercare'), 8, 2]
+      [L('البناء والتهيئة', 'Build & configure'), 22, 5, [[L('تهيئة الشركات والمخازن', 'Configure companies & warehouses'), 'task'], [L('تهيئة خريطة الحسابات', 'Chart of accounts setup'), 'task'], [L('اعتماد خريطة الحسابات', 'Chart of accounts sign-off'), 'approval']]],
+      [L('ترحيل البيانات', 'Data migration'), 14, 7, [[L('ملف العملاء والموردين', 'Customers & vendors file'), 'form'], [L('أرصدة المخزون الافتتاحية', 'Opening stock balances'), 'form'], [L('مطابقة الأرصدة', 'Balance reconciliation'), 'task']]],
+      [L('اختبار القبول UAT', 'UAT'), 10, 4, [[L('سيناريوهات الاختبار', 'Test scenarios'), 'approval'], [L('تسجيل الملاحظات', 'Log findings'), 'form']]],
+      [L('الإطلاق والدعم', 'Go-live & hypercare'), 8, 2, [[L('خطة الإطلاق Cut-over', 'Cut-over plan'), 'approval'], [L('دعم ما بعد الإطلاق 30 يوم', '30-day hypercare'), 'task']]]
     ];
     const kind = { task: ['neutral', L('مهمة', 'Task')], form: ['info', L('نموذج للعميل', 'Client form')], approval: ['accent', L('موافقة', 'Sign-off')] };
     return `
     <div class="page-head">
       <div><h1 class="t-h1">${L('قوالب التنفيذ', 'Implementation playbooks')}</h1><p class="sub">${L('مراحل ومهام ومتطلبات جاهزة، بتتنسخ لكل مشروع جديد', 'Reusable phases, tasks and client requirements, copied into every new project')}</p></div>
-      <div class="actions"><button class="btn btn-outline">${icon('download', 'sm')}${L('استيراد من Excel', 'Import from Excel')}</button><button class="btn btn-primary">${icon('plus', 'sm')}${L('قالب جديد', 'New playbook')}</button></div>
+      <div class="actions"><button class="btn btn-outline" data-open="import">${icon('upload', 'sm')}${L('استيراد من Excel', 'Import from Excel')}</button><button class="btn btn-primary" data-open="new">${icon('plus', 'sm')}${L('قالب جديد', 'New playbook')}</button></div>
     </div>
     <section class="grid g-12" style="align-items:start">
       <div class="span-7 stack gap-4">
-        <div class="row gap-3"><label class="control search grow">${icon('search', 'sm')}<input placeholder="${L('ابحث في القوالب…', 'Search playbooks…')}"></label><div class="pills"><span class="pill active">${L('الكل', 'All')} <span class="n">6</span></span><span class="pill">${L('بتوعنا', 'Ours')} <span class="n">4</span></span><span class="pill">${L('من GoLive', 'GoLive library')} <span class="n">2</span></span></div></div>
-        <div class="tpls">${TP.map(t => `<article class="card tpl ${t[9] ? 'on' : ''}">
-          <div class="row between start gap-3"><span class="ic-tile" style="${t[1] ? ui.tone[t[1]] : ''}">${icon(t[0])}</span>${t[9] ? ui.tag('brand', L('افتراضي', 'Default'), false) : `<button class="icon-btn sm">${icon('more')}</button>`}</div>
-          <div><div class="t">${t[2]}</div><div class="d">${t[3]}</div></div>
-          <div class="phs">${Array.from({ length: t[4] }, () => '<i></i>').join('')}</div>
-          <div class="st"><span>${icon('layers', 'xs')}${t[4]} ${L('مراحل', 'phases')}</span><span>${icon('list-checks', 'xs')}${t[5]} ${L('مهمة', 'tasks')}</span><span>${icon('clipboard-list', 'xs')}${t[6]} ${L('متطلب', 'reqs')}</span><span>${icon('clock', 'xs')}${t[8]}</span></div>
-          <div class="row between t-cap muted"><span>${L(`استُخدم في ${t[7]} مشاريع`, `Used in ${t[7]} projects`)}</span></div>
-        </article>`).join('')}</div>
+        <div class="row gap-3"><label class="control search grow">${icon('search', 'sm')}<input data-search="tpGrid" placeholder="${L('ابحث في القوالب…', 'Search playbooks…')}"></label><div class="pills" data-tabs="tps" data-filter-table="tpGrid"><span class="pill active" data-tab="all">${L('الكل', 'All')} <span class="n">6</span></span><span class="pill" data-tab="ours">${L('بتوعنا', 'Ours')} <span class="n">4</span></span><span class="pill" data-tab="lib">${L('من GoLive', 'GoLive library')} <span class="n">2</span></span></div></div>
+        <div class="tpls" id="tpGrid">${TP.map(t => tpCard(L, ui, icon, t)).join('')}</div>
       </div>
       <aside class="span-5 card sticky">
-        <div class="card-head bordered"><div><h3 class="t-h3">${L('Odoo ERP قياسي', 'Odoo ERP standard')}</h3><p class="sub">${L('آخر تعديل من منى عادل · من أسبوع', 'Last edited by Mona Adel · 1 week ago')}</p></div><div class="row gap-2"><button class="btn btn-outline btn-sm">${icon('pencil')}${L('تعديل', 'Edit')}</button><button class="btn btn-primary btn-sm">${icon('rocket')}${L('استخدم', 'Use')}</button></div></div>
+        <div class="card-head bordered"><div><h3 class="t-h3" data-tp-title>${L('Odoo ERP قياسي', 'Odoo ERP standard')}</h3><p class="sub">${L('آخر تعديل من منى عادل · من أسبوع', 'Last edited by Mona Adel · 1 week ago')}</p></div><div class="row gap-2"><button class="btn btn-outline btn-sm" data-open="item">${icon('plus')}${L('عنصر', 'Item')}</button><button class="btn btn-primary btn-sm" data-confirm="use">${icon('rocket')}${L('استخدم', 'Use')}</button></div></div>
         <div class="card-body">
-          ${phases.map((p, i) => `<div class="ph-acc"><div class="ph-h"><span class="num">${i + 1}</span><span class="t">${p[0]}</span><span class="c">${p[1]} ${L('مهمة', 'tasks')} · ${p[2]} ${L('متطلب', 'reqs')}</span>${icon(p[3] ? 'chevron-down' : 'chevron-right', 'sm ' + (p[3] ? '' : 'flip'))}</div>
-            ${p[3] ? `<div class="ph-b">${p[3].map(t => `<div class="ti">${icon(t[1] === 'approval' ? 'file-pen-line' : t[1] === 'form' ? 'clipboard-list' : 'square-check-big')}<span>${t[0]}</span>${ui.tag(kind[t[1]][0], kind[t[1]][1], false)}</div>`).join('')}</div>` : ''}</div>`).join('')}
+          ${phases.map((p, i) => `<div class="ph-acc ${i < 2 ? 'open' : ''}"><div class="ph-h" data-acc><span class="num">${i + 1}</span><span class="t">${p[0]}</span><span class="c">${p[1]} ${L('مهمة', 'tasks')} · ${p[2]} ${L('متطلب', 'reqs')}</span>${icon('chevron-down', 'sm')}</div>
+            <div class="ph-b">${p[3].map(t => `<div class="ti">${icon(t[1] === 'approval' ? 'file-pen-line' : t[1] === 'form' ? 'clipboard-list' : 'square-check-big')}<span>${t[0]}</span>${ui.tag(kind[t[1]][0], kind[t[1]][1], false)}</div>`).join('')}<button class="add-i" data-open="item">${icon('plus', 'xs')}${L('إضافة عنصر', 'Add item')}</button></div></div>`).join('')}
           <div class="callout info mt-4">${icon('info', 'sm')}<span>${L('المتطلبات من نوع «نموذج للعميل» بتظهر تلقائيًا في بوابة العميل لما المرحلة تبدأ.', '“Client form” items appear automatically in the client portal when their phase starts.')}</span></div>
         </div>
       </aside>

@@ -1,0 +1,62 @@
+.rl{display:flex;flex-direction:column}
+.rl-g{font:var(--gl-type-overline);color:var(--gl-text-muted);text-transform:uppercase;letter-spacing:.4px;padding:var(--gl-space-4) var(--gl-space-5) var(--gl-space-2)}
+.ri{display:flex;gap:var(--gl-space-3);padding:var(--gl-space-3) var(--gl-space-5);border-inline-start:3px solid transparent;cursor:pointer}
+.ri:hover{background:var(--gl-bg-hover)}
+.ri.on{background:var(--gl-brand-subtle);border-inline-start-color:var(--gl-brand-primary)}
+.ri .t{font:var(--gl-type-body-strong)}
+.ri .m{font:var(--gl-type-caption);color:var(--gl-text-muted);margin-top:2px;display:flex;gap:6px;align-items:center}
+.ri .ic-tile{width:36px;height:36px}
+.ri.sub .ic-tile{background:var(--gl-success-bg);color:var(--gl-success-fg)}
+.fhead{padding:var(--gl-space-6);border-block-end:1px solid var(--gl-border-default)}
+.prog{display:flex;align-items:center;gap:var(--gl-space-3);margin-top:var(--gl-space-4)}
+.q{display:flex;flex-direction:column;gap:var(--gl-space-3)}
+.q .qn{font:var(--gl-type-body-strong);display:flex;gap:var(--gl-space-2)}
+.q .qn span{color:var(--gl-text-muted)}
+.mtx{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--gl-border-default);border-radius:var(--gl-radius-md);overflow:hidden;font:var(--gl-type-body-sm)}
+.mtx th{background:var(--gl-bg-subtle);font:var(--gl-type-label-sm);color:var(--gl-text-muted);height:36px;padding-inline:var(--gl-space-3);text-align:center}
+.mtx th:first-child,.mtx td:first-child{text-align:start}
+.mtx td{height:44px;padding-inline:var(--gl-space-3);border-block-start:1px solid var(--gl-border-default);text-align:center}
+.mtx .box{display:inline-grid}
+.saved{display:inline-flex;align-items:center;gap:6px;font:var(--gl-type-caption);color:var(--gl-text-muted)}
+//JS
+GL.mount({
+  shell: 'portal', nav: 'p-req',
+  title: L => L('المطلوب منك', 'Requests'),
+  render: (L, { icon, ui }) => {
+    const ck = on => `<span class="box ${on ? 'on' : ''}">${on ? icon('check') : ''}</span>`;
+    const deps = [[L('المبيعات', 'Sales'), 1, 1, 0, 1], [L('المشتريات', 'Purchasing'), 1, 1, 1, 0], [L('المخازن', 'Inventory'), 1, 0, 0, 0], [L('الحسابات', 'Finance'), 1, 1, 1, 1]];
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('المطلوب منك', 'What we need from you')}</h1><p class="sub">${L('نماذج وملفات بيطلبها فريق التنفيذ، بتتحفظ تلقائيًا وتقدر تكمّلها بعدين', 'Forms and files requested by your implementation team — auto-saved, finish any time')}</p></div>
+      <div class="actions"><div class="pills"><span class="pill active">${L('مفتوحة', 'Open')} <span class="n">4</span></span><span class="pill">${L('اتسلمت', 'Submitted')} <span class="n">19</span></span></div></div>
+    </div>
+    <section class="grid g-12" style="align-items:start">
+      <aside class="span-4 card rl">
+        <div class="rl-g">${L('مستحق قريب', 'Due soon')}</div>
+        ${[['clipboard-list', L('صلاحيات المستخدمين حسب القسم', 'User permissions by department'), L('مستحق بكرة', 'Due tomorrow'), 'warning', 1], ['upload', L('ملف أرصدة العملاء الافتتاحية', 'Opening customer balances'), L('30 نوف', 'Nov 30'), 'neutral'], ['calendar-check', L('مواعيد تدريب المستخدمين', 'Training dates'), L('2 ديس', 'Dec 2'), 'neutral']].map(r => `<div class="ri ${r[4] ? 'on' : ''}"><span class="ic-tile">${icon(r[0], 'sm')}</span><div class="grow" style="min-width:0"><div class="t ell">${r[1]}</div><div class="m">${ui.tag(r[3], r[2], false)}</div></div></div>`).join('')}
+        <div class="rl-g">${L('اتسلمت مؤخرًا', 'Recently submitted')}</div>
+        ${[[L('بيانات الأصناف والوحدات', 'Products & units of measure'), L('اتسلم 12 نوف · اتراجع', 'Submitted Nov 12 · reviewed')], [L('شجرة الحسابات', 'Chart of accounts'), L('اتسلم 3 نوف · اتراجع', 'Submitted Nov 3 · reviewed')], [L('قائمة الموردين', 'Supplier list'), L('اتسلم 28 أكت', 'Submitted Oct 28')]].map(r => `<div class="ri sub"><span class="ic-tile">${icon('check')}</span><div class="grow" style="min-width:0"><div class="t ell">${r[0]}</div><div class="m">${r[1]}</div></div></div>`).join('')}
+        <div style="height:var(--gl-space-3)"></div>
+      </aside>
+      <div class="span-8 card">
+        <div class="fhead">
+          <div class="row between start gap-4"><div><div class="row gap-2">${ui.tag('warning', L('مستحق بكرة', 'Due tomorrow'))}<span class="t-cap muted">${L('طلبته منى عادل · 20 نوف', 'Requested by Mona Adel · Nov 20')}</span></div>
+            <h2 class="t-h2 mt-2">${L('صلاحيات المستخدمين حسب القسم', 'User permissions by department')}</h2><p class="sec t-sm mt-1">${L('هنستخدم الإجابات دي عشان نجهز صلاحيات Odoo قبل التدريب. ممكن تحول السؤال لزميلك لو مش متأكد.', 'We use these answers to configure Odoo access before training. Forward any question to a colleague if unsure.')}</p></div>
+            <button class="btn btn-outline btn-sm">${icon('user-plus')}${L('حوّل لزميل', 'Forward')}</button></div>
+          <div class="prog"><div class="bar thin grow"><i style="width:58%"></i></div><span class="t-label-sm t-cap">${L('7 من 12 سؤال', '7 of 12 answered')}</span><span class="saved">${icon('cloud-upload', 'xs')}${L('اتحفظ من دقيقة', 'Saved 1 min ago')}</span></div>
+        </div>
+        <div class="card-body stack gap-8">
+          <div class="q"><div class="qn"><span>7.</span>${L('مين في كل قسم يقدر يعمل إيه؟', 'What can each department do?')}</div>
+            <table class="mtx"><thead><tr><th>${L('القسم', 'Department')}</th><th>${L('عرض', 'View')}</th><th>${L('إنشاء', 'Create')}</th><th>${L('اعتماد', 'Approve')}</th><th>${L('حذف', 'Delete')}</th></tr></thead>
+              <tbody>${deps.map(d => `<tr><td class="t-strong">${d[0]}</td>${d.slice(1).map(v => `<td>${ck(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+          <div class="q"><div class="qn"><span>8.</span>${L('مين يعتمد أوامر الشراء اللي فوق 50,000 ج.م؟', 'Who approves purchase orders above EGP 50,000?')}</div>
+            <div class="grid g-2" style="gap:var(--gl-space-3)">${[[L('المدير المالي', 'CFO'), L('خالد منصور', 'Khaled Mansour'), 1], [L('مدير المشتريات', 'Procurement manager'), L('هبة سليم', 'Heba Selim')], [L('الاتنين بالترتيب', 'Both, in sequence'), L('موافقة على مرحلتين', 'Two-step approval')], [L('حد تاني', 'Someone else'), L('اكتب الاسم', 'Type a name')]].map(o => `<label class="opt ${o[2] ? 'on' : ''}"><span class="radio ${o[2] ? 'on' : ''}"></span><span><span class="t">${o[0]}</span><br><span class="d">${o[1]}</span></span></label>`).join('')}</div></div>
+          <div class="q"><div class="qn"><span>9.</span>${L('ارفع الهيكل التنظيمي لو موجود', 'Upload your org chart if available')} <span class="t-cap">(${L('اختياري', 'optional')})</span></div>
+            <div class="dropzone"><span class="ic-tile">${icon('cloud-upload')}</span><div class="t-strong">${L('اسحب الملف هنا أو', 'Drag a file here or')} <span style="color:var(--gl-brand-text)">${L('اختار من جهازك', 'browse')}</span></div><div class="t-cap muted">PDF, XLSX, PNG · ${L('حتى 25 MB', 'up to 25 MB')}</div></div></div>
+          <div class="q"><div class="qn"><span>10.</span>${L('أي ملاحظات تانية؟', 'Anything else we should know?')}</div><div class="textarea ph">${L('مثلًا: فيه موظفين بيشتغلوا في أكتر من قسم…', 'e.g. some staff work across more than one department…')}</div></div>
+        </div>
+        <div class="wiz-foot"><span class="saved">${icon('lock', 'xs')}${L('بياناتك متشافة لفريق نيل سوفت بس', 'Visible only to the NileSoft team')}</span><div class="row gap-2"><button class="btn btn-ghost">${L('حفظ ومتابعة بعدين', 'Save & finish later')}</button><button class="btn btn-primary">${icon('send', 'sm flip')}${L('إرسال للفريق', 'Submit to team')}</button></div></div>
+      </div>
+    </section>`;
+  }
+});

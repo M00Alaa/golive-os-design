@@ -1,0 +1,129 @@
+.plan .meta{display:grid;grid-template-columns:1fr 1fr;gap:var(--gl-space-3);padding:var(--gl-space-4);border-radius:var(--gl-radius-md);background:var(--gl-bg-subtle)}
+.plan .meta .k{font:var(--gl-type-caption);color:var(--gl-text-muted)}
+.plan .meta .v{font:600 16px/24px var(--gl-font-sans);font-variant-numeric:tabular-nums}
+.plan-top{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--gl-space-3)}
+.lim td{height:52px}
+.lim td.c,.lim th.c{text-align:center}
+.lim .grp td{height:36px;background:var(--gl-bg-subtle);font:var(--gl-type-overline);color:var(--gl-text-muted);text-transform:uppercase;letter-spacing:.4px}
+.cp{display:flex;align-items:center;gap:var(--gl-space-3);padding-block:var(--gl-space-3)}
+.cp + .cp{border-block-start:1px solid var(--gl-border-default)}
+.code-tag{font:600 12px/18px ui-monospace,Menlo,Consolas,monospace;padding:2px 8px;border-radius:var(--gl-radius-sm);background:var(--gl-bg-subtle);border:1px dashed var(--gl-border-strong);direction:ltr}
+//JS
+const planForm = (L, { ui, ctx }) => `
+  <div class="sec-title">${L('الأساسيات', 'Basics')}</div>
+  <div class="form-grid">
+    ${ui.field(L('اسم الخطة', 'Plan name'), ui.input('name', { req: 1, ph: 'Growth' }), { req: 1 })}
+    ${ui.field(L('الحالة', 'Status'), ui.select('status', [['pub', L('منشورة', 'Published')], ['draft', L('مسودة', 'Draft')], ['hidden', L('مخفية (بدعوة)', 'Hidden (invite only)')]]))}
+    ${ui.field(L('الوصف', 'Description'), ui.input('desc', { ph: L('سطر واحد يظهر في صفحة الأسعار', 'One line shown on the pricing page') }), { full: 1 })}
+    ${ui.field(L('السعر الشهري (USD)', 'Monthly price (USD)'), ui.input('pm', { req: 1, ltr: 1, icon: 'banknote', val: ctx.pm || '' }), { req: 1 })}
+    ${ui.field(L('السعر السنوي / شهر', 'Annual price / month'), ui.input('py', { ltr: 1, icon: 'banknote', val: ctx.py || '' }), { hint: L('خصم 20% افتراضي', '20% discount by default') })}
+  </div>
+  <div class="sec-title">${L('الحدود', 'Limits')}</div>
+  <div class="form-grid">
+    ${ui.field(L('المستخدمين', 'Users'), ui.input('u', { req: 1, ltr: 1, val: ctx.u || '' }), { req: 1 })}
+    ${ui.field(L('المشاريع النشطة', 'Active projects'), ui.input('pr', { req: 1, ltr: 1, val: ctx.pr || '' }), { req: 1 })}
+    ${ui.field(L('بوابات العملاء', 'Client portals'), ui.input('po', { ltr: 1, val: ctx.po || '' }))}
+    ${ui.field(L('التخزين (GB)', 'Storage (GB)'), ui.input('st', { ltr: 1, val: ctx.st || '' }))}
+  </div>
+  <div class="sec-title">${L('المزايا', 'Features')}</div>
+  <div class="card" style="box-shadow:none">${[[L('هوية البوابة الخاصة', 'Custom portal branding'), 1], [L('تقارير الربحية', 'Profitability reports'), 1], [L('API وWebhooks', 'API & webhooks'), 1], [L('تسجيل دخول موحد SSO', 'SSO / SAML'), 0], [L('مدير نجاح مخصص', 'Dedicated success manager'), 0]].map(f => `<div class="set-row" style="padding:var(--gl-space-3) var(--gl-space-4)"><span class="grow t-sm">${f[0]}</span><span class="switch ${f[1] ? 'on' : ''}" data-static></span></div>`).join('')}</div>`;
+const cpRow = (L, c) => `<div class="cp" data-row><span class="code-tag" data-f="name">${c[0]}</span><span class="grow t-sm" style="min-width:0">${c[1]}</span><span class="t-cap muted ltr">${c[2]}</span>${GL.ui.menuBtn('cp')}</div>`;
+const planCard = (L, ui, icon, p) => `
+  <article class="card plan ${p.pop ? 'pop' : ''}" data-row data-ctx='${JSON.stringify({ pm: p.pm, py: p.py, u: p.u, pr: p.pr, po: p.po, st: p.st }).replace(/'/g, '&#39;')}'>
+    ${p.pop ? `<span class="tag accent ribbon" style="background:var(--gl-accent-default);color:var(--gl-brand-950)">${icon('star', 'xs')}${L('الأكثر اشتراكًا', 'Most popular')}</span>` : ''}
+    <div class="plan-top"><div><div class="row gap-2"><h3 class="t-h2" data-f="name">${p.name}</h3>${p.draft ? ui.tag('neutral', L('مسودة', 'Draft')) : ui.tag('success', L('منشورة', 'Published'))}</div><p class="t-sm sec mt-1" data-f="desc">${p.desc}</p></div>${ui.menuBtn('plan', 'outline')}</div>
+    <div class="price">${p.pm === 'custom' ? `<b>${L('مخصص', 'Custom')}</b><span class="t-sm muted">${L('· يبدأ من $420', '· from $420')}</span>` : `<b data-pane-group="cycle" data-pane="m">$${p.pm}</b><b data-pane-group="cycle" data-pane="y" hidden>$${p.py}</b><span class="t-sm muted" data-pane-group="cycle" data-pane="m">${L('/ شهريًا للشركة', '/ month per company')}</span><span class="t-sm muted" data-pane-group="cycle" data-pane="y" hidden>${L('/ شهر · بيتدفع سنويًا', '/ mo · billed yearly')}</span>`}</div>
+    <div class="meta"><div><div class="k">${L('شركات مشتركة', 'Subscribers')}</div><div class="v">${p.subs}</div></div><div><div class="k">${L('من الإيراد الشهري', 'Share of MRR')}</div><div class="v"><span class="ltr">${p.mrr}</span> <span class="t-cap muted">· ${p.share}</span></div></div></div>
+    <ul>${p.feats.map(f => `<li class="${f[1] ? '' : 'off'}">${icon(f[1] ? 'check' : 'minus')}<span>${f[0]}</span></li>`).join('')}</ul>
+  </article>`;
+GL.mount({
+  nav: 'plans',
+  modals: {
+    plan: { kind: 'drawer', size: 'lg', icon: 'layers', title: L => L('تعديل الخطة', 'Edit plan'), sub: (L, c) => c.name, body: planForm, footNote: L => L('التعديل بيتطبق على الاشتراكات الجديدة بس', 'Applies to new subscriptions only'), toast: (L, v) => [L('اتحفظت الخطة', 'Plan saved'), v.name] },
+    newplan: { kind: 'drawer', size: 'lg', icon: 'plus', title: L => L('خطة جديدة', 'New plan'), sub: L => L('هتتحفظ كمسودة لحد ما تنشرها', 'Saved as a draft until you publish it'), body: planForm, submit: L => L('إنشاء الخطة', 'Create plan'),
+      add: { table: 'plansGrid', prepend: false, row: (v, L) => planCard(L, GL.ui, GL.icon, { name: v.name, desc: v.desc || '—', pm: v.pm, py: v.py || Math.round(v.pm * .8), subs: '0', mrr: '$0', share: '0%', draft: 1, feats: [[L(`حتى ${v.u} مستخدم`, `Up to ${v.u} users`), 1], [L(`${v.pr} مشاريع نشطة`, `${v.pr} active projects`), 1]] }) },
+      toast: (L, v) => [L('اتعملت الخطة كمسودة', 'Plan created as draft'), v.name] },
+    limits: { size: 'lg', icon: 'sliders-horizontal', title: L => L('تعديل الحدود', 'Edit limits'), sub: L => L('اكتب -1 لبلا حدود', 'Use -1 for unlimited'),
+      body: L => `<table class="tbl lim"><colgroup><col><col style="width:128px"><col style="width:128px"><col style="width:128px"></colgroup><thead><tr><th>${L('الحد', 'Limit')}</th><th>Starter</th><th>Growth</th><th>Enterprise</th></tr></thead><tbody>${[[L('المستخدمين', 'Users'), 8, 30, -1], [L('المشاريع النشطة', 'Active projects'), 3, 10, -1], [L('بوابات العملاء', 'Client portals'), 3, 10, -1], [L('التخزين GB', 'Storage GB'), 2, 10, 100]].map(r => `<tr><td>${r[0]}</td>${r.slice(1).map((v, i) => `<td><span class="control sm"><input class="ltr" name="l${i}${r[1]}" data-req value="${v}"></span></td>`).join('')}</tr>`).join('')}</tbody></table>`,
+      toast: L => [L('اتحدثت الحدود', 'Limits updated'), L('بتتطبق فورًا على الاستخدام', 'Enforced immediately')] },
+    coupon: { icon: 'percent', title: L => L('كوبون جديد', 'New coupon'),
+      body: (L, { ui }) => `<div class="form-grid">
+        ${ui.field(L('الكود', 'Code'), ui.input('code', { req: 1, ltr: 1, ph: 'WINTER25' }), { req: 1 })}
+        ${ui.field(L('نوع الخصم', 'Discount type'), ui.select('type', [['pct', L('نسبة %', 'Percentage')], ['fix', L('مبلغ ثابت', 'Fixed amount')]]))}
+        ${ui.field(L('القيمة', 'Value'), ui.input('val', { req: 1, ltr: 1, ph: '25' }), { req: 1 })}
+        ${ui.field(L('المدة', 'Duration'), ui.select('dur', [['once', L('مرة واحدة', 'Once')], ['3', L('3 شهور', '3 months')], ['ever', L('دائم', 'Forever')]]))}
+        ${ui.field(L('أقصى استخدام', 'Max redemptions'), ui.input('max', { ltr: 1, ph: '100' }), { opt: L('اختياري', 'optional') })}
+        ${ui.field(L('ينتهي في', 'Expires'), ui.input('exp', { type: 'date', ltr: 1 }), { opt: L('اختياري', 'optional') })}
+      </div><div class="field"><label>${L('يطبق على', 'Applies to')}</label><div class="row gap-2" data-multi data-req-group>${['Starter', 'Growth', 'Enterprise'].map((p, i) => `<span class="opt ${i < 2 ? 'on' : ''}" style="flex:1"><span class="box ${i < 2 ? 'on' : ''}">${i < 2 ? GL.icon('check') : ''}</span>${p}</span>`).join('')}</div></div>`,
+      submit: L => L('إنشاء الكوبون', 'Create coupon'), add: { table: 'cpList', row: (v, L) => cpRow(L, [v.code.toUpperCase(), (v.type === 'pct' ? v.val + '%' : '$' + v.val) + L(' خصم', ' off'), '0/' + (v.max || '∞')]) },
+      toast: (L, v) => [L('اتعمل الكوبون', 'Coupon created'), v.code.toUpperCase()] }
+  },
+  menus: {
+    plan: [{ icon: 'pencil', ar: 'تعديل', en: 'Edit', open: 'plan' }, { icon: 'copy', ar: 'نسخ كخطة جديدة', en: 'Duplicate as new', toast: (L, n) => `success|${L('اتعملت نسخة', 'Duplicated')}|${n}` }, { icon: 'eye-off', ar: 'إخفاء من صفحة الأسعار', en: 'Hide from pricing page', toast: (L, n) => `info|${L('الخطة اتخفت', 'Plan hidden')}|${n}` }, '-', { icon: 'archive', ar: 'أرشفة', en: 'Archive', confirm: 'arch', danger: 1 }],
+    cp: [{ icon: 'copy', ar: 'نسخ الكود', en: 'Copy code', toast: (L, n) => `success|${L('اتنسخ', 'Copied')}|${n}` }, { icon: 'circle-pause', ar: 'إيقاف مؤقت', en: 'Pause', toast: (L, n) => `info|${L('الكوبون اتوقف', 'Coupon paused')}|${n}` }, '-', { icon: 'trash-2', ar: 'حذف', en: 'Delete', del: 1, danger: 1 }]
+  },
+  confirms: { arch: { icon: 'archive', danger: 1, title: (L, c) => L(`أرشفة خطة ${c.name}؟`, `Archive the ${c.name} plan?`), text: L => L('الشركات المشتركة حاليًا هتفضل عليها، بس مش هتظهر لمشتركين جدد.', 'Existing subscribers keep it; new sign-ups won’t see it.'), btn: L => L('أرشفة', 'Archive'), run: (L, c, row) => { row.style.opacity = .5; }, toast: (L, c) => [L('اتأرشفت الخطة', 'Plan archived'), c.name] } },
+  title: L => L('الخطط والأسعار', 'Plans & Pricing'),
+  render: (L, { icon, ui }) => {
+    const yes = icon('check', 'sm yes'), no = icon('minus', 'sm no');
+    const rows = [
+      ['g', L('الحدود', 'Limits')],
+      [L('المستخدمين', 'Users'), '8', '30', L('بلا حدود', 'Unlimited')],
+      [L('المشاريع النشطة', 'Active projects'), '3', '10', L('بلا حدود', 'Unlimited')],
+      [L('بوابات العملاء', 'Client portals'), '3', '10', L('بلا حدود', 'Unlimited')],
+      [L('مساحة التخزين', 'Storage'), '2 GB', '10 GB', '100 GB'],
+      ['g', L('المزايا', 'Features')],
+      [L('قوالب تنفيذ جاهزة', 'Implementation playbooks'), 1, 1, 1],
+      [L('موافقات إلكترونية للعميل', 'Client e-sign-offs'), 1, 1, 1],
+      [L('هوية البوابة الخاصة', 'Custom portal branding'), 0, 1, 1],
+      [L('تقارير الربحية', 'Profitability reports'), 0, 1, 1],
+      [L('تسجيل دخول موحد SSO', 'SSO / SAML'), 0, 0, 1],
+      [L('API وWebhooks', 'API & webhooks'), 0, 1, 1],
+      [L('مدير نجاح مخصص', 'Dedicated success manager'), 0, 0, 1]
+    ];
+    const cell = v => v === 1 ? yes : v === 0 ? no : `<span class="t-strong">${v}</span>`;
+    return `
+    <div class="page-head">
+      <div><h1 class="t-h1">${L('الخطط والأسعار', 'Plans & Pricing')}</h1><p class="sub">${L('الخطط والحدود والفترة التجريبية والكوبونات · التعديلات للاشتراكات الجديدة بس', 'Plans, limits, trial and coupons · changes apply to new subscriptions only')}</p></div>
+      <div class="actions">
+        <div class="pills" data-tabs="cycle"><span class="pill active" data-tab="m">${L('شهري', 'Monthly')}</span><span class="pill" data-tab="y">${L('سنوي', 'Annual')} <span class="tag success" style="height:20px">-20%</span></span></div>
+        <button class="btn btn-outline" data-toast="info|${L('بيفتح صفحة الأسعار العامة', 'Opens the public pricing page')}|golive.example/pricing">${icon('external-link', 'sm')}${L('صفحة الأسعار', 'Pricing page')}</button>
+        <button class="btn btn-primary" data-open="newplan">${icon('plus', 'sm')}${L('خطة جديدة', 'New plan')}</button>
+      </div>
+    </div>
+
+    <section class="plans" id="plansGrid">
+      ${planCard(L, ui, icon, { name: 'Starter', pm: 79, py: 63, u: 8, pr: 3, po: 3, st: 2, desc: L('للفرق الصغيرة اللي بتبدأ أول مشاريعها', 'For small teams running their first projects'), subs: '61', mrr: '$4,819', share: '26%', feats: [[L('حتى 8 مستخدمين', 'Up to 8 users'), 1], [L('3 مشاريع نشطة', '3 active projects'), 1], [L('بوابة العميل', 'Client portal'), 1], [L('هوية البوابة الخاصة', 'Custom branding'), 0]] })}
+      ${planCard(L, ui, icon, { name: 'Growth', pm: 179, py: 143, u: 30, pr: 10, po: 10, st: 10, pop: 1, desc: L('لشركات التنفيذ اللي بتدير مشاريع كتير بالتوازي', 'For implementers running many projects in parallel'), subs: '64', mrr: '$11,456', share: '62%', feats: [[L('حتى 30 مستخدم', 'Up to 30 users'), 1], [L('10 مشاريع نشطة', '10 active projects'), 1], [L('هوية البوابة الخاصة', 'Custom branding'), 1], [L('تقارير الربحية', 'Profitability reports'), 1]] })}
+      ${planCard(L, ui, icon, { name: 'Enterprise', pm: 'custom', py: 420, u: -1, pr: -1, po: -1, st: 100, desc: L('للشركات الكبيرة اللي محتاجة SSO ودعم مخصص', 'For larger firms needing SSO and dedicated support'), subs: '5', mrr: '$2,145', share: '12%', feats: [[L('مستخدمين ومشاريع بلا حدود', 'Unlimited users & projects'), 1], [L('SSO / SAML', 'SSO / SAML'), 1], [L('مدير نجاح مخصص', 'Dedicated success manager'), 1], [L('اتفاقية SLA', 'Uptime SLA'), 1]] })}
+    </section>
+
+    <section class="grid g-12">
+      <div class="span-8 card table-wrap">
+        <div class="card-head bordered"><div><h3 class="t-h3">${L('الحدود والمزايا', 'Limits & features')}</h3><p class="sub">${L('المرجع اللي بيتطبق عليه حساب الاستخدام في كل مساحة عمل', 'The source of truth for usage enforcement in every workspace')}</p></div><button class="btn btn-outline btn-sm" data-open="limits">${icon('pencil')}${L('تعديل', 'Edit')}</button></div>
+        <table class="tbl lim">
+          <colgroup><col><col style="width:136px"><col style="width:136px"><col style="width:136px"></colgroup>
+          <thead><tr><th>${L('الميزة', 'Feature')}</th><th class="c">Starter</th><th class="c">Growth</th><th class="c">Enterprise</th></tr></thead>
+          <tbody>${rows.map(r => r[0] === 'g' ? `<tr class="grp"><td colspan="4">${r[1]}</td></tr>` : `<tr><td>${r[0]}</td><td class="c">${cell(r[1])}</td><td class="c">${cell(r[2])}</td><td class="c">${cell(r[3])}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+      <aside class="span-4 side">
+        <div class="card">
+          <div class="card-head"><div><h3 class="t-h3">${L('الفترة التجريبية', 'Free trial')}</h3><p class="sub">${L('بتبدأ تلقائيًا مع أي تسجيل جديد', 'Starts automatically on sign-up')}</p></div></div>
+          <div class="card-body pt0">
+            <div class="kv"><span class="k">${L('المدة', 'Length')}</span><span class="v" style="width:120px">${ui.select('trial', [L('7 أيام', '7 days'), L('14 يوم', '14 days'), L('30 يوم', '30 days')], { val: L('14 يوم', '14 days'), cls: 'sm' })}</span></div>
+            <div class="kv"><span class="k">${L('الخطة أثناء التجربة', 'Trial plan')}</span><span class="v">Growth</span></div>
+            <div class="kv"><span class="k">${L('مطلوب كارت؟', 'Card required')}</span><span class="switch"></span></div>
+            <div class="kv"><span class="k">${L('نسبة التحويل (90 يوم)', 'Conversion (90d)')}</span><span class="v">${ui.tag('success', '38%', false)}</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><h3 class="t-h3">${L('الكوبونات', 'Coupons')}</h3><p class="sub">${L('3 نشطة', '3 active')}</p></div><button class="btn btn-outline btn-sm" data-open="coupon">${icon('plus')}${L('كوبون', 'Coupon')}</button></div>
+          <div class="card-body pt0" id="cpList">
+            ${[['LAUNCH30', L('خصم 30% لأول 3 شهور', '30% off first 3 months'), '41/100'], ['ODOOMEET', L('شهر مجاني · Growth', '1 month free · Growth'), '12/50'], ['PARTNER20', L('خصم 20% دائم للشركاء', '20% off forever · partners'), '7/∞']].map(c => cpRow(L, c)).join('')}
+          </div>
+        </div>
+      </aside>
+    </section>`;
+  }
+});
