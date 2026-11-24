@@ -236,6 +236,7 @@
       root.innerHTML = `<div class="app">${sidebar(page.nav)}<div class="main">${topbar()}<main class="content">${body}</main></div></div>`;
     }
     if (page.after) page.after(L);
+    (window.GL_AFTER || []).forEach(f => f(page, L));
   }
 
   document.addEventListener('click', e => {
@@ -253,6 +254,11 @@
     av: (txt, cls, extra) => `<span class="avatar ${extra || 'sm round'} ${cls}">${txt}</span>`,
     stack: list => `<span class="av-stack">${list.map(a => `<span class="avatar sm round ${a[1]}">${a[0]}</span>`).join('')}</span>`,
     bar: (pct, cls) => `<div class="bar thin ${cls || ''}"><i style="width:${pct}%"></i></div>`,
+    input: (name, o) => { o = o || {}; return `<span class="control ${o.cls || ""}">${o.icon ? icon(o.icon, "sm") : ""}<input name="${name}" type="${o.type || 'text'}" ${o.ltr ? 'class="ltr"' : ''} ${o.req ? 'data-req' : ''} ${o.min ? `data-min="${o.min}"` : ''} placeholder="${o.ph || ''}" value="${o.val || ''}"></span>`; },
+    select: (name, opts, o) => { o = o || {}; return `<span class="control ${o.cls || ""}">${o.icon ? icon(o.icon, "sm") : ""}<select name="${name}" ${o.req ? 'data-req' : ''} ${o.filter ? `data-col-filter="${o.filter}" data-key="${o.key || name}"` : ''}>${o.ph !== undefined ? `<option value="">${o.ph}</option>` : ''}${opts.map(x => Array.isArray(x) ? `<option value="${x[0]}" ${x[0] === o.val ? 'selected' : ''}>${x[1]}</option>` : `<option ${x === o.val ? 'selected' : ''}>${x}</option>`).join('')}</select>${icon('chevron-down', 'sm sel-ic')}</span>`; },
+    textarea: (name, o) => { o = o || {}; return `<textarea class="textarea" name="${name}" ${o.req ? 'data-req' : ''} rows="${o.rows || 4}" placeholder="${o.ph || ''}">${o.val || ''}</textarea>`; },
+    field: (label, ctl, o) => { o = o || {}; return `<div class="field ${o.full ? 'full' : ''}"><label>${label}${o.req ? ' <span class="req">*</span>' : ''}${o.opt ? ` <span class="t-cap muted">(${o.opt})</span>` : ''}</label>${ctl}${o.hint ? `<span class="hint">${o.hint}</span>` : ''}</div>`; },
+    menuBtn: (menu, cls) => `<button class="icon-btn sm ${cls || ''}" data-menu="${menu}" title="More">${icon('more')}</button>`,
     tone: { success: 'background:var(--gl-success-bg);color:var(--gl-success-fg)', warning: 'background:var(--gl-warning-bg);color:var(--gl-warning-fg)', danger: 'background:var(--gl-danger-bg);color:var(--gl-danger-fg)', info: 'background:var(--gl-info-bg);color:var(--gl-info-fg)', violet: 'background:var(--gl-violet-bg);color:var(--gl-violet-fg)', accent: 'background:var(--gl-accent-subtle);color:var(--gl-accent-text)' }
   };
 
