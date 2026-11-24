@@ -31,14 +31,40 @@
 <script src="assets/charts.js"></script>
 <script src="assets/data.js"></script>
 <script src="assets/app.js"></script>
+<script src="assets/interact.js"></script>
 <script>
+const tkForm = (L, { ui }) => `
+  ${ui.field(L('الشركة', 'Company'), ui.select('co', GL_COMPANIES.map(c => GL.L(c[0], c[1])), { ph: L('اختار الشركة', 'Choose a company'), req: 1, icon: 'building' }), { req: 1 })}
+  ${ui.field(L('الموضوع', 'Subject'), ui.input('subject', { req: 1, ph: L('وصف قصير للمشكلة', 'Short summary of the issue') }), { req: 1 })}
+  <div class="form-grid">
+    ${ui.field(L('الأولوية', 'Priority'), ui.select('pr', [['u', L('عاجلة', 'Urgent')], ['h', L('عالية', 'High')], ['m', L('متوسطة', 'Medium')], ['l', L('منخفضة', 'Low')]], { val: 'm' }))}
+    ${ui.field(L('التصنيف', 'Category'), ui.select('cat', [L('خطأ تقني', 'Bug'), L('الفوترة', 'Billing'), L('بوابة العميل', 'Client portal'), L('سؤال', 'Question')]))}
+    ${ui.field(L('المسؤول', 'Assignee'), ui.select('as', [['', L('غير مسندة', 'Unassigned')], ['HN', L('هند نبيل', 'Hend Nabil')], ['YF', L('يوسف فريد', 'Youssef Farid')]]), { full: 1 })}
+  </div>
+  ${ui.field(L('التفاصيل', 'Details'), ui.textarea('d', { req: 1, rows: 6, ph: L('خطوات إعادة المشكلة، لقطات شاشة…', 'Steps to reproduce, screenshots…') }), { req: 1 })}
+  <div class="dropzone">${GL.icon('cloud-upload')}<span>${L('اسحب ملفات أو', 'Drag files or')} <b class="brand-t">${L('اختار من جهازك', 'browse')}</b></span><span class="t-cap muted">PNG, PDF · 10MB</span></div>`;
 GL.mount({
   nav: 'support',
+  modals: {
+    ticket: { kind: 'drawer', icon: 'life-buoy', title: L => L('تذكرة جديدة', 'New ticket'), sub: L => L('افتح تذكرة نيابة عن شركة', 'Open a ticket on behalf of a company'), body: tkForm, submit: L => L('إنشاء التذكرة', 'Create ticket'), submitIcon: 'plus',
+      add: { table: 'stTbl', row: (v, L) => window.tkRow(L, ['#48' + (30 + Math.floor(Math.random() * 60)), v.subject, v.co, v.pr, v.cat, v.as ? [v.as, v.as === 'HN' ? 'av-violet' : 'av-teal'] : null, ['ok', L('متبقي 4س', '4h left')], L('الآن', 'Just now'), 'new', 1]) },
+      toast: L => [L('اتعملت التذكرة', 'Ticket created'), L('اتبعت إشعار للشركة', 'The company was notified')] },
+    sla: { size: 'lg', icon: 'timer', title: L => L('قواعد الـ SLA', 'SLA rules'), sub: L => L('أهداف الرد والحل حسب الخطة', 'Response and resolution targets by plan'),
+      body: (L, { ui }) => `<table class="tbl"><colgroup><col><col style="width:184px"><col style="width:184px"></colgroup><thead><tr><th>${L('الخطة', 'Plan')}</th><th>${L('أول رد', 'First response')}</th><th>${L('الحل', 'Resolution')}</th></tr></thead><tbody>${[['Starter', '8h', '3d'], ['Growth', '4h', '2d'], ['Enterprise', '1h', '1d']].map(r => `<tr><td>${ui.tag(GL_PLAN_TAG[r[0]], r[0], false)}</td><td>${ui.select('f' + r[0], ['1h', '2h', '4h', '8h', '24h'], { val: r[1], cls: 'sm', icon: 'timer' })}</td><td>${ui.select('r' + r[0], ['1d', '2d', '3d', '5d'], { val: r[2], cls: 'sm', icon: 'check-circle' })}</td></tr>`).join('')}</tbody></table>
+        <div class="set-row" style="padding:0"><div class="grow"><div class="t-strong">${L('ساعات العمل بس', 'Business hours only')}</div><div class="t-sm sec">${L('الأحد–الخميس، 9 ص – 6 م (القاهرة)', 'Sun–Thu, 9 AM – 6 PM (Cairo)')}</div></div><span class="switch on" data-static></span></div>
+        <div class="set-row" style="padding:0"><div class="grow"><div class="t-strong">${L('تنبيه قبل التخطي', 'Warn before breach')}</div><div class="t-sm sec">${L('إشعار للمسؤول قبل 30 دقيقة', 'Notify the assignee 30 minutes before')}</div></div><span class="switch on" data-static></span></div>`,
+      toast: L => [L('اتحفظت قواعد الـ SLA', 'SLA rules saved'), ''] }
+  },
   title: L => L('الدعم الفني', 'Support'),
+  menus: {
+    tk: [{ icon: 'eye', ar: 'فتح التذكرة', en: 'Open ticket', href: 'support-ticket.html' }, { icon: 'user-check', ar: 'إسناد لي', en: 'Assign to me', toast: (L, n) => `success|${L('اتسندت ليك', 'Assigned to you')}|${n}` }, { icon: 'flag', ar: 'رفع الأولوية', en: 'Escalate', toast: (L, n) => `warning|${L('اترفعت الأولوية', 'Escalated')}|${n}` }, '-', { icon: 'check-circle', ar: 'تعليم كمحلولة', en: 'Mark resolved', confirm: 'solve' }],
+    sort: [{ icon: 'timer', ar: 'الأقرب للـ SLA', en: 'SLA soonest', toast: L => `info|${L('الترتيب: الأقرب للـ SLA', 'Sorted by SLA')}|` }, { icon: 'clock', ar: 'الأحدث', en: 'Newest', toast: L => `info|${L('الترتيب: الأحدث', 'Sorted by newest')}|` }, { icon: 'flag', ar: 'الأولوية', en: 'Priority', toast: L => `info|${L('الترتيب: الأولوية', 'Sorted by priority')}|` }]
+  },
+  confirms: { solve: { icon: 'check-circle', title: (L, c) => L('تعليم التذكرة كمحلولة؟', 'Mark ticket as resolved?'), text: (L, c) => c.name, btn: L => L('تم الحل', 'Resolve'), run: (L, c, row) => { row.querySelector('[data-st]').innerHTML = GL.ui.tag('success', L('محلولة', 'Resolved')); GLI.flash(row); }, toast: L => [L('اتحلت التذكرة', 'Ticket resolved'), L('اتبعت استبيان رضا للعميل', 'A CSAT survey was sent')] } },
   render: (L, { icon, ui }) => {
     const pr = { u: ['var(--gl-danger-solid)', L('عاجلة', 'Urgent')], h: ['var(--gl-warning-solid)', L('عالية', 'High')], m: ['var(--gl-info-solid)', L('متوسطة', 'Medium')], l: ['var(--gl-neutral-400)', L('منخفضة', 'Low')] };
     const stt = { open: ['info', L('مفتوحة', 'Open')], pend: ['warning', L('بانتظار العميل', 'Waiting')], prog: ['brand', L('قيد المعالجة', 'In progress')], new: ['accent', L('جديدة', 'New')] };
-    const T = [
+    const T0 = [
       ['#4821', L('مشكلة في استيراد بيانات العملاء', 'Customer data import fails'), L('نيل سوفت للحلول', 'NileSoft Solutions'), 'u', L('خطأ تقني', 'Bug'), [L('ه', 'HN'), 'av-violet'], ['bad', L('متبقي 18 د', '18m left')], L('منذ 12 د', '12m ago'), 'prog', 1],
       ['#4824', L('البوابة لا تظهر لعميل جديد', 'Portal not visible for new client'), L('سحابة الأهرام', 'Ahram Cloud'), 'h', L('بوابة العميل', 'Client portal'), null, ['warn', L('متبقي 1س 40د', '1h 40m left')], L('منذ 25 د', '25m ago'), 'new', 1],
       ['#4819', L('طلب تصدير كل المشاريع Excel', 'Export all projects to Excel'), L('بوابة الشرق للاستشارات', 'Sharq Gate Consulting'), 'm', L('طلب ميزة', 'Feature request'), [L('ي', 'YF'), 'av-teal'], ['ok', L('متبقي 6س', '6h left')], L('منذ ساعة', '1h ago'), 'open', 0],
@@ -47,11 +73,19 @@ GL.mount({
       ['#4802', L('مزامنة Google Calendar بتتأخر', 'Google Calendar sync delayed'), L('رؤية للأنظمة المتكاملة', 'Roya Integrated Systems'), 'l', L('التكاملات', 'Integrations'), null, ['ok', L('متبقي يومين', '2d left')], L('أمس', 'Yesterday'), 'new', 0],
       ['#4798', L('ازاي أضيف عميل للبوابة؟', 'How do I add a client to the portal?'), L('أفق الرقمية', 'Ofoq Digital'), 'l', L('سؤال', 'Question'), [L('ه', 'HN'), 'av-violet'], ['ok', L('متبقي يومين', '2d left')], L('منذ يومين', '2 days ago'), 'prog', 0]
     ];
-    const views = [['inbox', L('كل المفتوحة', 'All open'), 12, 1], ['user', L('المسندة لي', 'Assigned to me'), 4], ['circle-dot', L('غير مسندة', 'Unassigned'), 3], ['timer', L('قرب تخطي الـ SLA', 'SLA at risk'), 2], ['hourglass', L('بانتظار العميل', 'Waiting on customer'), 5], ['check-circle', L('اتحلت', 'Resolved'), 318]];
+    const T = T0;
+    const views = [['all', 'inbox', L('كل المفتوحة', 'All open'), 7, 1], ['me', 'user', L('المسندة لي', 'Assigned to me'), 2], ['un', 'circle-dot', L('غير مسندة', 'Unassigned'), 2], ['risk', 'timer', L('قرب تخطي الـ SLA', 'SLA at risk'), 2], ['pend', 'hourglass', L('بانتظار العميل', 'Waiting on customer'), 2], ['done', 'check-circle', L('اتحلت', 'Resolved'), 318]];
+    window.tkRow = (L, t) => { const cat = ['me', 'un', 'risk', 'pend'].filter((k, i) => [t[5] && t[5][0] === L('ه', 'HN') || t[5] && t[5][0] === 'HN', !t[5], t[6][0] !== 'ok', t[8] === 'pend'][i]).concat(['c' + ({ [L('خطأ تقني', 'Bug')]: 1, [L('الفوترة', 'Billing')]: 2, [L('بوابة العميل', 'Client portal')]: 3 }[t[4]] || 4)]).join(' ');
+      return `<tr class="${t[9] ? 'unread' : ''}" data-row data-cat="${cat}" data-pr="${t[3]}">
+            <td class="subj"><a href="support-ticket.html"><div class="nm" data-f="name">${t[1]}</div><div class="cell-sub"><span class="ltr">${t[0]}</span> · ${t[2]} · ${t[4]}</div></a></td>
+            <td><span class="prio"><i style="background:${pr[t[3]][0]}"></i>${pr[t[3]][1]}</span></td>
+            <td>${t[5] ? GL.ui.av(t[5][0], t[5][1]) : `<span class="avatar sm round" style="border:1.5px dashed var(--gl-border-strong);color:var(--gl-text-muted)">${icon('user', 'xs')}</span>`}</td>
+            <td><span class="sla ${t[6][0]}">${icon('timer')}${t[6][1]}</span></td>
+            <td data-st>${GL.ui.tag(stt[t[8]][0], stt[t[8]][1])}</td><td class="sec t-sm">${t[7]}</td><td class="right">${GL.ui.menuBtn('tk')}</td></tr>`; };
     return `
     <div class="page-head">
       <div><h1 class="t-h1">${L('الدعم الفني', 'Support')}</h1><p class="sub">${L('تذاكر الشركات المشتركة مع الـ SLA حسب الخطة', 'Tickets from subscribed companies, with plan-based SLAs')}</p></div>
-      <div class="actions"><button class="btn btn-outline">${icon('settings', 'sm')}${L('قواعد الـ SLA', 'SLA rules')}</button><button class="btn btn-primary">${icon('plus', 'sm')}${L('تذكرة جديدة', 'New ticket')}</button></div>
+      <div class="actions"><button class="btn btn-outline" data-open="sla">${icon('settings', 'sm')}${L('قواعد الـ SLA', 'SLA rules')}</button><button class="btn btn-primary" data-open="ticket">${icon('plus', 'sm')}${L('تذكرة جديدة', 'New ticket')}</button></div>
     </div>
     <section class="stat-strip">
       ${ui.mini('inbox', '', '12', L('تذاكر مفتوحة', 'Open tickets'))}
@@ -60,26 +94,21 @@ GL.mount({
       ${ui.mini('smile', ui.tone.success, '96%', L('رضا العملاء (30 يوم)', 'CSAT (30 days)'))}
     </section>
     <section class="layout">
-      <nav class="views">${views.map(v => `<a class="${v[3] ? 'on' : ''}" href="#">${icon(v[0], 'sm')}<span>${v[1]}</span><span class="n">${v[2]}</span></a>`).join('')}
+      <nav class="views" data-tabs="sv" data-act="on" data-filter-table="stTbl">${views.map(v => `<a class="${v[4] ? 'on' : ''}" href="#" data-tab="${v[0]}">${icon(v[1], 'sm')}<span>${v[2]}</span><span class="n">${v[3]}</span></a>`).join('')}
         <div class="divider" style="margin-block:var(--gl-space-3)"></div>
         <div class="t-over muted" style="padding:0 var(--gl-space-3) var(--gl-space-2)">${L('حسب التصنيف', 'By category')}</div>
-        ${[[L('خطأ تقني', 'Bug'), 4], [L('الفوترة', 'Billing'), 2], [L('بوابة العميل', 'Client portal'), 3], [L('أسئلة', 'Questions'), 3]].map(c => `<a href="#">${icon('tag', 'sm')}<span>${c[0]}</span><span class="n">${c[1]}</span></a>`).join('')}
+        ${[[L('خطأ تقني', 'Bug'), 4], [L('الفوترة', 'Billing'), 2], [L('بوابة العميل', 'Client portal'), 3], [L('أسئلة', 'Questions'), 3]].map((c, i) => `<a href="#" data-tab="c${i + 1}">${icon('tag', 'sm')}<span>${c[0]}</span><span class="n">${c[1]}</span></a>`).join('')}
       </nav>
       <div class="card table-wrap">
-        <div class="toolbar"><label class="control search">${icon('search', 'sm')}<input placeholder="${L('ابحث في التذاكر…', 'Search tickets…')}"></label>
-          <span class="chip">${icon('plus')}${L('الأولوية', 'Priority')}</span><span class="chip">${icon('plus')}${L('المسؤول', 'Assignee')}</span><span class="chip">${icon('plus')}${L('الخطة', 'Plan')}</span>
-          <div class="end"><button class="btn btn-ghost btn-sm">${icon('sort')}${L('الأقرب للـ SLA', 'SLA soonest')}</button></div></div>
-        <table class="tbl">
-          <colgroup><col><col style="width:96px"><col style="width:64px"><col style="width:144px"><col style="width:152px"><col style="width:112px"></colgroup>
-          <thead><tr><th>${L('التذكرة', 'Ticket')}</th><th>${L('الأولوية', 'Priority')}</th><th>${L('المسؤول', 'Owner')}</th><th>${L('الـ SLA', 'SLA')}</th><th>${L('الحالة', 'Status')}</th><th>${L('آخر تحديث', 'Updated')}</th></tr></thead>
-          <tbody>${T.map(t => `<tr class="${t[9] ? 'unread' : ''}">
-            <td class="subj"><a href="support-ticket.html"><div class="nm">${t[1]}</div><div class="cell-sub"><span class="ltr">${t[0]}</span> · ${t[2]} · ${t[4]}</div></a></td>
-            <td><span class="prio"><i style="background:${pr[t[3]][0]}"></i>${pr[t[3]][1]}</span></td>
-            <td>${t[5] ? ui.av(t[5][0], t[5][1]) : `<span class="avatar sm round" style="border:1.5px dashed var(--gl-border-strong);color:var(--gl-text-muted)">${icon('user', 'xs')}</span>`}</td>
-            <td><span class="sla ${t[6][0]}">${icon('timer')}${t[6][1]}</span></td>
-            <td>${ui.tag(stt[t[8]][0], stt[t[8]][1])}</td><td class="sec t-sm">${t[7]}</td></tr>`).join('')}</tbody>
+        <div class="toolbar"><label class="control search sm">${icon('search', 'sm')}<input data-search="stTbl" placeholder="${L('ابحث في التذاكر…', 'Search tickets…')}"></label>
+          <span class="sel sm">${ui.select('p', [['u', L('عاجلة', 'Urgent')], ['h', L('عالية', 'High')], ['m', L('متوسطة', 'Medium')], ['l', L('منخفضة', 'Low')]], { ph: L('كل الأولويات', 'All priorities'), filter: 'stTbl', key: 'pr', cls: 'sm', icon: 'flag' })}</span>
+          <div class="end"><button class="btn btn-ghost btn-sm" data-menu="sort">${icon('sort')}${L('الأقرب للـ SLA', 'SLA soonest')}</button></div></div>
+        <table class="tbl" id="stTbl">
+          <colgroup><col><col style="width:96px"><col style="width:64px"><col style="width:136px"><col style="width:136px"><col style="width:104px"><col style="width:48px"></colgroup>
+          <thead><tr><th>${L('التذكرة', 'Ticket')}</th><th>${L('الأولوية', 'Priority')}</th><th>${L('المسؤول', 'Owner')}</th><th>${L('الـ SLA', 'SLA')}</th><th>${L('الحالة', 'Status')}</th><th>${L('آخر تحديث', 'Updated')}</th><th></th></tr></thead>
+          <tbody>${T.map(t => window.tkRow(L, t)).join('')}</tbody>
         </table>
-        <div class="card-foot"><span class="t-sm muted">${L('عرض 7 من 12', 'Showing 7 of 12')}</span><button class="btn btn-ghost btn-sm">${L('عرض المزيد', 'Load more')}</button></div>
+        <div class="card-foot"><span class="t-sm muted">${L('عرض 7 من 12', 'Showing 7 of 12')}</span><button class="btn btn-ghost btn-sm" data-toast="info|${L('مفيش تذاكر تانية بالفلتر ده', 'No more tickets for this view')}|">${L('عرض المزيد', 'Load more')}</button></div>
       </div>
     </section>`;
   }

@@ -183,7 +183,7 @@
     menuRow = btn.closest('[data-row]');
     const name = menuRow ? (rowData(menuRow).name || '') : '';
     const m = document.createElement('div'); m.className = 'menu';
-    m.innerHTML = items.map(it => it === '-' ? '<div class="menu-sep"></div>' : `<button class="menu-i ${it.danger ? 'danger' : ''}" ${it.open ? `data-open="${it.open}"` : ''} ${it.del ? `data-delete="${esc(name)}"` : ''} ${it.toast ? `data-toast="${esc(it.toast(L, name))}"` : ''} ${it.confirm ? `data-confirm="${it.confirm}"` : ''} ${it.href ? `data-href="${it.href}"` : ''}>${icon(it.icon, 'sm')}<span>${L(it.ar, it.en)}</span></button>`).join('');
+    m.innerHTML = items.map(it => it === '-' ? '<div class="menu-sep"></div>' : `<button class="menu-i ${it.danger ? 'danger' : ''}" ${it.open ? `data-open="${it.open}"` : ''} ${it.del ? `data-delete="${esc(name)}"` : ''} ${it.toast ? `data-toast="${esc(it.toast(L, name))}"` : ''} ${it.confirm ? `data-confirm="${it.confirm}"` : ''} ${it.href ? `data-href="${it.href}"` : ''} ${it.ins ? `data-insert="${esc(it.ins(L))}"` : ''}>${icon(it.icon, 'sm')}<span>${L(it.ar, it.en)}</span></button>`).join('');
     document.body.appendChild(m);
     const r = btn.getBoundingClientRect(), rtl = document.documentElement.dir === 'rtl';
     m.style.top = (r.bottom + window.scrollY + 6) + 'px';
@@ -216,6 +216,9 @@
       return;
     }
     if ((el = q('[data-toast]'))) { e.preventDefault(); const [k, a, b] = el.dataset.toast.split('|'); toast(k, a, b); closeMenus(); return; }
+    if ((el = q('[data-insert]'))) { const ta = $('[data-composer] textarea'); if (ta) { ta.value = el.dataset.insert; ta.focus(); } closeMenus(); return; }
+    if ((el = q('[data-file]'))) { e.preventDefault(); const c = el.closest('[data-composer]'); const box = c && $('[data-files]', c); if (box) { const n = el.dataset.file; const d = document.createElement('span'); d.className = 'att'; d.innerHTML = icon('file', 'sm') + `<span class="ltr">${n}</span><span class="muted">240 KB</span><button class="icon-btn sm" type="button" data-rm>${icon('x', 'xs')}</button>`; box.appendChild(d); box.hidden = false; } return; }
+    if ((el = q('[data-rm]'))) { e.preventDefault(); const it = el.closest('.att,[data-row],.chip'); if (it) it.remove(); return; }
     if ((el = q('[data-href]'))) { location.href = el.dataset.href; return; }
     if ((el = q('[data-clear-filters]'))) { const id = el.dataset.clearFilters; $$(`[data-search="${id}"],[data-col-filter="${id}"]`).forEach(f => { f.value = ''; }); const tc = $(`[data-filter-table="${id}"]`); if (tc) { UI[tc.dataset.tabs] = 'all'; applyTabs(document); } filterTable(id); return; }
     if ((el = q('[data-send]'))) { e.preventDefault(); send(el); return; }
@@ -244,7 +247,7 @@
     const fm = f.closest('[data-form]'); if (fm) fm.classList.add('dirty');
     if (f.dataset.pw !== undefined) pwMeter(f);
   });
-  document.addEventListener('change', e => { const f = e.target; if (f.dataset.colFilter) filterTable(f.dataset.colFilter); if (f.closest('.is-error')) setErr(f, checkField(f)); const fm = f.closest('[data-form]'); if (fm) fm.classList.add('dirty'); });
+  document.addEventListener('change', e => { const f = e.target; if (f.dataset.changeToast !== undefined) toast('success', L('اتحدث', 'Updated'), f.options ? f.options[f.selectedIndex].text : f.value); if (f.dataset.colFilter) filterTable(f.dataset.colFilter); if (f.closest('.is-error')) setErr(f, checkField(f)); const fm = f.closest('[data-form]'); if (fm) fm.classList.add('dirty'); });
   document.addEventListener('focusout', e => { const f = e.target; if (f.matches && f.matches('[data-req],[type=email],[data-min]') && f.value) setErr(f, checkField(f)); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMenus(); closeOverlay(); } if (e.key === 'Enter' && e.target.closest('[data-composer]') && (e.ctrlKey || e.metaKey)) { const b = $('[data-send]', e.target.closest('[data-composer]')); if (b) send(b); } });
   window.addEventListener('scroll', closeMenus, { passive: true });
@@ -269,6 +272,8 @@
     d.className = 'msg ' + (note ? 'note' : 'mine');
     d.innerHTML = `${GL.ui.av(me[0], me[1], 'round')}<div class="bubble"><div class="hd"><b>${me[2]}</b>${note ? GL.ui.tag('accent', L('ملاحظة داخلية', 'Internal note'), false) : ''}<span>· ${L('الآن', 'just now')}</span></div><div class="bd">${esc(v)}</div></div>`;
     if (th) { th.appendChild(d); flash(d); d.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+    const fb = $('[data-files]', c); if (fb && fb.children.length) { const a = document.createElement('div'); a.className = 'row gap-2 wrap'; a.innerHTML = fb.innerHTML; $$('[data-rm]', a).forEach(x => x.remove()); d.querySelector('.bubble').appendChild(a); fb.innerHTML = ''; fb.hidden = true; }
+    const after = $('[data-after]', c); if (after && after.value && page && page.afterSend) page.afterSend(after.value);
     ta.value = '';
     toast('success', note ? L('اتضافت الملاحظة', 'Note added') : L('اتبعتت', 'Sent'), note ? L('ظاهرة لفريقك بس', 'Visible to your team only') : '');
   }
