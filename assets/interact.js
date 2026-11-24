@@ -283,7 +283,7 @@
   GLI.shared.menus.default = [{ icon: 'pencil', ar: 'تعديل', en: 'Edit', open: 'edit' }, { icon: 'copy', ar: 'نسخ', en: 'Duplicate', toast: (L, n) => `success|${L('اتعملت نسخة', 'Duplicated')}|${n}` }, '-', { icon: 'trash-2', ar: 'حذف', en: 'Delete', del: 1, danger: 1 }];
 
   window.GL_AFTER = (window.GL_AFTER || []).concat([(p) => {
-    page = p; closeMenus();
+    page = p; GLI.page = p; closeMenus();
     applyTabs(document);
     $$('[data-search]').forEach(f => filterTable(f.dataset.search));
     if (firstRun) {
